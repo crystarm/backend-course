@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.karandashov</groupId>
+    <artifactId>java-backend-course-demo</artifactId>
+    <!--  Правила версионирования: https://semver.org/lang/ru/  -->
+    <!--  Словом SNAPSHOT помечается нестабильная версия, код которой может меняться  -->
+    <version>1.0.0-SNAPSHOT</version>
+
+    <!--  Это корневой pom, поэтому при сборке не нужно паковать jar - указываем "pom"  -->
+    <packaging>pom</packaging>
+
+    <!--  Задаем все версии внутри properties  -->
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+        <junit.version>6.0.2</junit.version>
+        <maven.shade.plugin.version>3.4.1</maven.shade.plugin.version>
+    </properties>
+
+    <!--  jbcd - это аббревиатура от названия проекта - используется как префикс  -->
+    <modules>
+        <module>jbcd-1-core</module>
+    </modules>
+
+    <!--  Перечисляем все внешние зависимости с указанием версий из properties  -->
+    <!--  Таким образом, во всех модулях будут единые версии зависимостей       -->
+    <dependencyManagement>
+        <dependencies>
+            <!--  JUnit 5 (Jupiter) для тестирования  -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Настройка плагинов для сборки проекта -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Плагин для запуска тестов -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
