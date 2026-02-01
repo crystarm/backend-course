@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.karandashov</groupId>
+        <artifactId>jbcd-1-core</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>jbcd-1c-collections</artifactId>
+
+    <dependencies>
+        <!-- Подключаем JUnit для тестирования -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- Настройка сборки проекта -->
+    <build>
+        <plugins>
+            <!-- Плагин для создания толстого JAR (fat JAR) со всеми зависимостями -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Создаем исполняемый JAR с указанием главного класса -->
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.karandashov.Main</mainClass>
+                                </transformer>
+                                <!-- Убираем дубликаты LICENSE и NOTICE -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>fat</shadedClassifierName>
+                            <!-- Фильтры для исключения module-info и дубликатов MANIFEST -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact> <!-- Применяется ко всем зависимостям -->
+                                    <excludes>
+                                        <exclude>module-info.class</exclude> <!-- Для основного module-info -->
+                                        <exclude>META-INF/versions/*/module-info.class</exclude> <!-- Для multi-release в Jackson -->
+                                        <exclude>META-INF/MANIFEST.MF</exclude> <!-- Чтобы избежать перезаписи MANIFEST -->
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
