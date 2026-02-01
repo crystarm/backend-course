@@ -1,0 +1,28 @@
+version: '3.8'
+
+volumes:
+  postgres_data:
+    # some configs
+
+services:
+  postgres:
+    image: postgres:17
+    restart: no
+    environment:
+      POSTGRES_DB: lectures_java_course_demo
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432" # for debug
+    command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+#      - /home/someUser/someDisk/postgres/data:/var/lib/postgresql/data # директория вместо volume
+      - postgres_data:/var/lib/postgresql/data
+    entrypoint: ["bash", "-c", "docker-entrypoint.sh postgres"]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test -d lectures_java_course_demo" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s

@@ -1,0 +1,23 @@
+version: "3.8"
+
+volumes:
+  garage-meta:
+    driver: local
+  garage-data:
+    driver: local # решает проблему overlay fs (лучше использовать постоянный каталог вместо volume)
+
+services:
+  garage:
+    image: dxflrs/garage:v2.1.0
+    container_name: garage-single
+    restart: no
+    ports:
+      - "3900:3900"         # основной S3 API
+      - "3901:3901"         # RPC (нужен только для multi-node)
+      - "3902:3902"         # Веб-интерфейс (для показа статического контента)
+      - "3903:3903"         # Admin API / метрики
+    init: true              # Создаёт директории автоматически
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro  # TOML-конфиг (только чтение, для безопасности)
+      - garage-meta:/var/lib/garage/meta   # Метаданные (LMDB/SQLite, SSD рекомендуется)
+      - garage-data:/var/lib/garage/data   # Данные объектов (HDD, XFS для больших объёмов)

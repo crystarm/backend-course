@@ -1,0 +1,179 @@
+version: '3.8'
+
+volumes:
+  kafka1_data:
+    name: kafka1_data
+  kafka2_data:
+    name: kafka2_data
+  kafka3_data:
+    name: kafka3_data
+
+services:
+
+  kafka1:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka1
+    restart: no
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka1_data:/var/lib/kafka/data
+    environment:
+      # CLUSTER_ID: Уникальный идентификатор кластера Kafka.
+      # Обязателен: Да, необходим для режима KRaft, чтобы однозначно идентифицировать кластер.
+      # Значение обычно представляет собой строку в формате base64 (например, сгенерированную с помощью `kafka-storage.sh random-uuid`).
+      CLUSTER_ID: MkU3OThGNTcwNTJENDM2Qg
+    
+      # KAFKA_NODE_ID: Уникальный идентификатор данной ноды Kafka в кластере.
+      # Обязателен: Да, каждая нода в кластере KRaft должна иметь уникальный идентификатор.
+      KAFKA_NODE_ID: 1
+    
+      # KAFKA_CONTROLLER_QUORUM_VOTERS: Список нод, участвующих в кворуме контроллеров KRaft, с их идентификаторами и адресами.
+      # Формат: '<node_id>@<hostname>:<controller_port>,<node_id>@<hostname>:<controller_port>,...'.
+      # Обязателен: Да, необходим для режима KRaft для управления метаданными кластера.
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+    
+      # KAFKA_PROCESS_ROLES: Указывает роли, которые выполняет эта нода (брокер, контроллер или оба).
+      # В режиме KRaft ноды могут быть брокерами, контроллерами или совмещать роли.
+      # Обязателен: Да, определяет обязанности ноды в кластере.
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+    
+      # KAFKA_INTER_BROKER_LISTENER_NAME: Имя слушателя, используемого для коммуникации между брокерами.
+      # Должно совпадать с одним из имен слушателей, указанных в KAFKA_LISTENERS.
+      # Обязателен: Да, необходим для обмена данными между брокерами.
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    
+      # KAFKA_CONTROLLER_LISTENER_NAMES: Имя слушателя, используемого для роли контроллера.
+      # Должно совпадать с одним из имен слушателей, указанных в KAFKA_LISTENERS.
+      # Обязателен: Да, если нода выполняет роль контроллера (указано в KAFKA_PROCESS_ROLES).
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    
+      # KAFKA_LISTENERS: Определяет слушатели для различных типов подключений (внутренние, внешние, контроллер).
+      # Формат: '<listener_name>://<host>:<port>,<listener_name>://<host>:<port>,...'.
+      # Обязателен: Да, указывает сетевые интерфейсы и порты, на которых Kafka принимает соединения.
+      KAFKA_LISTENERS: 'INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093'
+    
+      # KAFKA_ADVERTISED_LISTENERS: Указывает адреса, которые анонсируются клиентам для подключения к этому брокеру.
+      # Формат: '<listener_name>://<advertised_host>:<advertised_port>, ...'.
+      # Должно соответствовать KAFKA_LISTENERS, но с хостами, доступными извне.
+      # Обязателен: Да, обеспечивает возможность подключения клиентов к брокеру.
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka1:9092,EXTERNAL://localhost:29092'
+    
+      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: Сопоставляет каждое имя слушателя с протоколом безопасности (например, PLAINTEXT, SSL).
+      # Формат: '<listener_name>:<protocol>,<listener_name>:<protocol>,...'.
+      # Обязателен: Да, определяет протокол безопасности для каждого слушателя.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+
+      # KAFKA_LOG_RETENTION_MS: Время хранения сообщений в миллисекундах.
+      # 7 дней = 7 * 24 * 60 * 60 * 1000 = 604800000 мс.
+      # Указывает, как долго сообщения хранятся в топике перед удалением.
+      # По умолчанию: 604800000 (7 дней)
+      KAFKA_LOG_RETENTION_MS: 604800000
+
+      # KAFKA_LOG_RETENTION_BYTES: Максимальный размер лога топика (всех партиций на брокере) в байтах.
+      # 10 ГБ = 10 * 1024 * 1024 * 1024 = 10737418240 байт.
+      # Если размер лога превышает этот лимит, старые сегменты удаляются.
+      # По умолчанию: -1 (без ограничения по размеру)
+      KAFKA_LOG_RETENTION_BYTES: 10737418240
+    
+      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: Устанавливает коэффициент репликации для внутреннего топика __consumer_offsets.
+      # Должен быть меньше или равен количеству брокеров в кластере.
+      # Обязателен: Нет, по умолчанию 3, но рекомендуется указать явно для контроля.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    
+      # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: Устанавливает коэффициент репликации для лога транзакций.
+      # Должен быть меньше или равен количеству брокеров.
+      # Обязателен: Нет, по умолчанию 3, но рекомендуется указать явно.
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: Включает автоматическое создание топиков при первом обращении (производитель/потребитель).
+      # По умолчанию: true (в большинстве дистрибутивов Kafka), но рекомендуется указать явно для ясности.
+      # Включите, если хотите гарантировать автоматическое создание.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # KAFKA_NUM_PARTITIONS: Устанавливает дефолтное количество партиций для автоматически создаваемых топиков.
+      # По умолчанию: 1.
+      # Kafka автоматически распределит эти партиции по разным брокерам кластера (если возможно), чтобы обеспечить баланс.
+      # Обязателен: Да, если хотите изменить дефолт.
+      KAFKA_NUM_PARTITIONS: 3
+
+      # KAFKA_DEFAULT_REPLICATION_FACTOR: Устанавливает дефолтный коэффициент репликации для автоматически создаваемых топиков.
+      # Это общее количество копий партиции (лидер + реплики). То есть если установить на 3, то будет лидер + 2 реплики.
+      # По умолчанию: 1. Kafka обеспечит, чтобы реплики были на разных брокерах.
+      # Обязателен: Да, если хотите изменить дефолт.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+
+      # Дополнительно: KAFKA_MIN_INSYNC_REPLICAS: Минимальное количество синхронизированных реплик для подтверждения записи 
+      # (баланс скорости и надежности).
+      # Рекомендуется установить на 2 (для replication factor=3), чтобы записи требовали как минимум 2 реплик (лидер + 1 реплика).
+      # По умолчанию: 1. Необязательно, но полезно для отказоустойчивости.
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka2
+    restart: no
+    ports:
+      - "9093:9092"
+      - "29093:29092"
+    volumes:
+      - kafka2_data:/var/lib/kafka/data
+    environment:
+      CLUSTER_ID: MkU3OThGNTcwNTJENDM2Qg
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: 'INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka2:9092,EXTERNAL://localhost:29093'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_LOG_RETENTION_MS: 604800000
+      KAFKA_LOG_RETENTION_BYTES: 10737418240
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+
+  kafka3:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka3
+    restart: no
+    ports:
+      - "9094:9092"
+      - "29094:29092"
+    volumes:
+      - kafka3_data:/var/lib/kafka/data
+    environment:
+      CLUSTER_ID: MkU3OThGNTcwNTJENDM2Qg
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: 'INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka3:9092,EXTERNAL://localhost:29094'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_LOG_RETENTION_MS: 604800000
+      KAFKA_LOG_RETENTION_BYTES: 10737418240
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: no
+    ports:
+      - "9090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: TestCluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092,kafka2:9092,kafka3:9092
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9997
+      SERVER_SERVLET_CONTEXT_PATH: /

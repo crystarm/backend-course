@@ -1,0 +1,75 @@
+version: '3.8'
+
+volumes:
+  redis-master-data:
+    name: redis-master-data
+  redis-replica-data:
+    name: redis-replica-data
+
+services:
+  redis-master:
+    image: redis:8.2.3
+    container_name: redis-master
+    restart: no
+    command:
+      - redis-server
+      - --save 60 1                   # RDB: снимок каждые 60 сек, если изменился хотя бы 1 ключ
+      - --appendonly yes              # Включаем AOF (Append-Only File)
+      - --appendfsync everysec        # AOF: fsync каждую секунду (хороший баланс надёжности и производительности)
+      - --maxmemory 512mb             # Ограничение памяти
+      - --maxmemory-policy volatile-ttl   # При нехватке памяти удаляем ключи с TTL, у которых TTL ближе к истечению
+      - --maxmemory-samples 5         # Количество проверяемых ключей при eviction (по умолчанию 5)
+#     - --active-expire enabled _____ # Включаем активное истечение ключей (более не требуется - включено по-умолчанию)
+      - --port 6379
+      - --bind 0.0.0.0                # Слушаем на всех интерфейсах внутри контейнера
+    ports:
+      - "6379:6379"                   # Пробрасываем порт мастера наружу (удобно для подключения)
+    volumes:
+      - redis-master-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2'                   # Ограничиваем cpu с запасом на дополнительные нужды
+          memory: 640M                # Жёсткий лимит памяти контейнера (больше maxmemory для служебных нужд)
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  redis-replica:
+    image: redis:8.2.3
+    container_name: redis-replica
+    restart: no
+    command:
+      - redis-server
+      - --save 60 1
+      - --appendonly yes
+      - --appendfsync everysec
+      - --maxmemory 512mb
+      - --maxmemory-policy volatile-ttl
+      - --maxmemory-samples 10
+      - --port 6379
+      - --bind 0.0.0.0
+      # Настройки реплики:
+      - --replicaof redis-master 6379   # Указываем мастер (имя сервиса из compose)
+      - --replica-read-only yes         # Реплика только для чтения (рекомендуется)
+    ports:
+      - "6380:6379"                     # Пробрасываем другой порт наружу, чтобы не конфликтовал с мастером
+    volumes:
+      - redis-replica-data:/data
+    depends_on:
+      redis-master:
+        condition: service_healthy      # Реплика стартует только после того, как мастер здоров
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 640M
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
