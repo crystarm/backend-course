@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-1b-oop-exceptions</artifactId>
+    <artifactId>jbcd-1b-oop-exceptions-io</artifactId>
 
     <dependencies>
         <!-- Подключаем jackson для работы с json -->

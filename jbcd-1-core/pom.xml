@@ -16,7 +16,7 @@
 
     <modules>
         <module>jbcd-1a-first-program</module>
-        <module>jbcd-1b-oop-exceptions</module>
+        <module>jbcd-1b-oop-exceptions-io</module>
     </modules>
 
 </project>
