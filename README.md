@@ -31,19 +31,7 @@ java-backend-course-demo = jbcd
 - - выполните `docker-compose up -d`
 - - при запуске приложения подложите в него local.env файл из соответствующей папки
 
-### Возможные ошибки
-
-```text
-[main] ERROR com.karandashov.Main - Не заданы переменные окружения!
-```
-Решение: вы не подложили local.env для внешнего сервиса.
-Перейдите Run/Debug Configurations -> Edit Configurations -> Modify options -> Environment Variables -> + -> Path -> /path/to/local.env
-
-```text
-Fatal error compiling: error: invalid target release
-```
-Решение: вы пытаетесь использовать старый JDK.
-Перейдите: File -> Project Structure -> Project -> Project SDK -> любой JDK 21+
+Возможные ошибки [смотри здесь](tutorials/errors.md)
 
 ## Оглавление
 
