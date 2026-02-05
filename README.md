@@ -33,6 +33,10 @@ java-backend-course-demo = jbcd
 
 Возможные ошибки [смотри здесь](tutorials/errors.md)
 
+## Туториалы
+
+* [Большой гайд как начать проект для лабораторных](tutorials/workInIde.md)
+
 ## Оглавление
 
 ### test-database
