@@ -19,6 +19,7 @@
         <module>jbcd-1b-oop-exceptions-io</module>
         <module>jbcd-1c-io-collections</module>
         <module>jbcd-1d-reflection-annotation</module>
+        <module>jbcd-1d-lombok</module>
     </modules>
 
 </project>
