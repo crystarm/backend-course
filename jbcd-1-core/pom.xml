@@ -18,6 +18,7 @@
         <module>jbcd-1a-first-program</module>
         <module>jbcd-1b-oop-exceptions-io</module>
         <module>jbcd-1c-io-collections</module>
+        <module>jbcd-1d-reflection-annotation</module>
     </modules>
 
 </project>

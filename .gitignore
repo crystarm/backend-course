@@ -1,6 +1,4 @@
 target/
-# демонстрационная папка target
-!jbcd-1-core/jbcd-1a-first-program/target
 
 **/dependency-reduced-pom.xml
 
