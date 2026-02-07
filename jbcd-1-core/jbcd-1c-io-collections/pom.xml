@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-1c-collections</artifactId>
+    <artifactId>jbcd-1c-io-collections</artifactId>
 
     <dependencies>
         <!-- Подключаем JUnit для тестирования -->

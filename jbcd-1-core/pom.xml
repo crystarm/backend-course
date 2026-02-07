@@ -17,7 +17,7 @@
     <modules>
         <module>jbcd-1a-first-program</module>
         <module>jbcd-1b-oop-exceptions-io</module>
-        <module>jbcd-1c-collections</module>
+        <module>jbcd-1c-io-collections</module>
     </modules>
 
 </project>
