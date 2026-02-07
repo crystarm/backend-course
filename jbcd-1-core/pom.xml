@@ -20,6 +20,7 @@
         <module>jbcd-1c-io-collections</module>
         <module>jbcd-1d-reflection-annotation</module>
         <module>jbcd-1d-lombok</module>
+        <module>jbcd-1b-java-core</module>
     </modules>
 
 </project>
