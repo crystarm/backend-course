@@ -13,5 +13,12 @@ public class Main {
 
         User user2 = new User("Петр", "Петрович", 21);
         System.out.println(user2.getAge());
+
+        User user3 = User.builder()
+                .firstName("Сидор")
+                .lastName("Сидорович")
+                .age(25)
+                .build();
+        System.out.println(user3.toString());
     }
 }
