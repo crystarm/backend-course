@@ -63,3 +63,5 @@ java-backend-course-demo = jbcd
 - **jbcd-1c-collections**: Демонстрация различных коллекций и чтения csv файла.
 - **jbcd-1d-reflection-annotation**: Демонстрация возможностей рефлексии и аннотаций
 - **jbcd-1d-lombok**: Использование Lombok
+- **jbcd-1d-mapstruct**: Использование MapStruct
+- **jbcd-1d-mapstruct-lombok**: Использование MapStruct совместно с Lombok

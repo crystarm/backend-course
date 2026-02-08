@@ -21,6 +21,8 @@
         <module>jbcd-1c-io-collections</module>
         <module>jbcd-1d-reflection-annotation</module>
         <module>jbcd-1d-lombok</module>
+        <module>jbcd-1d-mapstruct</module>
+        <module>jbcd-1d-mapstruct-lombok</module>
     </modules>
 
 </project>
