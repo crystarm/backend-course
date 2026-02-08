@@ -1,25 +1,28 @@
-package com.karandashov.parser;
+package com.karandashov.parser.impl;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.CollectionParser;
+import com.karandashov.parser.LineCsvParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
-public class TreeMapCsvParser extends CsvParser {
+public class ArrayListCsvParser extends LineCsvParser implements CollectionParser {
 
     private final String fileName;
 
-    public TreeMapCsvParser(String fileName) {
+    public ArrayListCsvParser(String fileName) {
         this.fileName = fileName;
     }
 
-    public SortedMap<Integer, User> parse() {
-        SortedMap<Integer, User> collection = new TreeMap<>();
+    @Override
+    public List<User> parseAll() {
+        List<User> collection = new ArrayList<>();
 
         try (
                 InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(fileName);
@@ -31,7 +34,7 @@ public class TreeMapCsvParser extends CsvParser {
             while (line != null) {
                 User user = parseLine(line);
                 if (user != null) {
-                    collection.put(user.getId(), user);
+                    collection.add(user);
                 }
                 line = br.readLine();
             }
@@ -41,5 +44,10 @@ public class TreeMapCsvParser extends CsvParser {
         }
 
         return collection;
+    }
+
+    @Override
+    public User parse() {
+        return parseAll().getFirst();
     }
 }

@@ -1,26 +1,28 @@
-package com.karandashov.parser;
+package com.karandashov.parser.impl;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.CollectionParser;
+import com.karandashov.parser.LineCsvParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-public class HashMapCsvParser extends CsvParser {
+public class HashSetCsvParser extends LineCsvParser implements CollectionParser {
 
     private final String fileName;
 
-    public HashMapCsvParser(String fileName) {
+    public HashSetCsvParser(String fileName) {
         this.fileName = fileName;
     }
 
-    public Map<Integer, User> parse() {
-
-        Map<Integer, User> collection = new HashMap<>();
+    @Override
+    public Set<User> parseAll() {
+        Set<User> collection = new HashSet<>();
 
         try (
                 InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(fileName);
@@ -32,7 +34,7 @@ public class HashMapCsvParser extends CsvParser {
             while (line != null) {
                 User user = parseLine(line);
                 if (user != null) {
-                    collection.put(user.getId(), user);
+                    collection.add(user);
                 }
                 line = br.readLine();
             }
@@ -42,5 +44,10 @@ public class HashMapCsvParser extends CsvParser {
         }
 
         return collection;
+    }
+
+    @Override
+    public User parse() {
+        return parseAll().iterator().next();
     }
 }

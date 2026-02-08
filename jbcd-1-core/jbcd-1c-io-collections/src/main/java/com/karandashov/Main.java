@@ -1,12 +1,12 @@
 package com.karandashov;
 
 import com.karandashov.model.User;
-import com.karandashov.parser.HashMapCsvParser;
-import com.karandashov.parser.ArrayListCsvParser;
-import com.karandashov.parser.LinkedListCsvParser;
-import com.karandashov.parser.PriorityQueueCsvParser;
-import com.karandashov.parser.HashSetCsvParser;
-import com.karandashov.parser.TreeMapCsvParser;
+import com.karandashov.parser.impl.HashMapCsvParser;
+import com.karandashov.parser.impl.ArrayListCsvParser;
+import com.karandashov.parser.impl.LinkedListCsvParser;
+import com.karandashov.parser.impl.PriorityQueueCsvParser;
+import com.karandashov.parser.impl.HashSetCsvParser;
+import com.karandashov.parser.impl.TreeMapCsvParser;
 
 import java.util.List;
 import java.util.Map;
@@ -18,32 +18,32 @@ public class Main {
     public static void main(String[] args) {
 
         ArrayListCsvParser arrayListCsvParser = new ArrayListCsvParser("users.csv");
-        List<User> arrayListUsers = arrayListCsvParser.parse();
+        List<User> arrayListUsers = arrayListCsvParser.parseAll();
         System.out.println("ArrayList:");
         System.out.println(arrayListUsers);
 
         LinkedListCsvParser linkedListCsvParser = new LinkedListCsvParser("users.csv");
-        List<User> linkedListUsers = linkedListCsvParser.parse();
+        List<User> linkedListUsers = linkedListCsvParser.parseAll();
         System.out.println("LinkedList:");
         System.out.println(linkedListUsers);
 
         HashMapCsvParser hashMapCsvParser = new HashMapCsvParser("users.csv");
-        Map<Integer, User> hashMapUsers = hashMapCsvParser.parse();
+        Map<Integer, User> hashMapUsers = hashMapCsvParser.parseAll();
         System.out.println("HashMap:");
         System.out.println(hashMapUsers);
 
         TreeMapCsvParser treeMapCsvParser = new TreeMapCsvParser("users.csv");
-        Map<Integer, User> treeMapUsers = treeMapCsvParser.parse();
+        Map<Integer, User> treeMapUsers = treeMapCsvParser.parseAll();
         System.out.println("TreeMap:");
         System.out.println(treeMapUsers);
 
         HashSetCsvParser hashSetCsvParser = new HashSetCsvParser("users.csv");
-        Set<User> setUsers = hashSetCsvParser.parse();
+        Set<User> setUsers = hashSetCsvParser.parseAll();
         System.out.println("HashSet:");
         System.out.println(setUsers);
 
         PriorityQueueCsvParser priorityQueueCsvParser = new PriorityQueueCsvParser("users.csv");
-        Queue<User> pqUsers = priorityQueueCsvParser.parse();
+        Queue<User> pqUsers = priorityQueueCsvParser.parseAll();
         System.out.println("PriorityQueue:");
         System.out.println(pqUsers);
     }

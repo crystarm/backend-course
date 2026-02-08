@@ -1,6 +1,7 @@
 package com.karandashov.parser;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.impl.PriorityQueueCsvParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.PriorityQueue;
@@ -12,7 +13,7 @@ class PriorityQueueCsvParserTest {
     @Test
     void parse_returnsPriorityQueueOrderedById() {
         PriorityQueueCsvParser parser = new PriorityQueueCsvParser("test-file.csv");
-        PriorityQueue<User> pq = parser.parse();
+        PriorityQueue<User> pq = parser.parseAll();
 
         assertEquals(2, pq.size());
         assertEquals(0, pq.peek().getId());

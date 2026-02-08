@@ -1,6 +1,7 @@
 package com.karandashov.parser;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.impl.ArrayListCsvParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,7 +13,7 @@ class ArrayListCsvParserTest {
     @Test
     void parse_returnsArrayListWithAllUsers() {
         ArrayListCsvParser parser = new ArrayListCsvParser("test-file.csv");
-        List<User> users = parser.parse();
+        List<User> users = parser.parseAll();
 
         assertEquals(2, users.size(), "Должно быть считано 2 пользователя без заголовка");
         assertEquals(0, users.get(0).getId());

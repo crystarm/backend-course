@@ -1,6 +1,7 @@
 package com.karandashov.parser;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.impl.TreeMapCsvParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.SortedMap;
@@ -12,7 +13,7 @@ class TreeMapCsvParserTest {
     @Test
     void parse_returnsSortedMapById() {
         TreeMapCsvParser parser = new TreeMapCsvParser("test-file.csv");
-        SortedMap<Integer, User> map = parser.parse();
+        SortedMap<Integer, User> map = parser.parseAll();
 
         assertEquals(2, map.size());
         assertEquals(0, map.firstKey());

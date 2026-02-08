@@ -2,7 +2,7 @@ package com.karandashov.parser;
 
 import com.karandashov.model.User;
 
-public abstract class CsvParser {
+public abstract class LineCsvParser {
 
     protected User parseLine(String line) {
         String[] parts = line.split(";", -1); // сохраняем пустые хвостовые поля

@@ -1,6 +1,7 @@
 package com.karandashov.parser;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.impl.HashSetCsvParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -12,7 +13,7 @@ class HashSetCsvParserTest {
     @Test
     void parse_returnsSetWithUniqueUsers() {
         HashSetCsvParser parser = new HashSetCsvParser("test-file.csv");
-        Set<User> users = parser.parse();
+        Set<User> users = parser.parseAll();
 
         assertEquals(2, users.size());
         assertTrue(users.stream().anyMatch(u -> u.getId() == 0));

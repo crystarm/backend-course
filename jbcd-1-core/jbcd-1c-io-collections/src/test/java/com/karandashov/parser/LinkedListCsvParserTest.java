@@ -1,6 +1,7 @@
 package com.karandashov.parser;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.impl.LinkedListCsvParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,7 +13,7 @@ class LinkedListCsvParserTest {
     @Test
     void parse_returnsLinkedListWithAllUsersInOrder() {
         LinkedListCsvParser parser = new LinkedListCsvParser("test-file.csv");
-        List<User> users = parser.parse();
+        List<User> users = parser.parseAll();
 
         assertEquals(2, users.size());
         assertEquals(0, users.get(0).getId());

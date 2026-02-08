@@ -1,6 +1,8 @@
-package com.karandashov.parser;
+package com.karandashov.parser.impl;
 
 import com.karandashov.model.User;
+import com.karandashov.parser.CollectionParser;
+import com.karandashov.parser.LineCsvParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class LinkedListCsvParser extends CsvParser {
+public class LinkedListCsvParser extends LineCsvParser implements CollectionParser {
 
     private final String fileName;
 
@@ -18,7 +20,8 @@ public class LinkedListCsvParser extends CsvParser {
         this.fileName = fileName;
     }
 
-    public List<User> parse() {
+    @Override
+    public List<User> parseAll() {
         List<User> collection = new LinkedList<>();
 
         try (
@@ -41,5 +44,10 @@ public class LinkedListCsvParser extends CsvParser {
         }
 
         return collection;
+    }
+
+    @Override
+    public User parse() {
+        return parseAll().getFirst();
     }
 }
