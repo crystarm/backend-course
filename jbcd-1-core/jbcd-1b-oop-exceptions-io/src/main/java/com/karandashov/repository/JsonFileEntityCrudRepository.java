@@ -1,14 +1,14 @@
 package com.karandashov.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.karandashov.exception.FileException;
 import com.karandashov.model.Entity;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.*;
 import java.util.List;
 
-import static com.fasterxml.jackson.core.JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION;
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 /**
  * Реализация хранения в файле в виде json
@@ -17,14 +17,16 @@ public abstract class JsonFileEntityCrudRepository<T extends Entity> extends Ent
 
     protected final String fileName;
 
-    protected final ObjectMapper jsonMapper;
+    protected final JsonMapper jsonMapper;
 
     public JsonFileEntityCrudRepository(String fileName) {
         this.fileName = fileName;
-        this.jsonMapper = new ObjectMapper();
-        jsonMapper.findAndRegisterModules(); // обнаруживаем jsr310 для работы с datetime
-        jsonMapper.configure(INCLUDE_SOURCE_IN_LOCATION, true);
-        jsonMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.jsonMapper = JsonMapper.builder()
+                // выключаем падения при неизвестных json-полях
+                .disable(FAIL_ON_UNKNOWN_PROPERTIES)
+                // не включаем в json значения null (null в json является bad practice: ключ есть, а значения нет)
+                .changeDefaultPropertyInclusion(include -> include.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .build();
         writeFile("[]"); // очищаем файл
     }
 
