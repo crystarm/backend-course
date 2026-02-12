@@ -14,7 +14,8 @@
 При установке ide (или при первом запуске) она предложит тебе установить git (соглашайся) и JDK (выбирай любую 21).
 Maven уже будет внутри, отдельной установки не требуется.
 
-Если вы не работали до этого с github/gitlab с вашего пк, то скорее всего не добавили ssh ключ. Как это сделать читай:
+Если вы не работали до этого с github/gitlab с вашего пк, то скорее всего не добавили ssh ключ. Как это сделать читай в
+[моем туториале](ssh.md) или в официальных доках:
 * https://docs.gitlab.com/user/ssh/
 * https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 
