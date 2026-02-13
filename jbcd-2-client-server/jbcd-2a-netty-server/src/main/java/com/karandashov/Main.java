@@ -2,6 +2,7 @@ package com.karandashov;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.karandashov.controller.NewsEventController;
+import com.karandashov.repository.InMemoryNewsEventRepository;
 import com.karandashov.repository.NewsEventRepository;
 import com.karandashov.service.NewsEventService;
 import io.netty.bootstrap.ServerBootstrap;
@@ -29,7 +30,7 @@ public class Main {
                 .build();
 
         // Создаем репозиторий и сервис
-        NewsEventRepository repository = new NewsEventRepository();
+        NewsEventRepository repository = new InMemoryNewsEventRepository();
         NewsEventService service = new NewsEventService(repository);
         NewsEventController controller = new NewsEventController(service, jsonMapper);
 
