@@ -21,6 +21,7 @@
         <module>jbcd-2a-jooby-server-mvc</module>
         <module>jbcd-2a-http-client</module>
         <module>jbcd-2b-long-polling</module>
+        <module>jbcd-2b-sse</module>
     </modules>
 
 </project>
