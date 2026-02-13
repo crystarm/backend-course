@@ -22,6 +22,7 @@
         <module>jbcd-2a-http-client</module>
         <module>jbcd-2b-long-polling</module>
         <module>jbcd-2b-sse</module>
+        <module>jbcd-2b-websocket</module>
     </modules>
 
 </project>
