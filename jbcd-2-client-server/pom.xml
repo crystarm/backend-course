@@ -19,6 +19,7 @@
         <module>jbcd-2a-netty-server</module>
         <module>jbcd-2a-jooby-server</module>
         <module>jbcd-2a-jooby-server-mvc</module>
+        <module>jbcd-2a-http-client</module>
     </modules>
 
 </project>
