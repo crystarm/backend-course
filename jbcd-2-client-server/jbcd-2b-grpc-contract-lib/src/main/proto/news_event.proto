@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package com.karandashov;
+
+option java_multiple_files = true;
+option java_package = "com.karandashov.grpc";
+option java_outer_classname = "NewsEventProto";
+
+// Corresponds to NewsEvent.java
+message NewsEvent {
+  string id = 1; // UUID as string
+  string title = 2;
+  string message = 3;
+}
+
+// Corresponds to NewsEventList.java
+message NewsEventList {
+  repeated NewsEvent events = 1;
+}
+
+// Corresponds to CreateNewsEventRequest.java
+message CreateNewsEventRequest {
+  string title = 1;
+  string message = 2;
+}
+
+// Corresponds to UniversalResponse.java
+// Using oneof for the generic type T
+message UniversalResponse {
+  int32 code = 1;
+  string message = 2;
+  oneof data {
+    NewsEvent news_event = 3;
+    NewsEventList news_event_list = 4;
+    string string_data = 5;
+    // Add more types as needed
+  }
+}
+
+// Service definition
+service NewsEventService {
+  // Get all news events
+  rpc GetAllNewsEvents(Empty) returns (UniversalResponse);
+  
+  // Get a specific news event by ID
+  rpc GetNewsEvent(GetNewsEventRequest) returns (UniversalResponse);
+  
+  // Create a new news event
+  rpc CreateNewsEvent(CreateNewsEventRequest) returns (UniversalResponse);
+}
+
+// Empty message for requests that don't need parameters
+message Empty {
+}
+
+// Request message for getting a specific news event
+message GetNewsEventRequest {
+  string id = 1; // UUID as string
+}

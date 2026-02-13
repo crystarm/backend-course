@@ -23,6 +23,8 @@
         <module>jbcd-2b-long-polling</module>
         <module>jbcd-2b-sse</module>
         <module>jbcd-2b-websocket</module>
+        <module>jbcd-2b-grpc-contract-lib</module>
+        <module>jbcd-2b-grpc-server</module>
     </modules>
 
 </project>
