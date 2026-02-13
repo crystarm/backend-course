@@ -31,6 +31,7 @@
     <!--  jbcd - это аббревиатура от названия проекта - используется как префикс  -->
     <modules>
         <module>jbcd-1-core</module>
+        <module>jbcd-2-client-server</module>
     </modules>
 
     <!--  Перечисляем все внешние зависимости с указанием версий из properties  -->
