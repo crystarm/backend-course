@@ -73,7 +73,7 @@ target/
 
     <dependencyManagement>
         <dependencies>
-            <!--  JUnit 5 (Jupiter) для тестирования  -->
+            <!--  JUnit (Jupiter) для тестирования  -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
