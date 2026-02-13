@@ -25,6 +25,7 @@
         <module>jbcd-2b-websocket</module>
         <module>jbcd-2b-grpc-contract-lib</module>
         <module>jbcd-2b-grpc-server</module>
+        <module>jbcd-2b-grpc-client</module>
     </modules>
 
 </project>
