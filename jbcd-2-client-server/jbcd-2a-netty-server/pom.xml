@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.karandashov</groupId>
             <artifactId>jbcd-2-base-server-lib</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <!-- Jackson для работы с JSON -->
@@ -71,8 +71,7 @@
                                     <artifact>*:*</artifact> <!-- Применяется ко всем зависимостям -->
                                     <excludes>
                                         <exclude>module-info.class</exclude> <!-- Для основного module-info -->
-                                        <exclude>META-INF/versions/*/module-info.class</exclude> <!-- Для multi-release в Jackson -->
-                                        <exclude>META-INF/MANIFEST.MF</exclude> <!-- Чтобы избежать перезаписи MANIFEST -->
+                                        <exclude>META-INF/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
