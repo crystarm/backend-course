@@ -66,3 +66,19 @@ java-backend-course-demo = jbcd
 - **jbcd-1d-lombok**: Использование Lombok
 - **jbcd-1d-mapstruct**: Использование MapStruct
 - **jbcd-1d-mapstruct-lombok**: Использование MapStruct совместно с Lombok
+
+### jbcd-2-client-server
+
+Модуль для демонстрации работы с сетью:
+
+- **jbcd-2-base-server-lib**: Общая библиотека с DTO, моделями и сервисами, используемая в примерах модуля.
+- **jbcd-2a-netty-server**: Реализация HTTP-сервера на фреймворке Netty.
+- **jbcd-2a-jooby-server**: Пример создания REST API с использованием фреймворка Jooby.
+- **jbcd-2a-jooby-server-mvc**: Использование MVC-подхода в Jooby.
+- **jbcd-2a-http-client**: Примеры использования стандартного Java HttpClient.
+- **jbcd-2b-long-polling**: Реализация технологии Long Polling.
+- **jbcd-2b-sse**: Пример использования Server-Sent Events (SSE).
+- **jbcd-2b-websocket**: Двусторонний обмен данными через WebSockets.
+- **jbcd-2b-grpc-contract-lib**: Описание gRPC контракта через Protocol Buffers.
+- **jbcd-2b-grpc-server**: Реализация gRPC сервера.
+- **jbcd-2b-grpc-client**: Реализация gRPC клиента.
