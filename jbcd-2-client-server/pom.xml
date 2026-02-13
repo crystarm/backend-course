@@ -16,6 +16,7 @@
 
     <modules>
         <module>jbcd-2-base-server-lib</module>
+        <module>jbcd-2a-netty-server</module>
     </modules>
 
 </project>
