@@ -14,6 +14,10 @@ public abstract class BaseException extends RuntimeException {
         super(message);
     }
 
+    public BaseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public int getHttpCode() {
         return HTTP_CODE;
     }

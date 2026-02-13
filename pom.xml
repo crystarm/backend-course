@@ -40,6 +40,7 @@
     <modules>
         <module>jbcd-1-core</module>
         <module>jbcd-2-client-server</module>
+        <module>jbcd-3-database</module>
     </modules>
 
     <!--  Перечисляем все внешние зависимости с указанием версий из properties  -->
