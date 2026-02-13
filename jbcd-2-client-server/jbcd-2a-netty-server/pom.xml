@@ -30,13 +30,6 @@
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-
-        <!-- JUnit 5 для тестирования -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <!-- Настройка сборки проекта -->

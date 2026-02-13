@@ -50,14 +50,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
-
-        <!-- JUnit 5 для тестирования -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <!-- Настройка сборки проекта -->
