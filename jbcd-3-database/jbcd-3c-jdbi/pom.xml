@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.karandashov</groupId>
+        <artifactId>jbcd-3-database</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>jbcd-3c-jdbi</artifactId>
+
+    <dependencies>
+
+        <!-- ORM -->
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-sqlobject</artifactId>
+        </dependency>
+
+        <!-- Драйвер PostgreSQL для JDBC -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- connection pool для базы данных -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
+        <!-- liquibase для миграций в базе данных -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
+        <!-- библиотека легкого создания web-сервера -->
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby-netty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Наша библиотека с готовой реализацией репозитория и сервиса -->
+        <dependency>
+            <groupId>com.karandashov</groupId>
+            <artifactId>jbcd-2-base-server-lib</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <!-- Jackson для работы с JSON -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- для логирования -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+
+        <!-- JUnit для тестирования -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- mockito для тестов -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- Настройка сборки проекта -->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+            <!-- Плагин для создания толстого JAR (fat JAR) со всеми зависимостями -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Создаем исполняемый JAR с указанием главного класса -->
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.karandashov.Main</mainClass>
+                                </transformer>
+                                <!-- Убираем дубликаты LICENSE и NOTICE -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>fat</shadedClassifierName>
+                            <!-- Фильтры для исключения module-info и дубликатов MANIFEST -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact> <!-- Применяется ко всем зависимостям -->
+                                    <excludes>
+                                        <exclude>module-info.class</exclude> <!-- Для основного module-info -->
+                                        <exclude>META-INF/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

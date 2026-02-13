@@ -17,6 +17,7 @@
     <modules>
         <module>jbcd-3a-jdbc</module>
         <module>jbcd-3b-tools</module>
+        <module>jbcd-3c-jdbi</module>
     </modules>
 
 </project>
