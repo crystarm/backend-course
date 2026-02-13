@@ -20,11 +20,13 @@
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
         <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
         <maven.shade.plugin.version>3.4.1</maven.shade.plugin.version>
+        <maven.build.helper.plugin.version>3.6.0</maven.build.helper.plugin.version>
         <junit.version>6.0.2</junit.version>
         <jackson.version>3.0.4</jackson.version>
         <lombok.version>1.18.42</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
+        <jooby.version>4.0.15</jooby.version>
         <spring.dependencies.version>4.0.2</spring.dependencies.version>
     </properties>
 
@@ -76,6 +78,28 @@
                 <artifactId>lombok-mapstruct-binding</artifactId>
                 <version>${lombok.mapstruct.binding.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <!-- библиотека легкого создания web-сервера -->
+            <dependency>
+                <groupId>io.jooby</groupId>
+                <artifactId>jooby</artifactId>
+                <version>${jooby.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jooby</groupId>
+                <artifactId>jooby-netty</artifactId>
+                <version>${jooby.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jooby</groupId>
+                <artifactId>jooby-test</artifactId>
+                <version>${jooby.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jooby</groupId>
+                <artifactId>jooby-jackson</artifactId>
+                <version>${jooby.version}</version>
             </dependency>
 
             <!--  все версии зависимостей spring в одном пакете -->
