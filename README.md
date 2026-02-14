@@ -82,3 +82,9 @@ java-backend-course-demo = jbcd
 - **jbcd-2b-grpc-contract-lib**: Описание gRPC контракта через Protocol Buffers.
 - **jbcd-2b-grpc-server**: Реализация gRPC сервера.
 - **jbcd-2b-grpc-client**: Реализация gRPC клиента.
+
+### jbcd-3-database
+
+- **jbcd-3a-jdbc**: Пример работы с БД с помощью чистого JDBC.
+- **jbcd-3b-tools**: Использование connection pool Hikari и инструмента миграции Liquibase.
+- **jbcd-3c-jdbi**: Пример работы с простейшим ORM: Jdbi.
