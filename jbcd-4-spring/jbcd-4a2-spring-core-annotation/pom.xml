@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-4a-spring-core</artifactId>
+    <artifactId>jbcd-4a2-spring-core-annotation</artifactId>
 
     <dependencies>
 

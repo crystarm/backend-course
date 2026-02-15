@@ -1,0 +1,32 @@
+package com.karandashov;
+
+import com.karandashov.dto.CreateNewsEventRequest;
+import com.karandashov.service.NewsEventService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        ApplicationContext context = new AnnotationConfigApplicationContext(NewsConfiguration.class);
+
+        NewsEventService service = context.getBean(NewsEventService.class);
+
+        var news = service.save(new CreateNewsEventRequest("Test Title", "Test Message"));
+        assert news != null;
+        assert "Test Title".equals(news.getData().getTitle());
+        var id = news.getData().getId();
+
+        // проверяем работу валидатора
+        try {
+            service.save(new CreateNewsEventRequest("Test Title", "Another Message"));
+        } catch (IllegalArgumentException e) {
+            assert e.getMessage().contains("Title must be unique");
+        }
+
+        var sameNews = service.getById(id);
+        assert sameNews != null;
+        assert "Test Message".equals(sameNews.getData().getMessage());
+    }
+}

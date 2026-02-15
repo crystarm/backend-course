@@ -15,7 +15,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>jbcd-4a-spring-core</module>
+        <module>jbcd-4a1-spring-core-configuration</module>
+        <module>jbcd-4a2-spring-core-annotation</module>
     </modules>
 
 </project>
