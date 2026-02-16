@@ -17,6 +17,7 @@
     <modules>
         <module>jbcd-4a1-spring-core-configuration</module>
         <module>jbcd-4a2-spring-core-annotation</module>
+        <module>jbcd-4b-spring-boot-web</module>
     </modules>
 
 </project>
