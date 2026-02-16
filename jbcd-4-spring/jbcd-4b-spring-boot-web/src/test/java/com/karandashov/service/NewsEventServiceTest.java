@@ -9,21 +9,26 @@ import com.karandashov.repository.InMemoryNewsEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import java.util.Collection;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 public class NewsEventServiceTest {
 
+    @Autowired
     private InMemoryNewsEventRepository repository;
+
+    @Autowired
     private NewsEventService service;
 
     @BeforeEach
     void setUp() {
-        // Пересоздаем каждый раз для чистоты и независимости каждого отдельного теста
-        repository = new InMemoryNewsEventRepository();
-        service = new NewsEventService(repository);
+        repository.clear();
     }
 
     @Test

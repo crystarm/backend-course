@@ -35,4 +35,8 @@ public class InMemoryNewsEventRepository implements NewsEventRepository {
     public void save(NewsEvent newsEvent) {
         STORAGE.put(newsEvent.getId(), newsEvent);
     }
+
+    public void clear() {
+        STORAGE.clear();
+    }
 }
