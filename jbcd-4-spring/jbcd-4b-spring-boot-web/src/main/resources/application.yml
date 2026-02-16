@@ -8,6 +8,9 @@ spring:
     error:
       include-stacktrace: never
 
+cache:
+  enabled: true
+
 
 logging:
   level:

@@ -1,0 +1,12 @@
+#server:
+#  port: 8082
+
+spring:
+  application:
+    name: spring-boot-web-demo
+  web:
+    error:
+      include-stacktrace: never
+
+cache:
+  enabled: false
