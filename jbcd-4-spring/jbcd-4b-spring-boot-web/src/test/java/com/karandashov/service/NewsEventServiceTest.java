@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 public class NewsEventServiceTest {
 
-    @Autowired
+    @MockitoSpyBean
     private InMemoryNewsEventRepository repository;
 
     @Autowired
@@ -112,5 +113,26 @@ public class NewsEventServiceTest {
         // Verify the event was actually saved in the repository
         UUID savedId = response.getData().getId();
         assertTrue(repository.getById(savedId).isPresent());
+    }
+
+    @Test
+    void testCaching() {
+        // 1. Initial call to getAll()
+        UniversalResponse<NewsEventList> response1 = service.getAll();
+        // verify(repository, times(1)).getAll();
+
+        // 2. Second call to getAll() - should be cached
+        UniversalResponse<NewsEventList> response2 = service.getAll();
+        // Since it's the same object returned by the aspect (not deep cloned)
+        assertSame(response1, response2, "Should return the same instance from cache");
+
+        // 3. Save a new news - should clear cache
+        service.save(new CreateNewsEventRequest("Title", "Message"));
+
+        // 4. Third call to getAll() - should be a cache miss
+        UniversalResponse<NewsEventList> response3 = service.getAll();
+        assertNotSame(response1, response3, "Should return a different instance after cache clear");
+        
+        assertEquals(1, response3.getData().getEvents().size());
     }
 }

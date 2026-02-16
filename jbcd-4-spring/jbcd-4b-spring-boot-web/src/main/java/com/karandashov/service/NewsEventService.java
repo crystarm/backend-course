@@ -1,5 +1,7 @@
 package com.karandashov.service;
 
+import com.karandashov.aop.ClearCache;
+import com.karandashov.aop.UseCache;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
@@ -27,10 +29,12 @@ public class NewsEventService {
         return map(event);
     }
 
+    @UseCache
     public UniversalResponse<NewsEventList> getAll() {
         return map(repository.getAll());
     }
 
+    @ClearCache
     public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
         NewsEvent newsEvent = new NewsEvent(UUID.randomUUID(), request.getTitle(), request.getMessage());
         repository.save(newsEvent);
