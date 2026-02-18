@@ -6,7 +6,6 @@
 Это поможет быстрее проверить вашу работу (ссылку хотя бы предварительно можно открыть в браузере) и дать обратную связь.
 * ✅ https://gitlab.com/VladKarandashov/java-backend-course-demo
 * ❌ git@gitlab.com:VladKarandashov/java-backend-course-demo.git
-* ❌ https://gitlab.com/VladKarandashov/java-backend-course-demo.git
 
 Проверьте, что репозиторий публичный. Если сомневаетесь — проверьте через режим инкогнито в браузере.
 
@@ -140,3 +139,31 @@ public class Main {
 
 Проблема NPE — одна из основных в Java, поэтому старайтесь никогда не писать `return null`. Бросайте Runtime исключения,
 если программа не может продолжать работу. Либо возвращайте через Optional.
+
+## Работа с файлами без закрытия
+
+Если вы открываете файл/поток и не закрываете его, то получаете утечки ресурсов: дескрипторы накапливаются, файл может остаться
+заблокированным (особенно на Windows), а данные могут не успеть записаться на диск. Всегда закрывайте ресурсы, используйте try-with-resources
+или `finally` с явным закрытием.
+
+Используйте try-with-resources:
+```java
+try (
+    InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(fileName);
+    InputStreamReader inputStreamReader = new InputStreamReader(Objects.requireNonNull(resourceAsStream));
+    BufferedReader br = new BufferedReader(inputStreamReader)
+) {
+    // work with file
+}
+```
+
+Если по каким-то причинам так сделать нельзя — закрывайте вручную в `finally`:
+```java
+try {
+    // work with file
+} finally {
+    if (file != null) {
+        file.close();
+    }
+}
+```
