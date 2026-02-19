@@ -38,7 +38,8 @@ java-backend-course-demo = jbcd
 
 * [Как добавить ssh ключ в git](tutorials/ssh.md)
 * [Большой гайд как начать проект для лабораторных с помощью git](tutorials/startInGit.md)
-* [Большой гайд как начать проект для лабораторных с помощью ide](tutorials/startInIde.md)
+* [Большой гайд как начать проект для лабораторных с помощью idea](tutorials/startInIde.md)
+* [Как работать с git в idea + командная разработка](tutorials/workWithGit.md)
 
 ## Оглавление
 
