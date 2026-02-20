@@ -4,7 +4,9 @@ import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
 import com.karandashov.dto.UniversalResponse;
+import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.exceptions.NotFoundException;
+import com.karandashov.mapper.NewsMapper;
 import com.karandashov.repository.NewsEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,28 +23,30 @@ public class NewsEventService {
 
     private final NewsEventRepository repository;
 
+    private final NewsMapper mapper;
+
     public UniversalResponse<NewsEvent> getById(UUID id) {
-        NewsEvent event = repository.getById(id)
+        NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
-        return map(event);
+        NewsEvent newsEventDto = mapper.toDto(event);
+        return new UniversalResponse<>(newsEventDto);
     }
 
     public UniversalResponse<NewsEventList> getAll() {
-        return map(repository.getAll());
+        List<NewsEventEntity> events = repository.findAll();
+        List<NewsEvent> newsEventDtoList = mapper.toDtoList(events);
+        NewsEventList newsEventList = new NewsEventList(newsEventDtoList);
+        return new UniversalResponse<>(newsEventList);
     }
 
     public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
-        NewsEvent newsEvent = new NewsEvent(UUID.randomUUID(), request.getTitle(), request.getMessage());
-        repository.save(newsEvent);
-        return map(newsEvent);
-    }
-
-    private UniversalResponse<NewsEvent> map(NewsEvent newsEvent) {
-        return new UniversalResponse<>(newsEvent);
-    }
-
-    private UniversalResponse<NewsEventList> map(List<NewsEvent> newsEventList) {
-        NewsEventList data = new NewsEventList(newsEventList);
-        return new UniversalResponse<>(data);
+        NewsEventEntity entity = NewsEventEntity.builder()
+                .id(UUID.randomUUID())
+                .title(request.getTitle())
+                .message(request.getMessage())
+                .build();
+        entity = repository.save(entity);
+        NewsEvent newsEventDto = mapper.toDto(entity);
+        return new UniversalResponse<>(newsEventDto);
     }
 }

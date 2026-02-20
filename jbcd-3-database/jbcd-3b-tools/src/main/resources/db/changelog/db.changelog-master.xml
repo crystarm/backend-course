@@ -10,6 +10,5 @@
     </changeSet>
 
     <include relativeToChangelogFile="true" file="ddl/2025-09-23--create-table-news_table.xml"/>
-    <include relativeToChangelogFile="true" file="ddl/2025-09-23--update-table-news_table-add-count.xml"/>
 
 </databaseChangeLog>
