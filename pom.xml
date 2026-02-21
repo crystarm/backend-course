@@ -45,7 +45,7 @@
         <module>jbcd-2-client-server</module>
         <module>jbcd-3-database</module>
         <module>jbcd-4-spring</module>
-        <module>jbcd-5-test-and-docs</module>
+        <module>jbcd-5-docs</module>
     </modules>
 
     <!--  Перечисляем все внешние зависимости с указанием версий из properties  -->
