@@ -4,7 +4,7 @@
 
 HOST="localhost"
 PORT="8080"
-URL="http://$HOST:$PORT"
+URL="http://$HOST:$PORT/news"
 
 # делаем sse /listen запросы и фиксируем результат (перезапускаем если упало)
 

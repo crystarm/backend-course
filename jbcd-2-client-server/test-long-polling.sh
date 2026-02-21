@@ -4,7 +4,7 @@
 
 HOST="localhost"
 PORT="8080"
-URL="http://$HOST:$PORT"
+URL="http://$HOST:$PORT/news"
 
 # while true делаем get /listen запросы и фиксируем результат
 

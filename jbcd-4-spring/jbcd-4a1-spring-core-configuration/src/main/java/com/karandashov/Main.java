@@ -18,13 +18,6 @@ public class Main {
         assert "Test Title".equals(news.getData().getTitle());
         var id = news.getData().getId();
 
-        // проверяем работу валидатора
-        try {
-            service.save(new CreateNewsEventRequest("Test Title", "Another Message"));
-        } catch (IllegalArgumentException e) {
-            assert e.getMessage().contains("Title must be unique");
-        }
-
         var sameNews = service.getById(id);
         assert sameNews != null;
         assert "Test Message".equals(sameNews.getData().getMessage());

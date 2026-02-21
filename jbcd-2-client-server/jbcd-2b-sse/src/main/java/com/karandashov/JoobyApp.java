@@ -38,31 +38,33 @@ public class JoobyApp extends Jooby {
         NewsEventService service = new NewsEventService(repository);
 
         // Определяем маршруты через Script API
-        get("/", ctx -> service.getAll());
+        path("/news", () -> {
+            get("/", ctx -> service.getAll());
 
-        get("/{id}", ctx -> {
-            String id = ctx.path("id").value();
-            return service.getById(UUID.fromString(id));
-        });
+            get("/{id}", ctx -> {
+                String id = ctx.path("id").value();
+                return service.getById(UUID.fromString(id));
+            });
 
-        post("/", ctx -> {
-            CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
-            var newsEvent = service.save(request);
-            // при добавлении новой записи - асинхронно сообщаем всем открытым sse-каналам
-            CompletableFuture.runAsync(() ->
-                    CLIENTS.forEach(client -> client.send(newsEvent.getData()))
-            );
-            return newsEvent;
-        });
+            post("/", ctx -> {
+                CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
+                var newsEvent = service.save(request);
+                // при добавлении новой записи - асинхронно сообщаем всем открытым sse-каналам
+                CompletableFuture.runAsync(() ->
+                        CLIENTS.forEach(client -> client.send(newsEvent.getData()))
+                );
+                return newsEvent;
+            });
 
-        sse("/listen", client -> {
-            client.keepAlive(30, TimeUnit.SECONDS);
-            client.onClose(() -> CLIENTS.remove(client));
-            CLIENTS.add(client);
+            sse("/listen", client -> {
+                client.keepAlive(30, TimeUnit.SECONDS);
+                client.onClose(() -> CLIENTS.remove(client));
+                CLIENTS.add(client);
 
-            // отправляем существующие записи в канал
-            var existEvents = service.getAll().getData().getEvents();
-            existEvents.forEach(client::send);
+                // отправляем существующие записи в канал
+                var existEvents = service.getAll().getData().getEvents();
+                existEvents.forEach(client::send);
+            });
         });
 
         // Обработка бизнес-исключений

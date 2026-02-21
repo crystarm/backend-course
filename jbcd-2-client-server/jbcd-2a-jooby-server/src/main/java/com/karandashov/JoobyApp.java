@@ -30,16 +30,18 @@ public class JoobyApp extends Jooby {
         NewsEventService service = new NewsEventService(repository);
 
         // Определяем маршруты через Script API
-        get("/", ctx -> service.getAll());
+        path("/news", () -> {
+            get("/", ctx -> service.getAll());
 
-        get("/{id}", ctx -> {
-            String id = ctx.path("id").value();
-            return service.getById(UUID.fromString(id));
-        });
+            get("/{id}", ctx -> {
+                String id = ctx.path("id").value();
+                return service.getById(UUID.fromString(id));
+            });
 
-        post("/", ctx -> {
-            CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
-            return service.save(request);
+            post("/", ctx -> {
+                CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
+                return service.save(request);
+            });
         });
 
         // Обработка бизнес-исключений

@@ -11,7 +11,7 @@ public class Main {
 
     private static final String HOST = "localhost";
     private static final int PORT = 8080;
-    private static final String BASE_URL = "http://" + HOST + ":" + PORT + "/";
+    private static final String BASE_URL = "http://" + HOST + ":" + PORT + "/news";
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     public static void main(String[] args) {

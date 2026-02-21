@@ -21,13 +21,6 @@ public class Main {
         var id = news.getData().getId();
         log.info("Saved news event: {}", news);
 
-        // проверяем работу валидатора
-        try {
-            service.save(new CreateNewsEventRequest("Test Title", "Another Message"));
-        } catch (IllegalArgumentException e) {
-            assert e.getMessage().contains("Title must be unique");
-        }
-
         var sameNews = service.getById(id);
         assert sameNews != null;
         assert "Test Message".equals(sameNews.getData().getMessage());

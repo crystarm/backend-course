@@ -20,7 +20,7 @@ public class JoobyAppTest {
     public void testGetAll(io.jooby.Jooby app) throws IOException, InterruptedException {
         int serverPort = app.getServerOptions().getPort();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:" + serverPort + "/"))
+                .uri(URI.create("http://localhost:" + serverPort + "/news"))
                 .GET()
                 .build();
 
@@ -32,7 +32,7 @@ public class JoobyAppTest {
     public void testGetNotFound(io.jooby.Jooby app) throws IOException, InterruptedException {
         int serverPort = app.getServerOptions().getPort();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:" + serverPort + "/00000000-0000-0000-0000-000000000000"))
+                .uri(URI.create("http://localhost:" + serverPort + "/news/00000000-0000-0000-0000-000000000000"))
                 .GET()
                 .build();
 
@@ -44,7 +44,7 @@ public class JoobyAppTest {
     public void testCreate(io.jooby.Jooby app) throws IOException, InterruptedException {
         int serverPort = app.getServerOptions().getPort();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:" + serverPort + "/"))
+                .uri(URI.create("http://localhost:" + serverPort + "/news"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString("{\"title\":\"Test Title\", \"message\":\"Test Message\"}"))
                 .build();

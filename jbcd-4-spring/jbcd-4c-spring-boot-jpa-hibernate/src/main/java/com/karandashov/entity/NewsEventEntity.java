@@ -25,7 +25,7 @@ public class NewsEventEntity {
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "title", nullable = false, length = 256, unique = true)
+    @Column(name = "title", nullable = false, length = 256)
     private String title;
 
     @Column(name = "message", nullable = false, columnDefinition = "text")

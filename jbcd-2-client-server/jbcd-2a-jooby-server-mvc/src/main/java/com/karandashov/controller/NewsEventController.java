@@ -12,7 +12,7 @@ import io.jooby.annotation.PathParam;
 
 import java.util.UUID;
 
-@Path("/")
+@Path("/news")
 public class NewsEventController {
 
     private final NewsEventService service;

@@ -4,12 +4,12 @@
 
 HOST="localhost"
 PORT="8080"
-URL="http://$HOST:$PORT"
+URL="http://$HOST:$PORT/news"
 
 echo "Testing server at $URL"
 
 echo "1. Creating news..."
-RESPONSE=$(curl -s -X POST "$URL/" \
+RESPONSE=$(curl -s -X POST "$URL" \
      -H "Content-Type: application/json" \
      -d '{"title": "Test Title", "message": "Test Message Body"}')
 echo "Response: $RESPONSE"
@@ -28,5 +28,5 @@ curl -s -X GET "$URL/$ID"
 echo -e "\n-----------------------------------"
 
 echo "3. Getting all news..."
-curl -s -X GET "$URL/"
+curl -s -X GET "$URL"
 echo -e "\n-----------------------------------"

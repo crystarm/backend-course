@@ -39,27 +39,29 @@ public class JoobyApp extends Jooby {
         NewsEventService service = new NewsEventService(repository);
 
         // Определяем маршруты через Script API
-        get("/", ctx -> service.getAll());
+        path("/news", () -> {
+            get("/", ctx -> service.getAll());
 
-        get("/{id}", ctx -> {
-            String id = ctx.path("id").value();
-            return service.getById(UUID.fromString(id));
-        });
+            get("/{id}", ctx -> {
+                String id = ctx.path("id").value();
+                return service.getById(UUID.fromString(id));
+            });
 
-        post("/", ctx -> {
-            CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
-            var newsEvent = service.save(request);
-            QUEUE.add(newsEvent.getData());
-            return newsEvent;
-        });
+            post("/", ctx -> {
+                CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
+                var newsEvent = service.save(request);
+                QUEUE.add(newsEvent.getData());
+                return newsEvent;
+            });
 
-        get("/listen", ctx -> {
-            // Ожидаем сообщение в очереди с timeout (например, 15 секунд)
-            NewsEvent event = QUEUE.poll(15, TimeUnit.SECONDS);
-            if (event == null) {
-                throw new NotFoundException("Нет новых сообщений");
-            }
-            return event;
+            get("/listen", ctx -> {
+                // Ожидаем сообщение в очереди с timeout (например, 15 секунд)
+                NewsEvent event = QUEUE.poll(15, TimeUnit.SECONDS);
+                if (event == null) {
+                    throw new NotFoundException("Нет новых сообщений");
+                }
+                return event;
+            });
         });
 
         // Обработка бизнес-исключений

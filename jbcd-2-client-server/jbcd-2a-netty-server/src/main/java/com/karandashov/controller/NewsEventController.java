@@ -20,7 +20,8 @@ import java.util.regex.Pattern;
  */
 public class NewsEventController {
 
-    private static final Pattern ID_PATTERN = Pattern.compile("^/([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})$");
+    private static final Pattern ID_PATTERN = Pattern.compile("^/news/([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})$");
+
     private static final String APPLICATION_JSON = "application/json";
 
     private final NewsEventService service;
@@ -38,7 +39,7 @@ public class NewsEventController {
             HttpMethod method = request.method();
 
             if (method.equals(HttpMethod.GET)) {
-                if (uri.equals("/")) {
+                if (uri.equals("/news")) {
                     return handleGetAll();
                 } else {
                     Matcher matcher = ID_PATTERN.matcher(uri);
@@ -47,7 +48,7 @@ public class NewsEventController {
                         return handleGetById(UUID.fromString(id));
                     }
                 }
-            } else if (method.equals(HttpMethod.POST) && uri.equals("/")) {
+            } else if (method.equals(HttpMethod.POST) && uri.equals("/news")) {
                 return handleCreate(request);
             }
 

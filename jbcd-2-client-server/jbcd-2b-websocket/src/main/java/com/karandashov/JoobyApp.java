@@ -38,37 +38,39 @@ public class JoobyApp extends Jooby {
         NewsEventService service = new NewsEventService(repository);
 
         // Определяем маршруты через Script API
-        get("/", ctx -> service.getAll());
+        path("/news", () -> {
+            get("/", ctx -> service.getAll());
 
-        get("/{id}", ctx -> {
-            String id = ctx.path("id").value();
-            return service.getById(UUID.fromString(id));
-        });
-
-        post("/", ctx -> {
-            CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
-            var newsEvent = service.save(request);
-            // при добавлении новой записи - асинхронно сообщаем всем открытым каналам
-            CompletableFuture.runAsync(() ->
-                    CLIENTS.forEach((session, ws) -> ws.send(newsEvent.getData().getId().toString()))
-            );
-            return newsEvent;
-        });
-
-        ws("/ws", (ctx, configurer) -> {
-            configurer.onConnect(ws -> {
-                CLIENTS.put(ctx.session(), ws);
-                var response = service.getAll();
-                response.getData().getEvents().forEach(event -> ctx.send(event.getId().toString()));
+            get("/{id}", ctx -> {
+                String id = ctx.path("id").value();
+                return service.getById(UUID.fromString(id));
             });
 
-            configurer.onMessage((ws, message) -> log.info("Received message: {}", message));
+            post("/", ctx -> {
+                CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
+                var newsEvent = service.save(request);
+                // при добавлении новой записи - асинхронно сообщаем всем открытым каналам
+                CompletableFuture.runAsync(() ->
+                        CLIENTS.forEach((session, ws) -> ws.send(newsEvent.getData().getId().toString()))
+                );
+                return newsEvent;
+            });
 
-            configurer.onClose((ws, statusCode) -> CLIENTS.remove(ctx.session()));
+            ws("/ws", (ctx, configurer) -> {
+                configurer.onConnect(ws -> {
+                    CLIENTS.put(ctx.session(), ws);
+                    var response = service.getAll();
+                    response.getData().getEvents().forEach(event -> ctx.send(event.getId().toString()));
+                });
 
-            configurer.onError((ws, cause) -> {
-                CLIENTS.remove(ctx.session());
-                log.error("WebSocket error", cause);
+                configurer.onMessage((ws, message) -> log.info("Received message: {}", message));
+
+                configurer.onClose((ws, statusCode) -> CLIENTS.remove(ctx.session()));
+
+                configurer.onError((ws, cause) -> {
+                    CLIENTS.remove(ctx.session());
+                    log.error("WebSocket error", cause);
+                });
             });
         });
 
