@@ -167,7 +167,7 @@ services:
       KAFKA_MIN_INSYNC_REPLICAS: 2
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: kafbat/kafka-ui:latest
     container_name: kafka-ui
     restart: no
     ports:

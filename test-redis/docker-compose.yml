@@ -5,10 +5,12 @@ volumes:
     name: redis-master-data
   redis-replica-data:
     name: redis-replica-data
+  redisinsight-data:
+    name: redisinsight-data
 
 services:
   redis-master:
-    image: redis:8.2.3
+    image: redis:8.6.0
     container_name: redis-master
     restart: no
     command:
@@ -39,7 +41,7 @@ services:
       start_period: 20s
 
   redis-replica:
-    image: redis:8.2.3
+    image: redis:8.6.0
     container_name: redis-replica
     restart: no
     command:
@@ -73,3 +75,17 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    restart: no
+    ports:
+      - "5540:5540"
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica:
+        condition: service_healthy
+    volumes:
+      - redisinsight-data:/data

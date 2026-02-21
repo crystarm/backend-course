@@ -6,7 +6,7 @@ volumes:
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     restart: no
     environment:
       POSTGRES_DB: lectures_java_course_demo

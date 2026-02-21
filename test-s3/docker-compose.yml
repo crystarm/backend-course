@@ -1,23 +1,39 @@
 version: "3.8"
 
-volumes:
-  garage-meta:
-    driver: local
-  garage-data:
-    driver: local # решает проблему overlay fs (лучше использовать постоянный каталог вместо volume)
-
 services:
-  garage:
-    image: dxflrs/garage:v2.1.0
-    container_name: garage-single
-    restart: no
+  seaweed:
+    image: chrislusf/seaweedfs:latest
+    container_name: seaweed
+    command: >
+      server -s3
+      -dir=/data
+      -ip=seaweed
+      -s3.port=8333
+      -filer.port=8888
+      -master.port=9333
+      -volume.port=8080
+      -s3.config=/etc/seaweedfs/s3.json
     ports:
-      - "3900:3900"         # основной S3 API
-      - "3901:3901"         # RPC (нужен только для multi-node)
-      - "3902:3902"         # Веб-интерфейс (для показа статического контента)
-      - "3903:3903"         # Admin API / метрики
-    init: true              # Создаёт директории автоматически
+      - "8333:8333"   # S3 endpoint ← для сервисов
+      - "8888:8888"   # Filer Web UI  (файловая иерархия поверх object storage) ← вот это главное
+      - "9333:9333"   # Master Web UI (управление кластером и метаданными томов)
     volumes:
-      - ./garage.toml:/etc/garage.toml:ro  # TOML-конфиг (только чтение, для безопасности)
-      - garage-meta:/var/lib/garage/meta   # Метаданные (LMDB/SQLite, SSD рекомендуется)
-      - garage-data:/var/lib/garage/data   # Данные объектов (HDD, XFS для больших объёмов)
+      - ./data:/data
+      - ./s3.json:/etc/seaweedfs/s3.json:ro
+
+  s3ui:
+    image: cloudlena/s3manager:latest
+    depends_on:
+      - seaweed
+    environment:
+      ENDPOINT: seaweed:8333
+      ACCESS_KEY_ID: student
+      SECRET_ACCESS_KEY: student123
+      USE_SSL: "false"
+      SIGNATURE_TYPE: V4
+      # опционально:
+      ALLOW_DELETE: "true"
+      LIST_RECURSIVE: "false"
+      PORT: "8080"
+    ports:
+      - "8080:8080"
