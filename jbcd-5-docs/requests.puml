@@ -1,0 +1,96 @@
+@startuml
+title Онбординг сотрудника: HR + Документы + Безопасность
+autonumber
+hide footbox
+
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+skinparam responseMessageBelowArrow true
+
+actor "Кандидат" as Candidate
+participant "HR UI" as HR_UI
+
+box "Company Services" #EEF5FF
+  participant "HR Service" as HR
+  participant "Document Service" as DOC
+  participant "Security Service" as SEC
+end box
+
+== Создание заявки ==
+Candidate -> HR_UI: Заполнить данные (ФИО, паспорт, должность)
+HR_UI -> HR: POST /employees (candidateData)
+activate HR
+
+note right of HR
+HR валидирует данные и создает заявку на онбординг.
+end note
+
+HR -> HR: Проверка обязательных полей\n(паспорт, ИНН, должность)
+
+alt Данные неполные
+  HR --> HR_UI: 400 Bad Request\n(список ошибок)
+  deactivate HR
+  note over HR_UI, Candidate
+  Сценарий завершён: кандидат исправляет данные\nи отправляет форму заново.
+  end note
+else Данные корректны
+  HR --> HR_UI: 201 Created\n(employeeId)
+end
+
+== Пакет документов ==
+HR -> DOC: POST /packages\n(employeeId, position)
+activate DOC
+
+DOC -> DOC: Сгенерировать шаблоны\n(договор, NDA, согласия)
+
+opt Нужно доп. соглашение
+  DOC -> DOC: Добавить доп. соглашение\n(условия удаленки)
+end
+
+DOC --> HR: packageId + список документов
+deactivate DOC
+
+== Логически параллельные шаги (без par) ==
+group Параллельно: проверка кандидата службой безопасности
+  HR -> SEC: POST /screening\n(employeeId, паспорт)
+  activate SEC
+  SEC -> SEC: Проверки по базам\n(внутр., внешн.)
+
+  alt Проверка не пройдена
+    SEC --> HR: screeningStatus=REJECTED\n(reason)
+  else Проверка пройдена
+    SEC --> HR: screeningStatus=APPROVED
+  end
+
+  deactivate SEC
+end
+
+group Параллельно: подписание документов
+  HR -> DOC: POST /packages/{packageId}/sign
+  activate DOC
+  DOC -> DOC: Отправить на подписание\n(КЭП/подпись в кабинете)
+  DOC --> HR: signed=true
+  deactivate DOC
+end
+
+== Финализация онбординга ==
+group Финализация
+  alt Документы подписаны И проверка пройдена
+    HR -> SEC: POST /badges\n(employeeId)
+    activate SEC
+    SEC --> HR: badgeId + статус=ISSUED
+    deactivate SEC
+
+    HR --> HR_UI: 200 OK\n(status=HIRED, badgeId)
+
+    note over HR_UI, Candidate
+    Уведомление кандидату:\n"Добро пожаловать! Пропуск готов."
+    end note
+  else Иначе
+    HR --> HR_UI: 409 Conflict\n(status=ON_HOLD, reason)
+  end
+end
+
+deactivate HR
+@enduml
