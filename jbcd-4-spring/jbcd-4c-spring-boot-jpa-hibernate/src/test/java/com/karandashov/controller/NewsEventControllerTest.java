@@ -1,34 +1,41 @@
 package com.karandashov.controller;
 
+import com.karandashov.BaseWithPostgresTest;
 import com.karandashov.dto.CreateNewsEventRequest;
+import com.karandashov.entity.NewsEventEntity;
+import com.karandashov.repository.NewsEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.containsString;
 
-@SpringBootTest
-public class NewsEventControllerTest {
+@AutoConfigureMockMvc
+public class NewsEventControllerTest extends BaseWithPostgresTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private NewsEventRepository repository;
 
+    @Autowired
+    private JsonMapper jsonMapper;
+
+    @Autowired
     private MockMvc mockMvc;
 
-    private final JsonMapper jsonMapper = new JsonMapper();
-
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    void tearDown() {
+        repository.deleteAll();
     }
 
     @Test
@@ -103,5 +110,53 @@ public class NewsEventControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.title").value("a"));
+    }
+
+    @Test
+    void testGetAllNews() throws Exception {
+        NewsEventEntity entity1 = NewsEventEntity.builder()
+                .id(UUID.randomUUID())
+                .title("Title 1")
+                .message("Message 1")
+                .build();
+        NewsEventEntity entity2 = NewsEventEntity.builder()
+                .id(UUID.randomUUID())
+                .title("Title 2")
+                .message("Message 2")
+                .build();
+        repository.save(entity1);
+        repository.save(entity2);
+
+        mockMvc.perform(get("/news"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.events", hasSize(2)))
+                .andExpect(jsonPath("$.data.events[0].title").value("Title 1"))
+                .andExpect(jsonPath("$.data.events[1].title").value("Title 2"));
+    }
+
+    @Test
+    void testGetNewsById() throws Exception {
+        UUID id = UUID.randomUUID();
+        NewsEventEntity entity = NewsEventEntity.builder()
+                .id(id)
+                .title("Title")
+                .message("Message")
+                .build();
+        repository.save(entity);
+
+        mockMvc.perform(get("/news/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.id").value(id.toString()))
+                .andExpect(jsonPath("$.data.title").value("Title"));
+    }
+
+    @Test
+    void testGetNewsByIdNotFound() throws Exception {
+        mockMvc.perform(get("/news/{id}", UUID.randomUUID()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(4000))
+                .andExpect(jsonPath("$.message").value("Не смог найти новость по id"));
     }
 }

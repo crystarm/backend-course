@@ -24,7 +24,6 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
-    contexts: local
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
 
 logging:

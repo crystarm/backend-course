@@ -36,7 +36,7 @@
         <jdbi.version>3.51.0</jdbi.version>
         <testcontainers.version>1.21.4</testcontainers.version>
 
-        <spring.dependencies.version>4.0.2</spring.dependencies.version>
+        <spring.dependencies.version>4.0.3</spring.dependencies.version>
     </properties>
 
     <!--  jbcd - это аббревиатура от названия проекта - используется как префикс  -->
