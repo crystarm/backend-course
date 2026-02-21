@@ -37,6 +37,7 @@
         <testcontainers.version>1.21.4</testcontainers.version>
 
         <spring.dependencies.version>4.0.3</spring.dependencies.version>
+        <spring.openapi.version>3.0.1</spring.openapi.version>
     </properties>
 
     <!--  jbcd - это аббревиатура от названия проекта - используется как префикс  -->
@@ -176,6 +177,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring.dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-bom</artifactId>
+                <version>${spring.openapi.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

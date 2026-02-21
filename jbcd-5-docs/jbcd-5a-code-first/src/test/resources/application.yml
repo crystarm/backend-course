@@ -22,3 +22,11 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
+
+springdoc:
+  api-docs:
+    enabled: true      # Всегда выключайте в ПРОД!
+    path: /api-docs
+  swagger-ui:
+    enabled: true      # Всегда выключайте в ПРОД!
+    path: /swagger-ui

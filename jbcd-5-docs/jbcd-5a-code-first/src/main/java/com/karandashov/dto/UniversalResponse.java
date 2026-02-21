@@ -1,5 +1,6 @@
 package com.karandashov.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 /**
@@ -9,10 +10,13 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Universal response dto")
 public class UniversalResponse<T> {
 
+    @Schema(description = "Business error code", requiredMode = Schema.RequiredMode.REQUIRED)
     private int code;
 
+    @Schema(description = "Message", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String message;
 
     private T data;

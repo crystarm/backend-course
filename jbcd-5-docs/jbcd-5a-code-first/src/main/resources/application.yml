@@ -30,3 +30,11 @@ logging:
   level:
     root: INFO
     com.karandashov: DEBUG
+
+springdoc:
+  api-docs:
+    enabled: true      # Всегда выключайте в ПРОД! Я включил только ради показа на занятиях
+    path: /api-docs
+  swagger-ui:
+    enabled: true      # Всегда выключайте в ПРОД!
+    path: /swagger-ui
