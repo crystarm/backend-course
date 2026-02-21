@@ -53,8 +53,7 @@ java-backend-course-demo = jbcd
 Пример запуска локального Redis с помощью docker compose.
 
 ### test-s3
-Пример запуска локального S3-совместимого хранилища (Garage) с помощью docker compose.
-Содержит скрипты и конфигурацию для подготовки окружения (создание бакета, права доступа).
+Пример запуска локального S3-совместимого хранилища с помощью docker compose.
 
 ### jbcd-1-core
 
@@ -90,3 +89,28 @@ java-backend-course-demo = jbcd
 - **jbcd-3a-jdbc**: Пример работы с БД с помощью чистого JDBC.
 - **jbcd-3b-tools**: Использование connection pool Hikari и инструмента миграции Liquibase.
 - **jbcd-3c-jdbi**: Пример работы с простейшим ORM: Jdbi.
+
+### jbcd-4-spring
+
+Модуль для демонстрации работы с фреймворком Spring:
+
+- **jbcd-4a1-spring-core-configuration**: Конфигурация чистого Spring Core с использованием Java Config.
+- **jbcd-4a2-spring-core-annotation**: Использование аннотаций (`@Component`, `@Service`, `@Repository` и др.) для управления бинами в Spring.
+- **jbcd-4b-spring-boot-web**: Создание веб-приложений с использованием Spring Boot Starter Web + использование AOP.
+- **jbcd-4c-spring-boot-jpa-hibernate**: Работа с базами данных через Spring Data JPA и Hibernate + liquibase.
+
+### jbcd-5-docs
+
+Модуль для демонстрации способов документирования API:
+- **jbcd-5a-code-first**: Генерация документации OpenAPI (Swagger) на основе существующего кода (подход Code First).
+- **open-api-service-spec.json**: Пример OpenAPI спецификации в формате JSON.
+- **requests.puml**: Пример диаграммы взаимодействия в формате PlantUML.
+
+### jbcd-6-tools
+(в разработке)
+
+### jbcd-7-infra
+(в разработке)
+
+### jbcd-8-advanced
+(в разработке)
