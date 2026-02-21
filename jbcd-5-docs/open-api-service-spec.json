@@ -1,0 +1,162 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "News API",
+    "description": "Demonstrates OPEN API",
+    "license": {
+      "name": "BSD Zero Clause License",
+      "url": "https://opensource.org/license/0bsd"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "News",
+      "description": "News operations"
+    }
+  ],
+  "paths": {
+    "/news": {
+      "get": {
+        "tags": [
+          "News"
+        ],
+        "summary": "Get all news",
+        "operationId": "getAll",
+        "responses": {
+          "200": {
+            "description": "List of news",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniversalResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "News"
+        ],
+        "summary": "Create news",
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNewsEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "News created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniversalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/news/{id}": {
+      "get": {
+        "tags": [
+          "News"
+        ],
+        "summary": "Get news by id",
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniversalResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "News not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniversalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateNewsEventRequest": {
+        "type": "object",
+        "description": "Create news event request",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "News title",
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[\\s\\S]{1,100}$"
+          },
+          "message": {
+            "type": "string",
+            "description": "News description"
+          }
+        },
+        "required": [
+          "message",
+          "title"
+        ]
+      },
+      "UniversalResponse": {
+        "type": "object",
+        "description": "Universal response dto",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Business error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message"
+          },
+          "data": {}
+        },
+        "required": [
+          "code"
+        ]
+      }
+    }
+  }
+}
