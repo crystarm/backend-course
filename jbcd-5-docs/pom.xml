@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
-
+        <module>jbcd-5a-code-first</module>
     </modules>
 
 </project>
