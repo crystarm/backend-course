@@ -103,14 +103,12 @@ java-backend-course-demo = jbcd
 
 Модуль для демонстрации способов документирования API:
 - **jbcd-5a-code-first**: Генерация документации OpenAPI (Swagger) на основе существующего кода (подход Code First).
+- **jbcd-5b-api-first**: Генерация кода на основе OpenAPI спецификации (подход API First).
 - **open-api-service-spec.json**: Пример OpenAPI спецификации в формате JSON.
 - **requests.puml**: Пример диаграммы взаимодействия в формате PlantUML.
 
 ### jbcd-6-tools
 (в разработке)
 
-### jbcd-7-infra
-(в разработке)
-
-### jbcd-8-advanced
+### jbcd-7-advanced
 (в разработке)
