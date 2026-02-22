@@ -1,10 +1,8 @@
-#server:
-#  port: 8082
-
 spring:
   application:
-    name: jbcd-4c-spring-boot-jpa-hibernate
+    name: jbcd-6a-kafka-spring
   kafka:
+    start: true
     bootstrap-servers: ${BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer

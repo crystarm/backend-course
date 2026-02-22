@@ -22,6 +22,7 @@ public class NotificationProducer {
                     response.topic(), response.partition(), response.offset(), event);
         } catch (Exception e) {
             log.error("Ошибка при отправке сообщения", e);
+            throw new RuntimeException(e);
         }
     }
 }

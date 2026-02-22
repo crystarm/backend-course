@@ -2,6 +2,7 @@ package com.karandashov;
 
 import com.karandashov.util.EventGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import static org.apache.kafka.common.utils.Utils.sleep;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "spring.kafka", name = "start", havingValue = "true")
 public class StartupApplicationListenerExample implements ApplicationListener<ContextRefreshedEvent> {
 
     public final NotificationProducer producer;
