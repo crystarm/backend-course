@@ -16,6 +16,7 @@
 
     <modules>
         <module>jbcd-5a-code-first</module>
+        <module>jbcd-5b-api-first</module>
     </modules>
 
 </project>
