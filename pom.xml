@@ -49,6 +49,7 @@
         <module>jbcd-3-database</module>
         <module>jbcd-4-spring</module>
         <module>jbcd-5-docs</module>
+        <module>jbcd-6-tools</module>
     </modules>
 
     <!--  Перечисляем все внешние зависимости с указанием версий из properties  -->
