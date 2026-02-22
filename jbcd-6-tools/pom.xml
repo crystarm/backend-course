@@ -16,6 +16,7 @@
 
     <modules>
         <module>jbcd-6a-kafka-simple</module>
+        <module>jbcd-6a-kafka-spring</module>
     </modules>
 
 </project>
