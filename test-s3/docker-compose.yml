@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   seaweed:
-    image: chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:4.13
     container_name: seaweed
     command: >
       server -s3
