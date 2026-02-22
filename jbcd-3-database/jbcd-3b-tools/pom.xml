@@ -58,12 +58,6 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <!-- Jackson для работы с JSON -->
-        <dependency>
-            <groupId>tools.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
         <!-- для логирования -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -117,22 +111,27 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.karandashov.Main</mainClass>
                                 </transformer>
-                                <!-- Убираем дубликаты LICENSE и NOTICE -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
                             </transformers>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>fat</shadedClassifierName>
-                            <!-- Фильтры для исключения module-info и дубликатов MANIFEST -->
+
                             <filters>
                                 <filter>
-                                    <artifact>*:*</artifact> <!-- Применяется ко всем зависимостям -->
+                                    <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>module-info.class</exclude> <!-- Для основного module-info -->
-                                        <exclude>META-INF/**</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**/module-info.class</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/io.netty.versions.properties</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>fat</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>
