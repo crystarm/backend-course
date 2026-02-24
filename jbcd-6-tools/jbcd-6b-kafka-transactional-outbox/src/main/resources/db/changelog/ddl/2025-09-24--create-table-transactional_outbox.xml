@@ -19,6 +19,20 @@
             <column name="payload" type="text">
                 <constraints nullable="false"/>
             </column>
+            <column name="created_at" type="timestamp" defaultValue="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_send" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
+
+        <createIndex
+                indexName="transactional_outbox_created_sent_idx"
+                tableName="transactional_outbox">
+            <column name="created_at"/>
+            <column name="is_send"/>
+        </createIndex>
+
     </changeSet>
 </databaseChangeLog>

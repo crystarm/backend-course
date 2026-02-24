@@ -19,6 +19,13 @@ spring:
       hibernate:
         format_sql: true
         default_schema: ${APP_DATABASE_SCHEMA}
+        jdbc:
+          batch_size: 5
+          batch_versioned_data: true
+        default_batch_fetch_size: 5
+        order_updates: true
+        batch_versioned_data: true
+        order_inserts: true
     show_sql: true
     open-in-view: false
   liquibase:

@@ -5,9 +5,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -33,4 +35,12 @@ public class TransactionalOutboxEntity {
 
     @Column(name = "payload", nullable = false, columnDefinition = "text")
     private String payload;
+
+    @Builder.Default
+    @Column(name = "is_send", nullable = false)
+    private Boolean isSend = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdDate;
 }
