@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <changeSet id="initial" author="karandashov">
+        <tagDatabase tag="initial"/>
+    </changeSet>
+
+    <include relativeToChangelogFile="true" file="ddl/2025-09-23--create-table-news_table.xml"/>
+    <include relativeToChangelogFile="true" file="ddl/2025-09-24--create-table-transactional_outbox.xml"/>
+
+</databaseChangeLog>
