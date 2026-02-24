@@ -42,6 +42,9 @@ public class TransactionalOutboxService {
     @Transactional
     public Pageable sendEvents(Pageable page) {
         var slice = transactionalOutboxRepository.findByIsSendIsFalseOrderByCreatedDate(page);
+        if (slice.isEmpty()) {
+            return Pageable.unpaged();
+        }
         Set<UUID> sendIds = new HashSet<>(page.getPageSize());
         slice.forEach(entity -> {
             var result = send(entity);
@@ -49,8 +52,10 @@ public class TransactionalOutboxService {
                 sendIds.add(entity.getId());
             }
         });
-        transactionalOutboxRepository.markSent(sendIds);
-        return slice.nextPageable();
+        if (!sendIds.isEmpty()) {
+            transactionalOutboxRepository.markSent(sendIds);
+        }
+        return slice.hasNext() ? page : Pageable.unpaged();
     }
 
     private boolean send(TransactionalOutboxEntity entity) {
