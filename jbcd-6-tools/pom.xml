@@ -17,6 +17,8 @@
     <modules>
         <module>jbcd-6a-kafka-simple</module>
         <module>jbcd-6a-kafka-spring</module>
+
+        <module>jbcd-6b-kafka-transactional-processor</module>
     </modules>
 
 </project>
