@@ -1,7 +1,6 @@
 package com.karandashov;
 
 import com.karandashov.dto.NotificationEvent;
-import com.karandashov.producer.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -9,6 +8,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.karandashov.Topics.*;
 
@@ -19,6 +19,13 @@ public class TransactionNotificationListener {
 
     private final NotificationProducer producer;
 
+    /*
+     * Важно: метод помечен как @Transactional. При наличии KafkaTransactionManager
+     * (он автоматически настроен благодаря transaction-id-prefix в properties)
+     * контейнер слушателя выполняет чтение сообщения, отправку в OUT-топики
+     * и фиксацию offset'а в рамках одной Kafka-транзакции.
+     */
+    @Transactional
     @KafkaListener(topics = IN_TOPIC, groupId = "NOTIFICATIONS_SERVICE_" + IN_TOPIC)
     public void listener(@Payload NotificationEvent event,
                          @Header(value = KafkaHeaders.RECEIVED_TIMESTAMP, required = false) Long ts,

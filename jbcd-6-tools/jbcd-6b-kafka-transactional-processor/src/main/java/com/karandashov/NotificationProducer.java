@@ -1,4 +1,4 @@
-package com.karandashov.producer;
+package com.karandashov;
 
 import com.karandashov.dto.NotificationEvent;
 import lombok.RequiredArgsConstructor;
