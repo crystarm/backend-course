@@ -1,6 +1,6 @@
 spring:
   application:
-    name: jbcd-4c-spring-boot-jpa-hibernate
+    name: jbcd-5b-api-first
   web:
     error:
       include-stacktrace: never
