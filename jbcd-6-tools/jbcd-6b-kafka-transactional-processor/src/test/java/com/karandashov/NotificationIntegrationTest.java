@@ -12,6 +12,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import static com.karandashov.Topics.IN_TOPIC;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SpringBootTest
@@ -32,6 +33,6 @@ class NotificationIntegrationTest {
     @Test
     void testSend() {
         NotificationEvent event = new NotificationEvent(1, "test-user");
-        assertDoesNotThrow(() -> producer.send(event));
+        assertDoesNotThrow(() -> producer.send(IN_TOPIC, event));
     }
 }

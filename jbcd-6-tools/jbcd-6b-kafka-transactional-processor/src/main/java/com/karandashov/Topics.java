@@ -6,5 +6,5 @@ public class Topics {
 
     public static final String OUT_TOPIC_EMAIL = "EMAIL";
 
-    public static final String OUT_TOPIC_SMS = "TG";
+    public static final String OUT_TOPIC_TG = "TG";
 }

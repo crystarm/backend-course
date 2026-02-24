@@ -1,6 +1,8 @@
 package com.karandashov;
 
 import com.karandashov.dto.NotificationEvent;
+import com.karandashov.producer.NotificationProducer;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -8,11 +10,14 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import static com.karandashov.Topics.IN_TOPIC;
+import static com.karandashov.Topics.*;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class TransactionNotificationListener {
+
+    private final NotificationProducer producer;
 
     @KafkaListener(topics = IN_TOPIC, groupId = "NOTIFICATIONS_SERVICE_" + IN_TOPIC)
     public void listener(@Payload NotificationEvent event,
@@ -22,7 +27,10 @@ public class TransactionNotificationListener {
                          @Header(value = KafkaHeaders.OFFSET, required = false) Long offset,
                          @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key
     ) {
-        log.info("<-- Получено событие из kafka (topic: {}, partition: {}, offset: {}, ts: {}, key: {}):\n {}",
+        log.info("<-- IN KAFKA TRANSACTION: Получено событие из kafka (topic: {}, partition: {}, offset: {}, ts: {}, key: {}):\n {}",
                 topic, partition, offset, ts, key, event);
+        producer.send(OUT_TOPIC_EMAIL, event);
+        producer.send(OUT_TOPIC_TG, event);
+        log.info("--> OUT KAFKA TRANSACTION");
     }
 }

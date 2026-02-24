@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import static com.karandashov.Topics.IN_TOPIC;
 import static org.apache.kafka.common.utils.Utils.sleep;
 
 @Component
@@ -20,7 +21,7 @@ public class StartupApplicationListenerExample implements ApplicationListener<Co
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             var event = EventGenerator.generateEvent();
-            producer.send(event);
+            producer.send(IN_TOPIC, event);
             sleep(1000);
         }
     }
