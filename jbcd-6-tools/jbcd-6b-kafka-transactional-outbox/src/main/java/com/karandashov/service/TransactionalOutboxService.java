@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -40,16 +42,24 @@ public class TransactionalOutboxService {
     @Transactional
     public Pageable sendEvents(Pageable page) {
         var slice = transactionalOutboxRepository.findByIsSendIsFalseOrderByCreatedDate(page);
-        slice.forEach(this::send);
+        Set<UUID> sendIds = new HashSet<>(page.getPageSize());
+        slice.forEach(entity -> {
+            var result = send(entity);
+            if (result) {
+                sendIds.add(entity.getId());
+            }
+        });
+        transactionalOutboxRepository.markSent(sendIds);
         return slice.nextPageable();
     }
 
-    private void send(TransactionalOutboxEntity entity) {
+    private boolean send(TransactionalOutboxEntity entity) {
         try {
             producer.send(entity);
-            entity.setIsSend(true);
+            return true;
         } catch (Exception ignored) {
             // проглотил ошибку, потому что ошибка отправка одной записи не должна ломать весь процесс
+            return false;
         }
     }
 }

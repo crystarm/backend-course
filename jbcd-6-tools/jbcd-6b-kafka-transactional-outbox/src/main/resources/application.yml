@@ -3,7 +3,7 @@
 
 spring:
   application:
-    name: jbcd-4c-spring-boot-jpa-hibernate
+    name: jbcd-6b-kafka-transactional-outbox
   web:
     error:
       include-stacktrace: never
@@ -19,13 +19,6 @@ spring:
       hibernate:
         format_sql: true
         default_schema: ${APP_DATABASE_SCHEMA}
-        jdbc:
-          batch_size: 5
-          batch_versioned_data: true
-        default_batch_fetch_size: 5
-        order_updates: true
-        batch_versioned_data: true
-        order_inserts: true
     show_sql: true
     open-in-view: false
   liquibase:
