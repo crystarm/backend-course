@@ -38,6 +38,7 @@
         <jacoco.version>0.8.14</jacoco.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <shedlock.version>7.6.0</shedlock.version>
+        <s3.version>2.42.0</s3.version>
 
         <spring.dependencies.version>4.0.3</spring.dependencies.version>
         <spring.openapi.version>3.0.1</spring.openapi.version>
@@ -191,6 +192,12 @@
                 <groupId>net.javacrumbs.shedlock</groupId>
                 <artifactId>shedlock-provider-jdbc-template</artifactId>
                 <version>${shedlock.version}</version>
+            </dependency>
+            <!-- s3 client -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>s3</artifactId>
+                <version>${s3.version}</version>
             </dependency>
 
             <!--  все версии зависимостей spring в одном пакете -->

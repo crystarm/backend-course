@@ -19,6 +19,8 @@
         <module>jbcd-6a-kafka-spring</module>
         <module>jbcd-6b-kafka-transactional-outbox</module>
         <module>jbcd-6b-kafka-transactional-processor</module>
+
+        <module>jbcd-6d-s3</module>
     </modules>
 
 </project>
