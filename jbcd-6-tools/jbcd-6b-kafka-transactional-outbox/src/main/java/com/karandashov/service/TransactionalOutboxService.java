@@ -6,7 +6,6 @@ import com.karandashov.repository.TransactionalOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +19,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TransactionalOutboxService {
-
-    public static final int BATCH_SIZE = 10;
 
     private final ObjectMapper objectMapper;
 
@@ -41,14 +38,16 @@ public class TransactionalOutboxService {
     }
 
     @Transactional
-    public void sendEvents() {
-        var events = transactionalOutboxRepository.findByIsSendIsFalseOrderByCreatedDate(Limit.of(BATCH_SIZE));
+    public int sendEvents(int batchSize) {
+        log.info("Выполняю batch на {}", batchSize);
+        var events = transactionalOutboxRepository.findByIsSendIsFalseOrderByCreatedDate(Limit.of(batchSize));
         if (events.isEmpty()) {
-            return;
+            return 0;
         }
         Set<UUID> sendIds = new HashSet<>(events.size());
         Set<String> errorKeys = new HashSet<>(events.size());
         for (TransactionalOutboxEntity event : events) {
+            // пропускаем событие, если был неотправленный предшественник с таким ключом
             if (errorKeys.contains(event.getKey())) {
                 continue;
             }
@@ -62,6 +61,7 @@ public class TransactionalOutboxService {
         if (!sendIds.isEmpty()) {
             transactionalOutboxRepository.markSent(sendIds);
         }
+        return events.size();
     }
 
     private boolean send(TransactionalOutboxEntity entity) {
