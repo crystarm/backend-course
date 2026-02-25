@@ -3,8 +3,6 @@ package com.karandashov.controller;
 import com.karandashov.BaseIntegrationTest;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.entity.NewsEventEntity;
-import com.karandashov.repository.NewsEventRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -25,18 +23,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class NewsEventControllerTest extends BaseIntegrationTest {
 
     @Autowired
-    private NewsEventRepository repository;
-
-    @Autowired
     private JsonMapper jsonMapper;
 
     @Autowired
     private MockMvc mockMvc;
-
-    @BeforeEach
-    void tearDown() {
-        repository.deleteAll();
-    }
 
     @Test
     void testSaveWithInvalidRequest() throws Exception {
@@ -124,8 +114,8 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                 .title("Title 2")
                 .message("Message 2")
                 .build();
-        repository.save(entity1);
-        repository.save(entity2);
+        newsEventRepository.save(entity1);
+        newsEventRepository.save(entity2);
 
         mockMvc.perform(get("/news"))
                 .andExpect(status().isOk())
@@ -143,7 +133,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                 .title("Title")
                 .message("Message")
                 .build();
-        repository.save(entity);
+        newsEventRepository.save(entity);
 
         mockMvc.perform(get("/news/{id}", id))
                 .andExpect(status().isOk())
