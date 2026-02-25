@@ -27,12 +27,11 @@
             </column>
         </createTable>
 
-        <createIndex
-                indexName="transactional_outbox_created_sent_idx"
-                tableName="transactional_outbox">
-            <column name="created_at"/>
-            <column name="is_send"/>
-        </createIndex>
+        <sql>
+            CREATE INDEX transactional_outbox_unsent_created_idx
+                ON transactional_outbox (created_at)
+                WHERE is_send = false;
+        </sql>
 
     </changeSet>
 </databaseChangeLog>

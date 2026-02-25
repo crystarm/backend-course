@@ -5,6 +5,7 @@ import com.karandashov.producer.UniversalProducer;
 import com.karandashov.repository.TransactionalOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,22 +41,27 @@ public class TransactionalOutboxService {
     }
 
     @Transactional
-    public Pageable sendEvents(Pageable page) {
-        var slice = transactionalOutboxRepository.findByIsSendIsFalseOrderByCreatedDate(page);
-        if (slice.isEmpty()) {
-            return Pageable.unpaged();
+    public void sendEvents() {
+        var events = transactionalOutboxRepository.findByIsSendIsFalseOrderByCreatedDate(Limit.of(BATCH_SIZE));
+        if (events.isEmpty()) {
+            return;
         }
-        Set<UUID> sendIds = new HashSet<>(page.getPageSize());
-        slice.forEach(entity -> {
-            var result = send(entity);
-            if (result) {
-                sendIds.add(entity.getId());
+        Set<UUID> sendIds = new HashSet<>(events.size());
+        Set<String> errorKeys = new HashSet<>(events.size());
+        for (TransactionalOutboxEntity event : events) {
+            if (errorKeys.contains(event.getKey())) {
+                continue;
             }
-        });
+            var result = send(event);
+            if (result) {
+                sendIds.add(event.getId());
+            } else {
+                errorKeys.add(event.getKey());
+            }
+        }
         if (!sendIds.isEmpty()) {
             transactionalOutboxRepository.markSent(sendIds);
         }
-        return slice.hasNext() ? page : Pageable.unpaged();
     }
 
     private boolean send(TransactionalOutboxEntity entity) {
