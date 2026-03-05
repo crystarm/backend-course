@@ -39,6 +39,7 @@
         <testcontainers.version>1.21.4</testcontainers.version>
         <shedlock.version>7.6.0</shedlock.version>
         <s3.version>2.42.0</s3.version>
+        <redisson.version>4.3.0</redisson.version>
 
         <spring.dependencies.version>4.0.3</spring.dependencies.version>
         <spring.openapi.version>3.0.1</spring.openapi.version>
@@ -198,6 +199,12 @@
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>s3</artifactId>
                 <version>${s3.version}</version>
+            </dependency>
+            <!-- redis client -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
 
             <!--  все версии зависимостей spring в одном пакете -->
