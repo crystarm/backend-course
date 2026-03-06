@@ -118,6 +118,20 @@ java-backend-course-demo = jbcd
 - **jbcd-6a-kafka-spring**: Работа с kafka при помощи Spring Kafka.
 - **jbcd-6b-kafka-transactional-outbox**: Реализация паттерна transactional outbox.
 - **jbcd-6b-kafka-transactional-processor**: Пример работы с kafka-транзакциями.
+- **jbcd-6c-redis-lettuce**: Демонстрация основных команд redis с помощью относительно-низкоуровнего клиента Lettuce.
+- **jbcd-6c-redis-redisson**: Пример использования Redisson для нестандартных задач.
+- **jbcd-6c-redis-spring-cache**: Кэш на основе Spring Cache + Redis и демонстрация pub/sub для SSE.
+- **jbcd-6d-s3**: Пример работы с S3.
+- temporal (в разработке)
 
 ### jbcd-7-advanced
+
+Модуль для демонстрации продвинутой функциональности:
+
+- session auth (в разработке)
+- observability (в разработке)
+- performance patterns и load testing (в разработке)
+
+### Демонстрационный проект
+
 (в разработке)
