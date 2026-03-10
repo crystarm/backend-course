@@ -50,6 +50,9 @@ public interface EntityRepository {
     // Read (возвращает null, если запись не найдена)
     Entity findById(int id);
 
+    // Read по второму параметру сущности из вашего варианта
+    Entity findByField(String field);
+
     List<Entity> findAll();
 
     // Update (используйте id для поиска сущности, возвращайте false, если запись не найдена)

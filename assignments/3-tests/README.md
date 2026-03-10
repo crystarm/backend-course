@@ -21,6 +21,9 @@ public interface EntityService {
     // Read (бросает исключение, если запись не найдена)
     Entity findById(int id);
 
+    // Read (бросает исключение, если запись не найдена)
+    Entity findByField(String field);
+
     List<Entity> findAll();
 
     // Update (используйте id для поиска сущности и бросайте исключение, если запись не найдена)
