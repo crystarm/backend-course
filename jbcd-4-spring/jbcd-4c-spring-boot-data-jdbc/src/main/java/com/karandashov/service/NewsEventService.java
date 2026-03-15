@@ -1,0 +1,54 @@
+package com.karandashov.service;
+
+import com.karandashov.dto.CreateNewsEventRequest;
+import com.karandashov.dto.NewsEvent;
+import com.karandashov.dto.NewsEventList;
+import com.karandashov.dto.UniversalResponse;
+import com.karandashov.entity.NewsEventEntity;
+import com.karandashov.exceptions.NotFoundException;
+import com.karandashov.mapper.NewsMapper;
+import com.karandashov.repository.NewsEventRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.StreamSupport;
+
+/**
+ * Слой бизнес логики
+ */
+@Service // по сути тоже самое что @Component, но с оттенком бизнес-логики
+@RequiredArgsConstructor
+public class NewsEventService {
+
+    private final NewsEventRepository repository;
+
+    private final NewsMapper mapper;
+
+    public UniversalResponse<NewsEvent> getById(UUID id) {
+        NewsEventEntity event = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
+        NewsEvent newsEventDto = mapper.toDto(event);
+        return new UniversalResponse<>(newsEventDto);
+    }
+
+    public UniversalResponse<NewsEventList> getAll() {
+        List<NewsEvent> events = StreamSupport
+                .stream(repository.findAll().spliterator(), false)
+                .map(mapper::toDto)
+                .toList();
+        NewsEventList newsEventList = new NewsEventList(events);
+        return new UniversalResponse<>(newsEventList);
+    }
+
+    public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
+        NewsEventEntity entity = NewsEventEntity.builder()
+                .title(request.getTitle())
+                .message(request.getMessage())
+                .build();
+        entity = repository.save(entity);
+        NewsEvent newsEventDto = mapper.toDto(entity);
+        return new UniversalResponse<>(newsEventDto);
+    }
+}

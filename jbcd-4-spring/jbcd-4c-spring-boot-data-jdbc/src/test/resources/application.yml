@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: jbcd-4c-spring-boot-data-jdbc
+  web:
+    error:
+      include-stacktrace: never
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    default-schema: ${APP_DATABASE_SCHEMA}

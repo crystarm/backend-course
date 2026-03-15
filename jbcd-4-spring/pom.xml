@@ -18,6 +18,7 @@
         <module>jbcd-4a1-spring-core-configuration</module>
         <module>jbcd-4a2-spring-core-annotation</module>
         <module>jbcd-4b-spring-boot-web</module>
+        <module>jbcd-4c-spring-boot-data-jdbc</module>
         <module>jbcd-4c-spring-boot-jpa-hibernate</module>
     </modules>
 
