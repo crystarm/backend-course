@@ -23,6 +23,7 @@
         <module>jbcd-6c-redis-redisson</module>
         <module>jbcd-6c-redis-spring-cache</module>
         <module>jbcd-6d-s3</module>
+        <module>jbcd-6e-temporal</module>
     </modules>
 
 </project>
