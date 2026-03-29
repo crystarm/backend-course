@@ -43,6 +43,7 @@ public class NewsEventControllerTest extends BaseTest {
     @BeforeEach
     void tearDown() {
         repository.deleteAll();
+        clearInvocations(repository);
         cacheManager.getCacheNames().forEach(name -> Objects.requireNonNull(cacheManager.getCache(name)).clear());
     }
 
