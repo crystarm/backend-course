@@ -96,7 +96,7 @@ services:
       timeout: 5s
 
   register-outbox-connector:
-    image: curlimages/curl:8.12.1
+    image: curlimages/curl:8.18.0
     depends_on:
       connect:
         condition: service_healthy
