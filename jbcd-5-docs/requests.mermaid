@@ -1,0 +1,88 @@
+sequenceDiagram
+    autonumber
+    
+    actor Candidate as Кандидат
+    participant HR_UI as HR UI
+    
+    box "Company Services"
+        participant HR as HR Service
+        participant DOC as Document Service
+        participant SEC as Security Service
+    end
+
+    Note over Candidate, SEC: Онбординг сотрудника: HR + Документы + Безопасность
+
+    Note over Candidate, SEC: == Создание заявки ==
+    Candidate->>HR_UI: Заполнить данные (ФИО, паспорт, должность)
+    HR_UI->>HR: POST /employees (candidateData)
+    activate HR
+
+    Note right of HR: HR валидирует данные и создает заявку на онбординг.
+    
+    HR->>HR: Проверка обязательных полей<br/>(паспорт, ИНН, должность)
+
+    alt Данные неполные
+        HR-->>HR_UI: 400 Bad Request<br/>(список ошибок)
+        deactivate HR
+        Note over Candidate, HR_UI: Сценарий завершён: кандидат исправляет данные<br/>и отправляет форму заново.
+    else Данные корректны
+        HR-->>HR_UI: 201 Created (employeeId)
+    end
+
+    Note over Candidate, SEC: == Пакет документов ==
+    HR->>DOC: POST /packages<br/>(employeeId, position)
+    activate DOC
+    
+    DOC->>DOC: Сгенерировать шаблоны<br/>(договор, NDA, согласия)
+    
+    opt Нужно доп. соглашение
+        DOC->>DOC: Добавить доп. соглашение<br/>(условия удаленки)
+    end
+    
+    DOC-->>HR: packageId + список документов
+    deactivate DOC
+
+    Note over Candidate, SEC: == Логически параллельные шаги (без par) ==
+    
+    rect rgb(245, 245, 245)
+        Note over HR, SEC: Параллельно: проверка кандидата службой безопасности
+        HR->>SEC: POST /screening<br/>(employeeId, паспорт)
+        activate SEC
+        SEC->>SEC: Проверки по базам<br/>(внутр., внешн.)
+        
+        alt Проверка не пройдена
+            SEC-->>HR: screeningStatus=REJECTED (reason)
+        else Проверка пройдена
+            SEC-->>HR: screeningStatus=APPROVED
+        end
+        deactivate SEC
+    end
+
+    rect rgb(245, 245, 245)
+        Note over HR, DOC: Параллельно: подписание документов
+        HR->>DOC: POST /packages/{packageId}/sign
+        activate DOC
+        DOC->>DOC: Отправить на подписание<br/>(КЭП/подпись в кабинете)
+        DOC-->>HR: signed=true
+        deactivate DOC
+    end
+
+    Note over Candidate, SEC: == Финализация онбординга ==
+    
+    rect rgb(245, 245, 245)
+        Note over HR, SEC: Финализация
+        alt Документы подписаны И проверка пройдена
+            HR->>SEC: POST /badges (employeeId)
+            activate SEC
+            SEC-->>HR: badgeId + статус=ISSUED
+            deactivate SEC
+            
+            HR-->>HR_UI: 200 OK (status=HIRED, badgeId)
+            
+            Note over Candidate, HR_UI: Уведомление кандидату:<br/>"Добро пожаловать! Пропуск готов."
+        else Иначе
+            HR-->>HR_UI: 409 Conflict (status=ON_HOLD, reason)
+        end
+    end
+    
+    deactivate HR
