@@ -25,11 +25,6 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
-  kafka:
-    bootstrap-servers: ${BOOTSTRAP_SERVERS}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 logging:
   level:

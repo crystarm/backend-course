@@ -1,0 +1,32 @@
+{
+  "database.hostname": "postgres",
+  "database.port": "5432",
+  "database.user": "test",
+  "database.password": "test",
+  "database.dbname": "lectures_java_course_demo",
+  "schema.include.list": "jbcd_lesson",
+  "table.include.list": "jbcd_lesson.transactional_outbox",
+
+  "transforms": "outbox",
+  "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+  "transforms.outbox.route.by.field": "topic",
+  "transforms.outbox.route.topic.replacement": "${routedByValue}",
+  "transforms.outbox.table.field.event.id": "id",
+  "transforms.outbox.table.field.event.key": "key",
+  "transforms.outbox.table.field.event.payload": "payload",
+  "transforms.outbox.table.field.event.timestamp": "created_at",
+  "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+  "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+  "value.converter.schemas.enable": "false",
+
+  "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+  "name": "outbox-connector",
+  "tasks.max": "1",
+  "topic.prefix": "pgdemo",
+  "plugin.name": "pgoutput",
+  "slot.name": "outbox_slot",
+  "publication.name": "outbox_pub",
+  "publication.autocreate.mode": "filtered",
+  "snapshot.mode": "no_data",
+  "tombstones.on.delete": "false"
+}

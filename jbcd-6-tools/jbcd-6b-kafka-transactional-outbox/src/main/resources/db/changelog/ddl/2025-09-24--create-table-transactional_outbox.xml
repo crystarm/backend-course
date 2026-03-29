@@ -22,16 +22,6 @@
             <column name="created_at" type="timestamp" defaultValue="now()">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_send" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
-
-        <sql>
-            CREATE INDEX transactional_outbox_unsent_created_idx
-                ON transactional_outbox (created_at)
-                WHERE is_send = false;
-        </sql>
-
     </changeSet>
 </databaseChangeLog>
