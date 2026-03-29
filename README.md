@@ -49,6 +49,9 @@ java-backend-course-demo = jbcd
 ### test-kafka
 Пример запуска локального кластера Apache Kafka с помощью docker compose.
 
+### test-debezium
+Пример реализации паттерна transactional outbox с помощью debezium. Пример запуска и конфигурации debezium.
+
 ### test-redis
 Пример запуска локального Redis с помощью docker compose.
 
@@ -116,7 +119,7 @@ java-backend-course-demo = jbcd
 
 - **jbcd-6a-kafka-simple**: Работа с kafka при помощи низкоуровневого официального apache-клиента.
 - **jbcd-6a-kafka-spring**: Работа с kafka при помощи Spring Kafka.
-- **jbcd-6b-kafka-transactional-outbox**: Реализация паттерна transactional outbox.
+- **jbcd-6b-kafka-transactional-outbox**: Реализация паттерна transactional outbox + [debezium](test-debezium)
 - **jbcd-6b-kafka-transactional-processor**: Пример работы с kafka-транзакциями.
 - **jbcd-6c-redis-lettuce**: Демонстрация основных команд redis с помощью относительно-низкоуровнего клиента Lettuce.
 - **jbcd-6c-redis-redisson**: Пример использования Redisson для нестандартных задач.
