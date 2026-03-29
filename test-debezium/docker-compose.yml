@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
-    command:
+    command: # требуется дополнительно сконфигурировать WAL
       [
         "postgres",
         "-c", "wal_level=logical",
@@ -23,7 +23,7 @@ services:
         "-c", "max_replication_slots=10"
       ]
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql # обратите внимание на добавление роли в init.sql
       - postgres_data:/var/lib/postgresql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d lectures_java_course_demo" ]
@@ -44,7 +44,7 @@ services:
       kafka:
         condition: service_started
     env_file:
-      - app.env
+      - .env
     tmpfs:
       - /tmp
     healthcheck:
@@ -54,7 +54,7 @@ services:
       start_period: 40s
       timeout: 5s
 
-  kafka:
+  kafka: # Это минимальный вариант kafka
     image: confluentinc/cp-kafka:7.7.7
     container_name: kafka
     restart: no
@@ -96,7 +96,7 @@ services:
       KAFKA_CLUSTERS_0_METRICS_PORT: 9997
       SERVER_SERVLET_CONTEXT_PATH: /
       
-  connect:
+  connect: # сам сервис debezium connect, который подключится к WAL Postgres и будет отправлять сообщения в kafka
     image: quay.io/debezium/connect:3.3.0.Final
     container_name: connect
     depends_on:
@@ -105,10 +105,11 @@ services:
       kafka:
         condition: service_started
     ports:
-      - "8083:8083"
+      - "8083:8083" # порт для управления и регистрации правил (см ниже)
     environment:
       BOOTSTRAP_SERVERS: kafka:9092
       GROUP_ID: 1
+      # вспомогательные топики debezium
       CONFIG_STORAGE_TOPIC: connect_configs
       OFFSET_STORAGE_TOPIC: connect_offsets
       STATUS_STORAGE_TOPIC: connect_statuses
@@ -122,6 +123,9 @@ services:
       retries: 20
       timeout: 5s
 
+  # Просто поднять debezium connect недостаточно.
+  # Нужно зарегистрировать коннектор, который будет слушать изменения в таблице outbox.
+  # Сделаем это с помощью POST запроса с помощью curl.
   register-outbox-connector:
     image: curlimages/curl:8.18.0
     container_name: register-outbox-connector
@@ -129,6 +133,7 @@ services:
       connect:
         condition: service_healthy
     volumes:
+      # загляни в эти файлы, чтобы понять конфигурацию
       - ./register-connector.sh:/register-connector.sh:ro
       - ./producer.json:/producer.json:ro
     entrypoint: ["sh", "/register-connector.sh"]
