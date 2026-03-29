@@ -1,4 +1,5 @@
 {
+  "name": "outbox-connector",
   "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
   "tasks.max": "1",
   "database.hostname": "postgres",
@@ -6,7 +7,8 @@
   "database.user": "test",
   "database.password": "test",
   "database.dbname": "lectures_java_course_demo",
-  "table.include.list": "public.transactional_outbox",
+  "schema.include.list": "jbcd_lesson",
+  "table.include.list": "jbcd_lesson.transactional_outbox",
 
   "topic.prefix": "pgdemo",
   "plugin.name": "pgoutput",

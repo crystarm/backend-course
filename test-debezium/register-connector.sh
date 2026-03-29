@@ -8,6 +8,9 @@ done
 
 echo "Registering Debezium PostgreSQL connector..."
 
-curl -i -X PUT http://connect:8083/connectors/outbox-connector/config \
+curl -fsS -X PUT http://connect:8083/connectors/outbox-connector/config \
   -H 'Content-Type: application/json' \
-#  -d '' get from producer.json
+  --data-binary @/producer.json
+
+echo
+echo "Connector registration finished."

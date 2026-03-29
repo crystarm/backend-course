@@ -11,6 +11,5 @@
 
     <include relativeToChangelogFile="true" file="ddl/2025-09-23--create-table-news_table.xml"/>
     <include relativeToChangelogFile="true" file="ddl/2025-09-24--create-table-transactional_outbox.xml"/>
-    <include relativeToChangelogFile="true" file="ddl/2025-09-24--shedlock.xml"/>
 
 </databaseChangeLog>
