@@ -27,8 +27,11 @@
 ## Лабораторные работы
 
 1) [io and collections](1-io-and-collections)
+   * [популярные ошибки](1-io-and-collections/popularMistakes.md)
 2) [database](2-database)
+   * [популярные ошибки](2-database/popularMistakes.md)
 3) [tests](3-tests)
+   * [популярные ошибки](3-tests/popularMistakes.md)
 
 Для сдачи лабораторных работ вам потребуется публичный репозиторий на GitHub или GitLab.
 Все 3 лабораторные работы необходимо выполнить в нем. Используйте Maven как систему сборки.
