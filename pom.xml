@@ -40,6 +40,7 @@
         <shedlock.version>7.6.0</shedlock.version>
         <s3.version>2.42.0</s3.version>
         <redisson.version>4.3.0</redisson.version>
+        <temporal.version>1.29.0</temporal.version>
 
         <spring.dependencies.version>4.0.3</spring.dependencies.version>
         <spring.openapi.version>3.0.1</spring.openapi.version>
@@ -205,6 +206,12 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+            <!-- temporal worker -->
+            <dependency>
+                <groupId>io.temporal</groupId>
+                <artifactId>temporal-spring-boot-starter</artifactId>
+                <version>${temporal.version}</version>
             </dependency>
 
             <!--  все версии зависимостей spring в одном пакете -->
