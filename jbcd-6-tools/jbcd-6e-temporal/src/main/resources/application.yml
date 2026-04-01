@@ -1,0 +1,24 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: jbcd-6e-temporal
+  web:
+    error:
+      include-stacktrace: never
+  temporal:
+    namespace: default
+    connection:
+      target: ${TEMPORAL_TARGET:localhost:7233}
+    workers:
+      - name: news-worker
+        task-queue: news-event-task-queue
+    workers-auto-discovery:
+      packages:
+        - com.karandashov.temporal
+
+logging:
+  level:
+    root: INFO
+    com.karandashov: DEBUG
