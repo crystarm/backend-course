@@ -1,8 +1,8 @@
 package com.karandashov.controller;
 
 import com.karandashov.dto.ApprovedRequest;
+import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
-import com.karandashov.dto.NewsEventList;
 import com.karandashov.service.NewsEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,38 +19,29 @@ public class NewsEventController {
     private final NewsEventService service;
 
     /**
-     * Метод для создания новости и запуска процесса согласования через Temporal
+     * Запускаем workflow публикации новости.
      */
     @PostMapping
-    public void create(@RequestBody NewsEvent event) {
-        log.info("Request to create news: {}", event);
-
+    public void create(@RequestBody CreateNewsEventRequest request) {
+        log.info("Request to create news: {}", request);
+        service.create(request);
     }
 
     /**
-     * Метод для получения из Temporal новостей на шаге "на подтверждении"
+     * Читаем текущее состояние workflow по id новости.
      */
-    @GetMapping("/unapproved")
-    public NewsEventList getUnapprovedNews() {
-        log.info("Request to get all unapproved news");
-
+    @GetMapping("/{id}")
+    public NewsEvent getById(@PathVariable UUID id) {
+        log.info("Request to get news by id: {}", id);
+        return service.getById(id);
     }
 
     /**
-     * Метод для подтверждения/отклонения новости
+     * Отправляем signal в уже запущенный workflow.
      */
     @PostMapping("/status")
-    public NewsEvent process(@RequestBody ApprovedRequest request) {
+    public void process(@RequestBody ApprovedRequest request) {
         log.info("Request for approve/decline news: {}", request);
-
-    }
-
-    /**
-     * Метод для получения всех согласованных новостей
-     */
-    @GetMapping
-    public NewsEventList getNews() {
-        log.info("Request to get all approved news");
-
+        service.process(request);
     }
 }

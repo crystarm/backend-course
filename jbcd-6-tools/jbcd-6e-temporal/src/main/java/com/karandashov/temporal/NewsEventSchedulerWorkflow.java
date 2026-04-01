@@ -1,6 +1,12 @@
 package com.karandashov.temporal;
 
-public class NewsEventSchedulerWorkflow {
+import io.temporal.workflow.WorkflowInterface;
+import io.temporal.workflow.WorkflowMethod;
 
-    // temporal публикует новость каждую минуту с поздравлением о наступлении новой минуты
+// Отдельный workflow, который запускается по Temporal Schedule.
+@WorkflowInterface
+public interface NewsEventSchedulerWorkflow {
+
+    @WorkflowMethod
+    void publishMinuteGreeting();
 }

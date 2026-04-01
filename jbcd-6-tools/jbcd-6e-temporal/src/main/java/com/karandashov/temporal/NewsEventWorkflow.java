@@ -1,12 +1,25 @@
 package com.karandashov.temporal;
 
-public class NewsEventWorkflow {
+import com.karandashov.dto.ApprovedRequest;
+import com.karandashov.dto.NewsEvent;
+import io.temporal.workflow.QueryMethod;
+import io.temporal.workflow.SignalMethod;
+import io.temporal.workflow.WorkflowInterface;
+import io.temporal.workflow.WorkflowMethod;
 
-    // запускаем процесс по вызову api create (ключ - id новости)
-    // отдельный шаг валидации title (должен быть больше 3 и меньше 30 символов)
-    // отдельный шаг валидации message (должен быть больше 10 символов)
-    // новость переходит в ожидании подтверждения
-    // новость получает подтверждение и продолжает процесс
-    //
-    // публикация (финальный статус)
+// Контракт workflow, который Temporal будет запускать и восстанавливать из истории.
+@WorkflowInterface
+public interface NewsEventWorkflow {
+
+    // Основной вход в workflow.
+    @WorkflowMethod
+    NewsEvent process(NewsEvent event);
+
+    // Signal позволяет асинхронно отправить решение в уже работающий workflow.
+    @SignalMethod
+    void applyDecision(ApprovedRequest.Status status);
+
+    // Query возвращает текущее состояние workflow без изменения его истории.
+    @QueryMethod
+    NewsEvent getCurrentState();
 }

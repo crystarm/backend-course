@@ -16,4 +16,6 @@ public class NewsEvent {
     private String title;
 
     private String message;
+
+    private NewsStatus status;
 }
