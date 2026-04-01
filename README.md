@@ -125,13 +125,14 @@ java-backend-course-demo = jbcd
 - **jbcd-6c-redis-redisson**: Пример использования Redisson для нестандартных задач.
 - **jbcd-6c-redis-spring-cache**: Кэш на основе Spring Cache + Redis и демонстрация pub/sub для SSE.
 - **jbcd-6d-s3**: Пример работы с S3.
-- temporal (в разработке)
+- **jbcd-6e-temporal**: Пример работы с Temporal.
 
 ### jbcd-7-advanced
 
 Модуль для демонстрации продвинутой функциональности:
 
 - session auth (в разработке)
+- jwt auth (в разработке)
 - observability (в разработке)
 - performance patterns и load testing (в разработке)
 
