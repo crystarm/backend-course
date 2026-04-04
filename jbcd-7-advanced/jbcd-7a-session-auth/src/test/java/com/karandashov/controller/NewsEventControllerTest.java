@@ -1,9 +1,9 @@
 package com.karandashov.controller;
 
+import com.karandashov.AuthUtils;
 import com.karandashov.BaseTest;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.entity.NewsEventEntity;
-import com.karandashov.entity.UserEntity;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +11,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
@@ -38,12 +35,12 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithInvalidRequest() throws Exception {
-        AuthenticatedClient authenticatedClient = loginTestUser();
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("", "");
 
         mockMvc.perform(post("/api/news")
                         .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header("X-XSRF-TOKEN", authenticatedClient.csrfCookie().getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -53,12 +50,12 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMissingTitle() throws Exception {
-        AuthenticatedClient authenticatedClient = loginTestUser();
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest(null, "Message");
 
         mockMvc.perform(post("/api/news")
                         .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header("X-XSRF-TOKEN", authenticatedClient.csrfCookie().getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -68,12 +65,12 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMissingMessage() throws Exception {
-        AuthenticatedClient authenticatedClient = loginTestUser();
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("Title", null);
 
         mockMvc.perform(post("/api/news")
                         .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header("X-XSRF-TOKEN", authenticatedClient.csrfCookie().getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -83,13 +80,13 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithTitleTooLong() throws Exception {
-        AuthenticatedClient authenticatedClient = loginTestUser();
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         String longTitle = "a".repeat(101);
         CreateNewsEventRequest request = new CreateNewsEventRequest(longTitle, "Message");
 
         mockMvc.perform(post("/api/news")
                         .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header("X-XSRF-TOKEN", authenticatedClient.csrfCookie().getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -99,13 +96,13 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMaxTitleLength() throws Exception {
-        AuthenticatedClient authenticatedClient = loginTestUser();
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         String maxTitle = "a".repeat(100);
         CreateNewsEventRequest request = new CreateNewsEventRequest(maxTitle, "Message");
 
         mockMvc.perform(post("/api/news")
                         .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header("X-XSRF-TOKEN", authenticatedClient.csrfCookie().getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -115,17 +112,33 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMinTitleLength() throws Exception {
-        AuthenticatedClient authenticatedClient = loginTestUser();
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("a", "Message");
 
         mockMvc.perform(post("/api/news")
                         .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header("X-XSRF-TOKEN", authenticatedClient.csrfCookie().getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.title").value("a"));
+    }
+
+    @Test
+    void testSaveSuccessful() throws Exception {
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
+        CreateNewsEventRequest request = new CreateNewsEventRequest("Новая новость", "Текст новости");
+
+        mockMvc.perform(post("/api/news")
+                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
+                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.title").value("Новая новость"))
+                .andExpect(jsonPath("$.data.message").value("Текст новости"));
     }
 
     @Test
@@ -178,60 +191,19 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveRequiresAuthentication() throws Exception {
-        Cookie csrfCookie = fetchCsrfCookie();
+        Cookie csrfCookie = AuthUtils.fetchCsrfCookie(mockMvc);
 
         mockMvc.perform(post("/api/news")
                         .cookie(csrfCookie)
-                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, csrfCookie.getValue())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+                .content("""
                                 {
                                   "title": "Title",
                                   "message": "Message"
                                 }
                                 """))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(4010))
-                .andExpect(jsonPath("$.message").value("Требуется аутентификация"));
-    }
-
-    private AuthenticatedClient loginTestUser() throws Exception {
-        String email = "author@example.com";
-        String password = "password123";
-        userRepository.save(UserEntity.builder()
-                .id(UUID.randomUUID())
-                .email(email)
-                .passwordHash(passwordEncoder.encode(password))
-                .createdAt(Instant.now())
-                .build());
-
-        Cookie anonymousCsrfCookie = fetchCsrfCookie();
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .cookie(anonymousCsrfCookie)
-                        .header("X-XSRF-TOKEN", anonymousCsrfCookie.getValue())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("email", email)
-                        .param("password", password))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        Cookie sessionCookie = loginResult.getResponse().getCookie("SESSION");
-        Cookie csrfCookie = fetchCsrfCookie(sessionCookie);
-        return new AuthenticatedClient(sessionCookie, csrfCookie);
-    }
-
-    private Cookie fetchCsrfCookie(Cookie... cookies) throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get("/api/auth/me");
-        if (cookies.length > 0) {
-            requestBuilder.cookie(cookies);
-        }
-
-        MvcResult result = mockMvc.perform(requestBuilder)
-                .andExpect(cookie().exists("XSRF-TOKEN"))
-                .andReturn();
-        return result.getResponse().getCookie("XSRF-TOKEN");
-    }
-
-    private record AuthenticatedClient(Cookie sessionCookie, Cookie csrfCookie) {
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

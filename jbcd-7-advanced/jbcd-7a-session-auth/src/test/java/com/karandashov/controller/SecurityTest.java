@@ -1,5 +1,6 @@
 package com.karandashov.controller;
 
+import com.karandashov.AuthUtils;
 import com.karandashov.BaseTest;
 import com.karandashov.dto.auth.RegisterUserRequest;
 import jakarta.servlet.http.Cookie;
@@ -8,19 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.HttpCookie;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.nullValue;
@@ -40,6 +38,9 @@ public class SecurityTest extends BaseTest {
     @Autowired
     private JsonMapper jsonMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void registrationLoginMeLogoutShouldWorkWithRedisSession() throws Exception {
         CookieManager cookieManager = new CookieManager();
@@ -48,14 +49,18 @@ public class SecurityTest extends BaseTest {
                 .cookieHandler(cookieManager)
                 .build();
 
-        httpClient.send(HttpRequest.newBuilder(uri("/api/auth/me")).GET().build(), HttpResponse.BodyHandlers.ofString());
-        String csrfToken = getCookieValue(cookieManager);
+        httpClient.send(HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/me")).GET().build(), HttpResponse.BodyHandlers.ofString());
+        String csrfToken = AuthUtils.getCookieValue(
+                cookieManager,
+                AuthUtils.uri(port, "/"),
+                AuthUtils.CSRF_COOKIE_NAME
+        );
         RegisterUserRequest request = new RegisterUserRequest("student@example.com", "password123");
 
         HttpResponse<String> registrationResponse = httpClient.send(
-                HttpRequest.newBuilder(uri("/api/auth/registration"))
+                HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/registration"))
                         .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .header("X-XSRF-TOKEN", csrfToken)
+                        .header(AuthUtils.CSRF_HEADER_NAME, csrfToken)
                         .POST(HttpRequest.BodyPublishers.ofString(jsonMapper.writeValueAsString(request)))
                         .build(),
                 HttpResponse.BodyHandlers.ofString()
@@ -64,40 +69,47 @@ public class SecurityTest extends BaseTest {
         assertEquals("student@example.com", jsonMapper.readTree(registrationResponse.body()).path("data").path("email").asString());
 
         HttpResponse<String> loginResponse = httpClient.send(
-                HttpRequest.newBuilder(uri("/api/auth/login"))
+                HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/login"))
                         .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                        .header("X-XSRF-TOKEN", csrfToken)
+                        .header(AuthUtils.CSRF_HEADER_NAME, csrfToken)
                         .POST(HttpRequest.BodyPublishers.ofString("email=student%40example.com&password=password123"))
                         .build(),
                 HttpResponse.BodyHandlers.ofString()
         );
-        assertEquals(200, loginResponse.statusCode());
-        assertTrue(jsonMapper.readTree(loginResponse.body()).path("data").path("authenticated").asBoolean());
+        assertEquals(302, loginResponse.statusCode());
+        URI loginLocation = URI.create(loginResponse.headers().firstValue("location").orElseThrow());
+        assertEquals("/", loginLocation.getPath());
 
         Set<String> keysAfterLogin = stringRedisTemplate.keys("jbcd:7a:session-auth:*");
         assertTrue(keysAfterLogin != null && !keysAfterLogin.isEmpty());
 
         HttpResponse<String> meResponse = httpClient.send(
-                HttpRequest.newBuilder(uri("/api/auth/me")).GET().build(),
+                HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/me")).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
         );
         assertEquals(200, meResponse.statusCode());
         assertEquals("student@example.com", jsonMapper.readTree(meResponse.body()).path("data").path("email").asString());
 
-        httpClient.send(HttpRequest.newBuilder(uri("/api/auth/me")).GET().build(), HttpResponse.BodyHandlers.ofString());
-        String logoutCsrfToken = getCookieValue(cookieManager);
+        httpClient.send(HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/me")).GET().build(), HttpResponse.BodyHandlers.ofString());
+        String logoutCsrfToken = AuthUtils.getCookieValue(
+                cookieManager,
+                AuthUtils.uri(port, "/"),
+                AuthUtils.CSRF_COOKIE_NAME
+        );
         HttpResponse<String> logoutResponse = httpClient.send(
-                HttpRequest.newBuilder(uri("/api/auth/logout"))
-                        .header("X-XSRF-TOKEN", logoutCsrfToken)
+                HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/logout"))
+                        .header(AuthUtils.CSRF_HEADER_NAME, logoutCsrfToken)
                         .POST(HttpRequest.BodyPublishers.noBody())
                         .build(),
                 HttpResponse.BodyHandlers.ofString()
         );
-        assertEquals(200, logoutResponse.statusCode());
-        assertFalse(jsonMapper.readTree(logoutResponse.body()).path("data").path("authenticated").asBoolean());
+        assertEquals(302, logoutResponse.statusCode());
+        URI logoutLocation = URI.create(logoutResponse.headers().firstValue("location").orElseThrow());
+        assertEquals("/login", logoutLocation.getPath());
+        assertEquals("logout", logoutLocation.getQuery());
 
         HttpResponse<String> anonymousMeResponse = httpClient.send(
-                HttpRequest.newBuilder(uri("/api/auth/me")).GET().build(),
+                HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/me")).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
         );
         assertEquals(401, anonymousMeResponse.statusCode());
@@ -106,20 +118,20 @@ public class SecurityTest extends BaseTest {
 
     @Test
     void registrationShouldRejectDuplicateEmail() throws Exception {
-        Cookie csrfCookie = fetchCsrfCookie();
+        Cookie csrfCookie = AuthUtils.fetchCsrfCookie(mockMvc);
         RegisterUserRequest request = new RegisterUserRequest("student@example.com", "password123");
 
         mockMvc.perform(post("/api/auth/registration")
                         .cookie(csrfCookie)
-                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, csrfCookie.getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        Cookie secondCsrfCookie = fetchCsrfCookie();
+        Cookie secondCsrfCookie = AuthUtils.fetchCsrfCookie(mockMvc);
         mockMvc.perform(post("/api/auth/registration")
                         .cookie(secondCsrfCookie)
-                        .header("X-XSRF-TOKEN", secondCsrfCookie.getValue())
+                        .header(AuthUtils.CSRF_HEADER_NAME, secondCsrfCookie.getValue())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -138,29 +150,9 @@ public class SecurityTest extends BaseTest {
 
     @Test
     void protectedEndpointShouldRejectRequestWithoutCsrfToken() throws Exception {
-        Cookie csrfCookie = fetchCsrfCookie();
-        RegisterUserRequest request = new RegisterUserRequest("student@example.com", "password123");
-        mockMvc.perform(post("/api/auth/registration")
-                        .cookie(csrfCookie)
-                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .cookie(csrfCookie)
-                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("email", "student@example.com")
-                        .param("password", "password123"))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        Cookie sessionCookie = loginResult.getResponse().getCookie("SESSION");
-
-        assert sessionCookie != null;
+        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         mockMvc.perform(post("/api/news")
-                        .cookie(sessionCookie)
+                        .cookie(authenticatedClient.sessionCookie())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -168,9 +160,7 @@ public class SecurityTest extends BaseTest {
                                   "message": "Message"
                                 }
                                 """))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value(4030))
-                .andExpect(jsonPath("$.message").value("Доступ запрещен"));
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -182,30 +172,5 @@ public class SecurityTest extends BaseTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:8080"))
                 .andExpect(header().string("Access-Control-Allow-Credentials", "true"));
-    }
-
-    private Cookie fetchCsrfCookie(Cookie... cookies) throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get("/api/auth/me");
-        if (cookies.length > 0) {
-            requestBuilder.cookie(cookies);
-        }
-
-        MvcResult result = mockMvc.perform(requestBuilder)
-                .andExpect(cookie().exists("XSRF-TOKEN"))
-                .andReturn();
-        return result.getResponse().getCookie("XSRF-TOKEN");
-    }
-
-    private URI uri(String path) {
-        return URI.create("http://localhost:" + port + path);
-    }
-
-    private String getCookieValue(CookieManager cookieManager) {
-        List<HttpCookie> cookies = cookieManager.getCookieStore().get(uri("/"));
-        return cookies.stream()
-                .filter(cookie -> "XSRF-TOKEN".equals(cookie.getName()))
-                .map(HttpCookie::getValue)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Не нашел cookie " + "XSRF-TOKEN"));
     }
 }

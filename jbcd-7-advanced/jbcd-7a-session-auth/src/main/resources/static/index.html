@@ -104,9 +104,13 @@
         }
 
         logoutButton.addEventListener("click", async () => {
-            const {response, body} = await AuthApi.logout();
-            const message = body?.message ?? "Сессия завершена";
-            AuthApi.showAlert("news-form-alert", response.ok ? "alert-success" : "alert-error", message);
+            const {response} = await AuthApi.logout();
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            AuthApi.showAlert("news-form-alert", "alert-error", "Не удалось завершить сессию");
             await refreshAuthState();
         });
 

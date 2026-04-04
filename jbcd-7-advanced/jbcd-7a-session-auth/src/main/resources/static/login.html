@@ -65,6 +65,15 @@
     document.addEventListener("DOMContentLoaded", async () => {
         const loginForm = document.getElementById("login-form");
         const registrationForm = document.getElementById("registration-form");
+        const queryParams = new URLSearchParams(window.location.search);
+
+        if (queryParams.has("error")) {
+            AuthApi.showAlert("page-alert", "alert-error", "Неверный email или пароль");
+        }
+
+        if (queryParams.has("logout")) {
+            AuthApi.showAlert("page-alert", "alert-success", "Сессия завершена");
+        }
 
         await AuthApi.ensureCsrfCookie();
 
@@ -73,18 +82,13 @@
             const email = document.getElementById("login-email").value.trim();
             const password = document.getElementById("login-password").value;
 
-            const {response, body} = await AuthApi.login(email, password);
-            AuthApi.showAlert(
-                "page-alert",
-                response.ok ? "alert-success" : "alert-error",
-                body?.message ?? (response.ok ? "Логин выполнен" : "Не удалось выполнить логин")
-            );
-
-            if (response.ok) {
-                setTimeout(() => {
-                    window.location.href = "/";
-                }, 500);
+            const {response} = await AuthApi.login(email, password);
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
             }
+
+            AuthApi.showAlert("page-alert", "alert-error", "Не удалось выполнить логин");
         });
 
         registrationForm.addEventListener("submit", async (event) => {
