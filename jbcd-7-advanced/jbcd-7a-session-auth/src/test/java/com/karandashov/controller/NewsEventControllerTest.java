@@ -1,6 +1,6 @@
 package com.karandashov.controller;
 
-import com.karandashov.BaseWithPostgresTest;
+import com.karandashov.BaseTest;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.repository.NewsEventRepository;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class NewsEventControllerTest extends BaseWithPostgresTest {
+public class NewsEventControllerTest extends BaseTest {
 
     @Autowired
     private NewsEventRepository repository;
@@ -38,11 +38,13 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
         repository.deleteAll();
     }
 
+    // todo auth
+
     @Test
     void testSaveWithInvalidRequest() throws Exception {
         CreateNewsEventRequest request = new CreateNewsEventRequest("", "");
 
-        mockMvc.perform(post("/news")
+        mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -54,7 +56,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
     void testSaveWithMissingTitle() throws Exception {
         CreateNewsEventRequest request = new CreateNewsEventRequest(null, "Message");
 
-        mockMvc.perform(post("/news")
+        mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -66,7 +68,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
     void testSaveWithMissingMessage() throws Exception {
         CreateNewsEventRequest request = new CreateNewsEventRequest("Title", null);
 
-        mockMvc.perform(post("/news")
+        mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -79,7 +81,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
         String longTitle = "a".repeat(101);
         CreateNewsEventRequest request = new CreateNewsEventRequest(longTitle, "Message");
 
-        mockMvc.perform(post("/news")
+        mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -92,7 +94,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
         String maxTitle = "a".repeat(100);
         CreateNewsEventRequest request = new CreateNewsEventRequest(maxTitle, "Message");
 
-        mockMvc.perform(post("/news")
+        mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -104,7 +106,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
     void testSaveWithMinTitleLength() throws Exception {
         CreateNewsEventRequest request = new CreateNewsEventRequest("a", "Message");
 
-        mockMvc.perform(post("/news")
+        mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -127,7 +129,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
         repository.save(entity1);
         repository.save(entity2);
 
-        mockMvc.perform(get("/news"))
+        mockMvc.perform(get("/api/news"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.events", hasSize(2)))
@@ -145,7 +147,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
                 .build();
         repository.save(entity);
 
-        mockMvc.perform(get("/news/{id}", id))
+        mockMvc.perform(get("/api/news/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.id").value(id.toString()))
@@ -154,7 +156,7 @@ public class NewsEventControllerTest extends BaseWithPostgresTest {
 
     @Test
     void testGetNewsByIdNotFound() throws Exception {
-        mockMvc.perform(get("/news/{id}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/news/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(4000))
                 .andExpect(jsonPath("$.message").value("Не смог найти новость по id"));
