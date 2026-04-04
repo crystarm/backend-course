@@ -15,7 +15,11 @@ management:
       show-details: always
   tracing:
     sampling:
-      probability: 1.0   # для учебной среды удобно видеть все трассы
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        enabled: false
 
 logging:
   structured:
