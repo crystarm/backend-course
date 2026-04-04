@@ -26,6 +26,8 @@ public abstract class BaseTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
+//        registry.add("CORS_ALLOWED_ORIGINS", something??);
+
         registry.add("DATABASE_URL", POSTGRES::getJdbcUrl);
         registry.add("DATABASE_USERNAME", POSTGRES::getUsername);
         registry.add("DATABASE_PASSWORD", POSTGRES::getPassword);
