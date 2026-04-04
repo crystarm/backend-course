@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логин и регистрация</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="/css/styles.css" rel="stylesheet"/>
+    <script src="/js/auth.js" defer></script>
+</head>
+<body class="min-h-screen bg-base-200">
+<div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 px-4 py-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-primary">Security Demo</p>
+            <h1 class="text-4xl font-black">Логин и регистрация</h1>
+        </div>
+        <a class="btn btn-outline" href="/">К новостям</a>
+    </div>
+
+    <div id="page-alert"></div>
+
+    <section class="grid gap-6 lg:grid-cols-2">
+        <article class="card bg-base-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Вход</h2>
+                <p class="text-sm text-base-content/70">Логин создаст HTTP-сессию в Redis.</p>
+                <form id="login-form" class="space-y-4">
+                    <label class="form-control w-full">
+                        <span class="label-text mb-2">Email</span>
+                        <input id="login-email" class="input input-bordered w-full" required type="email">
+                    </label>
+                    <label class="form-control w-full">
+                        <span class="label-text mb-2">Пароль</span>
+                        <input id="login-password" class="input input-bordered w-full" required type="password">
+                    </label>
+                    <button class="btn btn-primary w-full" type="submit">Войти</button>
+                </form>
+            </div>
+        </article>
+
+        <article class="card bg-base-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Регистрация</h2>
+                <p class="text-sm text-base-content/70">После регистрации нужно отдельно выполнить логин.</p>
+                <form id="registration-form" class="space-y-4">
+                    <label class="form-control w-full">
+                        <span class="label-text mb-2">Email</span>
+                        <input id="registration-email" class="input input-bordered w-full" required type="email">
+                    </label>
+                    <label class="form-control w-full">
+                        <span class="label-text mb-2">Пароль</span>
+                        <input id="registration-password" class="input input-bordered w-full" minlength="8" required type="password">
+                    </label>
+                    <button class="btn btn-secondary w-full" type="submit">Зарегистрироваться</button>
+                </form>
+            </div>
+        </article>
+    </section>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const loginForm = document.getElementById("login-form");
+        const registrationForm = document.getElementById("registration-form");
+
+        await AuthApi.ensureCsrfCookie();
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const email = document.getElementById("login-email").value.trim();
+            const password = document.getElementById("login-password").value;
+
+            const {response, body} = await AuthApi.login(email, password);
+            AuthApi.showAlert(
+                "page-alert",
+                response.ok ? "alert-success" : "alert-error",
+                body?.message ?? (response.ok ? "Логин выполнен" : "Не удалось выполнить логин")
+            );
+
+            if (response.ok) {
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 500);
+            }
+        });
+
+        registrationForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const email = document.getElementById("registration-email").value.trim();
+            const password = document.getElementById("registration-password").value;
+
+            const {response, body} = await AuthApi.register(email, password);
+            AuthApi.showAlert(
+                "page-alert",
+                response.ok ? "alert-success" : "alert-error",
+                body?.message ?? (response.ok ? "Пользователь зарегистрирован" : "Не удалось зарегистрировать пользователя")
+            );
+
+            if (response.ok) {
+                registrationForm.reset();
+            }
+        });
+    });
+</script>
+</body>
+</html>

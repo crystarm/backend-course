@@ -2,16 +2,18 @@ package com.karandashov;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @Slf4j
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseTest {
 
@@ -26,7 +28,7 @@ public abstract class BaseTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-//        registry.add("CORS_ALLOWED_ORIGINS", something??);
+        registry.add("CORS_ALLOWED_ORIGINS", () -> "http://localhost:8080");
 
         registry.add("DATABASE_URL", POSTGRES::getJdbcUrl);
         registry.add("DATABASE_USERNAME", POSTGRES::getUsername);

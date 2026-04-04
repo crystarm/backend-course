@@ -12,7 +12,6 @@ public class PagesController implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
-        // todo перечисляем все что нужно отдавать из ресурсов
-        // никакой шаблонизации в контроллерах, только rest by js
+        registry.addViewController("/login").setViewName("forward:/login.html");
     }
 }
