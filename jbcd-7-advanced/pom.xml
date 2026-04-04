@@ -15,6 +15,8 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>jbcd-7a-session-auth</module>
+
         <module>jbcd-7b-observability</module>
     </modules>
 
