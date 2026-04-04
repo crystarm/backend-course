@@ -1,0 +1,13 @@
+volumes:
+  sso_data:
+
+services:
+  sso:
+    image: dexidp/dex:v2.45.1
+    restart: no
+    command: [ "dex", "serve", "/etc/dex/config.yaml" ]
+    ports:
+      - "5556:5556"
+    volumes:
+      - ./config.yaml:/etc/dex/config.yaml:ro
+      - sso_data:/var/dex

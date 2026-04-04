@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="/css/styles.css" rel="stylesheet"/>
+    <script src="/js/auth.js" type="module"></script>
+    <script src="/js/news.js" defer></script>
+</head>
+<body class="min-h-screen bg-base-200">
+<div class="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-4 py-8">
+    <header class="hero rounded-box bg-base-100 shadow-sm">
+        <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-primary">JWT Auth Demo</p>
+                <h1 class="text-4xl font-black">Новости с JWT и Dex OIDC</h1>
+                <p class="max-w-2xl text-base-content/70">
+                    Frontend получает токены у Dex и ходит в backend только с bearer token.
+                </p>
+            </div>
+            <div class="flex flex-col items-start gap-3 sm:items-end">
+                <div id="auth-state" class="badge badge-neutral badge-lg">Проверяем токен...</div>
+                <div class="flex gap-3">
+                    <a class="btn btn-outline btn-primary" href="/login">Войти через Dex</a>
+                    <button id="logout-button" class="btn btn-neutral hidden" type="button">Забыть токен</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold">Лента новостей</h2>
+                <button id="reload-news-button" class="btn btn-sm btn-outline" type="button">Обновить</button>
+            </div>
+            <div id="news-list" class="space-y-4"></div>
+        </div>
+
+        <aside class="space-y-4">
+            <div id="news-form-card" class="card bg-base-100 shadow-sm hidden">
+                <div class="card-body">
+                    <h2 class="card-title">Добавить новость</h2>
+                    <p class="text-sm text-base-content/70">Форма доступна только после логина.</p>
+                    <div id="news-form-alert"></div>
+                    <form id="news-form" class="space-y-4">
+                        <label class="form-control w-full">
+                            <span class="label-text mb-2">Заголовок</span>
+                            <input id="news-title" class="input input-bordered w-full" maxlength="100" required type="text">
+                        </label>
+                        <label class="form-control w-full">
+                            <span class="label-text mb-2">Сообщение</span>
+                            <textarea id="news-message" class="textarea textarea-bordered min-h-32" required></textarea>
+                        </label>
+                        <button class="btn btn-primary w-full" type="submit">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title">Как это работает</h2>
+                    <ul class="list-disc space-y-2 pl-5 text-sm text-base-content/80">
+                        <li>Публичны только GET-запросы к новостям.</li>
+                        <li>POST-запросы требуют JWT в заголовке Authorization.</li>
+                        <li>Frontend логинится через Dex по Authorization Code + PKCE.</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+    </section>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const AuthApi = window.AuthApi;
+        const NewsApi = window.NewsApi;
+        const authStateBadge = document.getElementById("auth-state");
+        const logoutButton = document.getElementById("logout-button");
+        const newsFormCard = document.getElementById("news-form-card");
+        const newsForm = document.getElementById("news-form");
+        const reloadNewsButton = document.getElementById("reload-news-button");
+
+        async function refreshAuthState() {
+            const {status, body} = await AuthApi.getCurrentUser();
+            const claims = body?.data?.claims ?? {};
+            const authenticated = status === 200 && body?.data?.authenticated;
+
+            authStateBadge.className = authenticated
+                ? "badge badge-success badge-lg"
+                : "badge badge-warning badge-lg";
+            authStateBadge.textContent = authenticated
+                ? `Вы вошли как ${AuthApi.extractDisplayName(claims)}`
+                : "Гостевой режим";
+
+            newsFormCard.classList.toggle("hidden", !authenticated);
+            logoutButton.classList.toggle("hidden", !authenticated);
+        }
+
+        async function refreshNews() {
+            const {body} = await NewsApi.getAllNews();
+            NewsApi.renderNewsList("news-list", body?.data?.events ?? []);
+        }
+
+        logoutButton.addEventListener("click", async () => {
+            await AuthApi.logout();
+            AuthApi.showAlert("news-form-alert", "alert-success", "Токен удален");
+            await refreshAuthState();
+        });
+
+        reloadNewsButton.addEventListener("click", refreshNews);
+
+        newsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const title = document.getElementById("news-title").value.trim();
+            const message = document.getElementById("news-message").value.trim();
+
+            const {response, body} = await NewsApi.createNews(title, message);
+            AuthApi.showAlert(
+                "news-form-alert",
+                response.ok ? "alert-success" : "alert-error",
+                body?.message ?? (response.ok ? "Новость сохранена" : "Нужен валидный токен")
+            );
+
+            if (response.ok) {
+                newsForm.reset();
+                await refreshNews();
+            }
+        });
+
+        await refreshAuthState();
+        await refreshNews();
+    });
+</script>
+</body>
+</html>
