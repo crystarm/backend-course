@@ -4,14 +4,10 @@ import com.karandashov.BaseTest;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.entity.UserEntity;
-import com.karandashov.repository.NewsEventRepository;
-import com.karandashov.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,18 +22,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 public class NewsEventControllerTest extends BaseTest {
-
-    @Autowired
-    private NewsEventRepository repository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private JsonMapper jsonMapper;
@@ -47,16 +35,6 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-    @BeforeEach
-    void tearDown() {
-        repository.deleteAll();
-        userRepository.deleteAll();
-        deleteRedisKeys("jbcd:7a:session-auth:*");
-    }
 
     @Test
     void testSaveWithInvalidRequest() throws Exception {
@@ -162,8 +140,8 @@ public class NewsEventControllerTest extends BaseTest {
                 .title("Title 2")
                 .message("Message 2")
                 .build();
-        repository.save(entity1);
-        repository.save(entity2);
+        newsEventRepository.save(entity1);
+        newsEventRepository.save(entity2);
 
         mockMvc.perform(get("/api/news"))
                 .andExpect(status().isOk())
@@ -181,7 +159,7 @@ public class NewsEventControllerTest extends BaseTest {
                 .title("Title")
                 .message("Message")
                 .build();
-        repository.save(entity);
+        newsEventRepository.save(entity);
 
         mockMvc.perform(get("/api/news/{id}", id))
                 .andExpect(status().isOk())
@@ -252,13 +230,6 @@ public class NewsEventControllerTest extends BaseTest {
                 .andExpect(cookie().exists("XSRF-TOKEN"))
                 .andReturn();
         return result.getResponse().getCookie("XSRF-TOKEN");
-    }
-
-    private void deleteRedisKeys(String pattern) {
-        var keys = stringRedisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            stringRedisTemplate.delete(keys);
-        }
     }
 
     private record AuthenticatedClient(Cookie sessionCookie, Cookie csrfCookie) {

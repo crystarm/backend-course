@@ -2,14 +2,11 @@ package com.karandashov.controller;
 
 import com.karandashov.BaseTest;
 import com.karandashov.dto.auth.RegisterUserRequest;
-import com.karandashov.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -27,16 +24,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 public class SecurityTest extends BaseTest {
@@ -49,18 +39,6 @@ public class SecurityTest extends BaseTest {
 
     @Autowired
     private JsonMapper jsonMapper;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-    @BeforeEach
-    void tearDown() {
-        userRepository.deleteAll();
-        deleteRedisKeys();
-    }
 
     @Test
     void registrationLoginMeLogoutShouldWorkWithRedisSession() throws Exception {
@@ -216,13 +194,6 @@ public class SecurityTest extends BaseTest {
                 .andExpect(cookie().exists("XSRF-TOKEN"))
                 .andReturn();
         return result.getResponse().getCookie("XSRF-TOKEN");
-    }
-
-    private void deleteRedisKeys() {
-        Set<String> keys = stringRedisTemplate.keys("jbcd:7a:session-auth:*");
-        if (keys != null && !keys.isEmpty()) {
-            stringRedisTemplate.delete(keys);
-        }
     }
 
     private URI uri(String path) {
