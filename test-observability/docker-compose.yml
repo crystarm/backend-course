@@ -1,0 +1,47 @@
+volumes:
+  openobserve_data:
+
+services:
+
+  app:
+    build: ./../jbcd-7-advanced/jbcd-7b-observability
+    container_name: app
+    restart: no
+    ports:
+      - "8080:8080"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      # можно использовать универсальный /actuator/health для проверки работоспособности
+      # test: ["CMD-SHELL", "curl -s http://localhost:8080/actuator/health | grep '\"status\":\"UP\"' || exit 1"]
+      # но для примера я использую реальный эндпойнт приложения. Это не универсально, но удобно для демонстрации
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8080/news >/dev/null 2>&1 || exit 1" ]
+      interval: 10s
+      retries: 12
+      start_period: 40s
+      timeout: 5s
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: openobserve
+    environment:
+      ZO_ROOT_USER_EMAIL: root@example.com
+      ZO_ROOT_USER_PASSWORD: rootpass123
+    ports:
+      - "5080:5080"
+    volumes:
+      - openobserve_data:/data
+
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    user: "0:0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+    command: [ "--config", "/etc/vector/vector.yaml" ]
+    depends_on:
+      app:
+        condition: service_healthy
+      openobserve:
+        condition: service_started

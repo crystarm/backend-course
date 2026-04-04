@@ -112,6 +112,7 @@ java-backend-course-demo = jbcd
 - **jbcd-5b-api-first**: Генерация кода на основе OpenAPI спецификации (подход API First).
 - **open-api-service-spec.json**: Пример OpenAPI спецификации в формате JSON.
 - **requests.puml**: Пример диаграммы взаимодействия в формате PlantUML.
+- **requests.mermaid**: Пример диаграммы взаимодействия в формате Mermaid.
 
 ### jbcd-6-tools
 
@@ -133,7 +134,7 @@ java-backend-course-demo = jbcd
 
 - session auth (в разработке)
 - jwt auth (в разработке)
-- observability (в разработке)
+- **jbcd-7b-observability + test-observability**: metrics, logs and tracing в openobserve с помощью vector
 - performance patterns и load testing (в разработке)
 
 ### Демонстрационный проект
