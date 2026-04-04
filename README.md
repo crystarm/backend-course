@@ -120,7 +120,7 @@ java-backend-course-demo = jbcd
 
 - **jbcd-6a-kafka-simple**: Работа с kafka при помощи низкоуровневого официального apache-клиента.
 - **jbcd-6a-kafka-spring**: Работа с kafka при помощи Spring Kafka.
-- **jbcd-6b-kafka-transactional-outbox**: Реализация паттерна transactional outbox + [debezium](test-debezium)
+- **jbcd-6b-kafka-transactional-outbox + test-debezium**: Реализация паттерна transactional outbox.
 - **jbcd-6b-kafka-transactional-processor**: Пример работы с kafka-транзакциями.
 - **jbcd-6c-redis-lettuce**: Демонстрация основных команд redis с помощью относительно-низкоуровнего клиента Lettuce.
 - **jbcd-6c-redis-redisson**: Пример использования Redisson для нестандартных задач.
@@ -133,8 +133,8 @@ java-backend-course-demo = jbcd
 Модуль для демонстрации продвинутой функциональности:
 
 - **jbcd-7a-session-auth**: Полноценный демонстрационный пример приложения с сессионной безопасностью.
-- jwt auth (в разработке)
-- **jbcd-7b-observability + test-observability**: metrics, logs and tracing в openobserve с помощью vector
+- **jbcd-7a-jwt-auth + test-sso**: Пример аутентификации через JWT и выделенный sso.
+- **jbcd-7b-observability + test-observability**: metrics, logs and tracing в openobserve с помощью vector.
 - performance patterns и load testing (в разработке)
 
 ### Демонстрационный проект
