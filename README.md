@@ -132,7 +132,7 @@ java-backend-course-demo = jbcd
 
 Модуль для демонстрации продвинутой функциональности:
 
-- session auth (в разработке)
+- **jbcd-7a-session-auth**: Полноценный демонстрационный пример приложения с сессионной безопасностью.
 - jwt auth (в разработке)
 - **jbcd-7b-observability + test-observability**: metrics, logs and tracing в openobserve с помощью vector
 - performance patterns и load testing (в разработке)
