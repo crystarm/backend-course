@@ -16,5 +16,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "spring.security.cors")
 public class CorsProperties {
 
+    // Список origins выносим в properties, чтобы не зашивать окружение в код
     private List<String> allowedOrigins = Collections.emptyList();
 }

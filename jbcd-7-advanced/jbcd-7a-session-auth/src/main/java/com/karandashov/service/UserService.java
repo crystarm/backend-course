@@ -37,6 +37,7 @@ public class UserService implements UserDetailsService {
         UserEntity userEntity = UserEntity.builder()
                 .id(UUID.randomUUID())
                 .email(normalizedEmail)
+                // В базе храним только хеш пароля
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .createdAt(Instant.now())
                 .build();
@@ -54,11 +55,14 @@ public class UserService implements UserDetailsService {
     @NullMarked
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Spring Security использует этот метод во время логина
         UserEntity userEntity = userRepository.findByEmail(normalizeEmail(email))
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
+        // Полученные данные будут сохранены в redis сессию
         return User.withUsername(userEntity.getEmail())
                 .password(userEntity.getPasswordHash())
+                // Пока ролевой модели нет, оставляем одну техническую
                 .authorities("USER")
                 .build();
     }

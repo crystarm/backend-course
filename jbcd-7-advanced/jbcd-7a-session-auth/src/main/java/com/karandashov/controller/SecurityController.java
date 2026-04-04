@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,10 +27,15 @@ public class SecurityController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UniversalResponse<AuthStateResponse>> currentUser(Authentication authentication) {
-        boolean authenticated = authentication != null
-                && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken);
+    public ResponseEntity<UniversalResponse<AuthStateResponse>> currentUser(
+            Authentication authentication,
+            CsrfToken csrfToken
+    ) {
+        // Явно материализуем токен, чтобы CookieCsrfTokenRepository записал XSRF-TOKEN в ответ
+        csrfToken.getToken();
+
+        boolean authenticated = authentication != null && authentication.isAuthenticated();
+
         AuthStateResponse response = new AuthStateResponse(authenticated, authenticated ? authentication.getName() : null);
         HttpStatus status = authenticated ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
         return ResponseEntity.status(status).body(new UniversalResponse<>(response));

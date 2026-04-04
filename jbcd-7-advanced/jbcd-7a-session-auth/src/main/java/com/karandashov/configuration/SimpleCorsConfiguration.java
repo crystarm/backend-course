@@ -26,9 +26,11 @@ public class SimpleCorsConfiguration {
     @Bean
     public CorsConfiguration configuration() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // Разрешенные origins приходят из конфигурации окружения.
         configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         configuration.setMaxAge(168000L);
         configuration.setAllowedHeaders(List.of("*"));
+        // Для cookie-based auth обязательно разрешаем credentials.
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(List.of("*"));
         return configuration;
