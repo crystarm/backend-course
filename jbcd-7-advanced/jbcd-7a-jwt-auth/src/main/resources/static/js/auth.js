@@ -1,49 +1,120 @@
-const AuthApi = (() => {
-    const CSRF_COOKIE_NAME = "XSRF-TOKEN";
-    const CSRF_HEADER_NAME = "X-XSRF-TOKEN";
+import {UserManager, WebStorageStateStore} from "https://cdn.jsdelivr.net/npm/oidc-client-ts@3.3.0/+esm";
 
-    function readCookie(name) {
-        const encodedName = `${name}=`;
-        return document.cookie
-            .split(";")
-            .map((item) => item.trim())
-            .find((item) => item.startsWith(encodedName))
-            ?.substring(encodedName.length) ?? null;
+const AuthApi = (() => {
+    let userManagerPromise;
+    let renewPromise = null;
+
+    async function fetchOidcConfiguration() {
+        const response = await fetch("/api/auth/config");
+        const body = await response.json();
+        return body.data;
     }
 
-    async function ensureCsrfCookie() {
-        if (readCookie(CSRF_COOKIE_NAME)) {
-            return;
+    async function getUserManager() {
+        if (!userManagerPromise) {
+            userManagerPromise = fetchOidcConfiguration().then((config) => {
+                const userManager = new UserManager({
+                    authority: config.issuerUri,
+                    client_id: config.clientId,
+                    redirect_uri: config.redirectUri,
+                    response_type: "code",
+                    scope: config.scope,
+                    userStore: new WebStorageStateStore({store: window.sessionStorage}),
+                    automaticSilentRenew: false
+                });
+
+                userManager.events.addAccessTokenExpiring(() => {
+                    renewTokens(userManager).catch(() => userManager.removeUser());
+                });
+                userManager.events.addAccessTokenExpired(() => {
+                    renewTokens(userManager).catch(() => userManager.removeUser());
+                });
+
+                return {userManager, config};
+            });
         }
 
-        await fetch("/api/auth/me", {
-            method: "GET",
-            credentials: "include"
-        });
+        return userManagerPromise;
+    }
+
+    async function renewTokens(userManager) {
+        if (!renewPromise) {
+            renewPromise = userManager.signinSilent().finally(() => {
+                renewPromise = null;
+            });
+        }
+
+        return renewPromise;
+    }
+
+    async function getActiveUser() {
+        const {userManager, config} = await getUserManager();
+        let user = await userManager.getUser();
+        if (!user) {
+            return null;
+        }
+
+        const expiresIn = typeof user.expires_in === "number" ? user.expires_in : null;
+        const shouldRefresh = user.expired
+            || (expiresIn !== null && expiresIn <= config.accessTokenExpiringNotificationSeconds);
+
+        if (shouldRefresh) {
+            try {
+                user = await renewTokens(userManager);
+            } catch (error) {
+                await userManager.removeUser();
+                return null;
+            }
+        }
+
+        return user;
+    }
+
+    function getBearerToken(user) {
+        return user?.id_token ?? user?.access_token ?? null;
     }
 
     async function request(url, options = {}) {
         const method = options.method ?? "GET";
         const headers = new Headers(options.headers ?? {});
+        const user = await getActiveUser();
+        const bearerToken = getBearerToken(user);
 
-        if (!["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase())) {
-            await ensureCsrfCookie();
-            const csrfToken = readCookie(CSRF_COOKIE_NAME);
-            if (csrfToken) {
-                headers.set(CSRF_HEADER_NAME, decodeURIComponent(csrfToken));
-            }
+        if (bearerToken) {
+            headers.set("Authorization", `Bearer ${bearerToken}`);
         }
 
         const response = await fetch(url, {
             ...options,
             method,
-            headers,
-            credentials: "include"
+            headers
         });
 
         const isJson = response.headers.get("content-type")?.includes("application/json");
         const body = isJson ? await response.json() : null;
         return {response, body};
+    }
+
+    async function handleLoginCallbackIfNeeded() {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (!searchParams.has("code") || !searchParams.has("state")) {
+            return false;
+        }
+
+        const {userManager} = await getUserManager();
+        await userManager.signinRedirectCallback();
+        window.location.replace("/");
+        return true;
+    }
+
+    async function login() {
+        const {userManager} = await getUserManager();
+        await userManager.signinRedirect();
+    }
+
+    async function logout() {
+        const {userManager} = await getUserManager();
+        await userManager.removeUser();
     }
 
     async function getCurrentUser() {
@@ -54,31 +125,8 @@ const AuthApi = (() => {
         };
     }
 
-    async function register(email, password) {
-        return request("/api/auth/registration", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({email, password})
-        });
-    }
-
-    async function login(email, password) {
-        const body = new URLSearchParams({email, password});
-        return request("/api/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-            },
-            body
-        });
-    }
-
-    async function logout() {
-        return request("/api/auth/logout", {
-            method: "POST"
-        });
+    function extractDisplayName(claims = {}) {
+        return claims.email ?? claims.name ?? claims.preferred_username ?? claims.sub ?? "unknown";
     }
 
     function showAlert(targetId, type, message) {
@@ -95,12 +143,14 @@ const AuthApi = (() => {
     }
 
     return {
-        ensureCsrfCookie,
         getCurrentUser,
-        register,
+        handleLoginCallbackIfNeeded,
         login,
         logout,
         request,
+        extractDisplayName,
         showAlert
     };
 })();
+
+window.AuthApi = AuthApi;

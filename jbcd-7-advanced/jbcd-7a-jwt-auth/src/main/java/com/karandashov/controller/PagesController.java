@@ -12,7 +12,7 @@ public class PagesController implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
-        // todo возможно нужен хитрый редирект на sso
+        // Отдаем отдельную статическую страницу, которая запускает OIDC flow в браузере.
         registry.addViewController("/login").setViewName("forward:/login.html");
     }
 }

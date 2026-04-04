@@ -46,3 +46,5 @@ const NewsApi = (() => {
         renderNewsList
     };
 })();
+
+window.NewsApi = NewsApi;

@@ -1,7 +1,9 @@
 package com.karandashov.dto.auth;
 
+import java.util.Map;
+
 public record AuthStateResponse(
         boolean authenticated,
-        String email
+        Map<String, Object> claims
 ) {
 }

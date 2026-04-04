@@ -1,15 +1,20 @@
 package com.karandashov.controller;
 
+import com.karandashov.configuration.properties.OidcProperties;
 import com.karandashov.dto.UniversalResponse;
 import com.karandashov.dto.auth.AuthStateResponse;
+import com.karandashov.dto.auth.OidcClientConfigurationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
 
 @Slf4j
 @RestController
@@ -17,13 +22,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class SecurityController {
 
+    private final OidcProperties oidcProperties;
+
+    @GetMapping("/config")
+    public UniversalResponse<OidcClientConfigurationResponse> config() {
+        OidcClientConfigurationResponse response = new OidcClientConfigurationResponse(
+                oidcProperties.getIssuerUri(),
+                oidcProperties.getClientId(),
+                oidcProperties.getFrontendBaseUrl() + "/login.html",
+                oidcProperties.getScope(),
+                oidcProperties.getAccessTokenExpiringNotificationSeconds()
+        );
+        return new UniversalResponse<>(response);
+    }
+
     @GetMapping("/me")
     public ResponseEntity<UniversalResponse<AuthStateResponse>> currentUser(
             Authentication authentication
     ) {
-        boolean authenticated = authentication != null && authentication.isAuthenticated();
+        boolean authenticated = authentication != null && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof Jwt;
 
-        AuthStateResponse response = new AuthStateResponse(authenticated, authenticated ? authentication.getName() : null);
+        AuthStateResponse response = authenticated
+                ? new AuthStateResponse(true, ((Jwt) authentication.getPrincipal()).getClaims())
+                : new AuthStateResponse(false, Collections.emptyMap());
         HttpStatus status = authenticated ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
         return ResponseEntity.status(status).body(new UniversalResponse<>(response));
     }

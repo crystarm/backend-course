@@ -23,6 +23,6 @@ public class StaticPagesTest extends BaseTest {
         mockMvc.perform(get("/index.html"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-                .andExpect(content().string(containsString("Session Auth Demo")));
+                .andExpect(content().string(containsString("JWT Auth Demo")));
     }
 }

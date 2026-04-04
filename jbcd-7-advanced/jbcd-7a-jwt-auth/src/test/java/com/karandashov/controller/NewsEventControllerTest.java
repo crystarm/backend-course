@@ -4,12 +4,10 @@ import com.karandashov.AuthUtils;
 import com.karandashov.BaseTest;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.entity.NewsEventEntity;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -19,7 +17,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 public class NewsEventControllerTest extends BaseTest {
@@ -30,17 +29,12 @@ public class NewsEventControllerTest extends BaseTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Test
     void testSaveWithInvalidRequest() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("", "");
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -50,12 +44,10 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMissingTitle() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest(null, "Message");
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -65,12 +57,10 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMissingMessage() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("Title", null);
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -80,13 +70,11 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithTitleTooLong() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         String longTitle = "a".repeat(101);
         CreateNewsEventRequest request = new CreateNewsEventRequest(longTitle, "Message");
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -96,13 +84,11 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMaxTitleLength() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         String maxTitle = "a".repeat(100);
         CreateNewsEventRequest request = new CreateNewsEventRequest(maxTitle, "Message");
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -112,12 +98,10 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveWithMinTitleLength() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("a", "Message");
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -127,12 +111,10 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveSuccessful() throws Exception {
-        AuthUtils.AuthenticatedClient authenticatedClient = AuthUtils.loginTestUser(mockMvc, userRepository, passwordEncoder);
         CreateNewsEventRequest request = new CreateNewsEventRequest("Новая новость", "Текст новости");
 
         mockMvc.perform(post("/api/news")
-                        .cookie(authenticatedClient.sessionCookie(), authenticatedClient.csrfCookie())
-                        .header(AuthUtils.CSRF_HEADER_NAME, authenticatedClient.csrfCookie().getValue())
+                        .with(AuthUtils.jwtUser())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -191,19 +173,14 @@ public class NewsEventControllerTest extends BaseTest {
 
     @Test
     void testSaveRequiresAuthentication() throws Exception {
-        Cookie csrfCookie = AuthUtils.fetchCsrfCookie(mockMvc);
-
         mockMvc.perform(post("/api/news")
-                        .cookie(csrfCookie)
-                        .header(AuthUtils.CSRF_HEADER_NAME, csrfCookie.getValue())
                         .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                        .content("""
                                 {
                                   "title": "Title",
                                   "message": "Message"
                                 }
                                 """))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(status().isUnauthorized());
     }
 }

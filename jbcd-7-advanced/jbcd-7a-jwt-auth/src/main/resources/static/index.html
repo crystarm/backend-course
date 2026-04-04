@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css"/>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="/css/styles.css" rel="stylesheet"/>
-    <script src="/js/auth.js" defer></script>
+    <script src="/js/auth.js" type="module"></script>
     <script src="/js/news.js" defer></script>
 </head>
 <body class="min-h-screen bg-base-200">
@@ -16,17 +16,17 @@
     <header class="hero rounded-box bg-base-100 shadow-sm">
         <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <p class="text-sm uppercase tracking-[0.3em] text-primary">Session Auth Demo</p>
-                <h1 class="text-4xl font-black">Новости с сессионной аутентификацией</h1>
+                <p class="text-sm uppercase tracking-[0.3em] text-primary">JWT Auth Demo</p>
+                <h1 class="text-4xl font-black">Новости с JWT и Dex OIDC</h1>
                 <p class="max-w-2xl text-base-content/70">
-                    Статика живет отдельно, все действия идут только через вызовы API.
+                    Frontend получает токены у Dex и ходит в backend только с bearer token.
                 </p>
             </div>
             <div class="flex flex-col items-start gap-3 sm:items-end">
-                <div id="auth-state" class="badge badge-neutral badge-lg">Проверяем сессию...</div>
+                <div id="auth-state" class="badge badge-neutral badge-lg">Проверяем токен...</div>
                 <div class="flex gap-3">
-                    <a class="btn btn-outline btn-primary" href="/login">Логин и регистрация</a>
-                    <button id="logout-button" class="btn btn-neutral hidden" type="button">Выйти</button>
+                    <a class="btn btn-outline btn-primary" href="/login">Войти через Dex</a>
+                    <button id="logout-button" class="btn btn-neutral hidden" type="button">Забыть токен</button>
                 </div>
             </div>
         </div>
@@ -66,8 +66,8 @@
                     <h2 class="card-title">Как это работает</h2>
                     <ul class="list-disc space-y-2 pl-5 text-sm text-base-content/80">
                         <li>Публичны только GET-запросы к новостям.</li>
-                        <li>POST-запросы требуют сессию и CSRF-токен из cookie.</li>
-                        <li>Сессии хранятся в Redis и подходят для нескольких инстансов.</li>
+                        <li>POST-запросы требуют JWT в заголовке Authorization.</li>
+                        <li>Frontend логинится через Dex по Authorization Code + PKCE.</li>
                     </ul>
                 </div>
             </div>
@@ -77,6 +77,8 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
+        const AuthApi = window.AuthApi;
+        const NewsApi = window.NewsApi;
         const authStateBadge = document.getElementById("auth-state");
         const logoutButton = document.getElementById("logout-button");
         const newsFormCard = document.getElementById("news-form-card");
@@ -85,13 +87,14 @@
 
         async function refreshAuthState() {
             const {status, body} = await AuthApi.getCurrentUser();
+            const claims = body?.data?.claims ?? {};
             const authenticated = status === 200 && body?.data?.authenticated;
 
             authStateBadge.className = authenticated
                 ? "badge badge-success badge-lg"
                 : "badge badge-warning badge-lg";
             authStateBadge.textContent = authenticated
-                ? `Вы вошли как ${body.data.email}`
+                ? `Вы вошли как ${AuthApi.extractDisplayName(claims)}`
                 : "Гостевой режим";
 
             newsFormCard.classList.toggle("hidden", !authenticated);
@@ -104,13 +107,8 @@
         }
 
         logoutButton.addEventListener("click", async () => {
-            const {response} = await AuthApi.logout();
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-
-            AuthApi.showAlert("news-form-alert", "alert-error", "Не удалось завершить сессию");
+            await AuthApi.logout();
+            AuthApi.showAlert("news-form-alert", "alert-success", "Токен удален");
             await refreshAuthState();
         });
 
@@ -125,7 +123,7 @@
             AuthApi.showAlert(
                 "news-form-alert",
                 response.ok ? "alert-success" : "alert-error",
-                body?.message ?? (response.ok ? "Новость сохранена" : "Не удалось сохранить новость")
+                body?.message ?? (response.ok ? "Новость сохранена" : "Нужен валидный токен")
             );
 
             if (response.ok) {
@@ -134,7 +132,6 @@
             }
         });
 
-        await AuthApi.ensureCsrfCookie();
         await refreshAuthState();
         await refreshNews();
     });
