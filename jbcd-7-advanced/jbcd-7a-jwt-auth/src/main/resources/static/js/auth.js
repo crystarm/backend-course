@@ -19,6 +19,7 @@ const AuthApi = (() => {
                     redirect_uri: config.redirectUri,
                     response_type: "code",
                     scope: config.scope,
+                    accessTokenExpiringNotificationTimeInSeconds: config.accessTokenExpiringNotificationSeconds,
                     userStore: new WebStorageStateStore({store: window.sessionStorage}),
                     automaticSilentRenew: false
                 });
@@ -55,6 +56,7 @@ const AuthApi = (() => {
         }
 
         const expiresIn = typeof user.expires_in === "number" ? user.expires_in : null;
+        // Обновляем вручную только когда токен уже истек или вот-вот истечет по нашему порогу.
         const shouldRefresh = user.expired
             || (expiresIn !== null && expiresIn <= config.accessTokenExpiringNotificationSeconds);
 

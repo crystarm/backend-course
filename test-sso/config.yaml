@@ -7,12 +7,17 @@ storage:
 
 web:
   http: 0.0.0.0:5556
+  allowedOrigins:
+    - http://localhost:8080
+  allowedHeaders:
+    - Content-Type
+    - Authorization
 
 oauth2:
   skipApprovalScreen: true
 
 expiry:
-  idTokens: 1m
+  idTokens: 2m
   authRequests: 5m
   signingKeys: 6h
   refreshTokens:
