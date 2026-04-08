@@ -33,6 +33,11 @@ staticClients:
     name: JBCD JWT Frontend
     redirectURIs:
       - http://localhost:8080/login.html
+  - id: jbcd-sso-session-client
+    secret: jbcd-sso-session-secret
+    name: JBCD SSO Session Client
+    redirectURIs:
+      - http://localhost:8080/login/oauth2/code/dex
 
 # Тестовый пользователь: student@example.com / password
 staticPasswords:

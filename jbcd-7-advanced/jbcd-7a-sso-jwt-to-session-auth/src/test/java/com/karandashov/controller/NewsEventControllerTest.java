@@ -15,9 +15,11 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -34,7 +36,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest("", "");
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -47,7 +50,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest(null, "Message");
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -60,7 +64,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest("Title", null);
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -74,7 +79,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest(longTitle, "Message");
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -88,7 +94,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest(maxTitle, "Message");
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -101,7 +108,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest("a", "Message");
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -114,7 +122,8 @@ public class NewsEventControllerTest extends BaseTest {
         CreateNewsEventRequest request = new CreateNewsEventRequest("Новая новость", "Текст новости");
 
         mockMvc.perform(post("/api/news")
-                        .with(AuthUtils.jwtUser())
+                        .with(AuthUtils.oidcUser())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -174,6 +183,7 @@ public class NewsEventControllerTest extends BaseTest {
     @Test
     void testSaveRequiresAuthentication() throws Exception {
         mockMvc.perform(post("/api/news")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -181,6 +191,7 @@ public class NewsEventControllerTest extends BaseTest {
                                   "message": "Message"
                                 }
                                 """))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

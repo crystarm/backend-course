@@ -12,7 +12,7 @@ public class PagesController implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
-        // Отдаем отдельную статическую страницу, которая запускает OIDC flow в браузере.
-        registry.addViewController("/login").setViewName("forward:/login.html") // fixme не знаю нужно ли это ;
+        // Отдаем отдельную статическую страницу, которая запускает oauth2Login flow.
+        registry.addViewController("/login").setViewName("forward:/login.html");
     }
 }
