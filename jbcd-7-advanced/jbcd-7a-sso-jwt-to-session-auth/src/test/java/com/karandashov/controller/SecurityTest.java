@@ -42,7 +42,8 @@ public class SecurityTest extends BaseTest {
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.authenticated").value(true))
                 .andExpect(jsonPath("$.data.userInfo.email").value("student@example.com"))
-                .andExpect(jsonPath("$.data.userInfo.preferred_username").value("student"));
+                .andExpect(jsonPath("$.data.userInfo.preferred_username").value("student"))
+                .andExpect(jsonPath("$.data.userInfo.groups[0]").value("students"));
     }
 
     @Test

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -33,9 +35,20 @@ public class SecurityController {
                 && authentication.isAuthenticated()
                 && authentication.getPrincipal() instanceof OAuth2AuthenticatedPrincipal;
 
+        Map<String, Object> userInfo = Collections.emptyMap();
+        if (authenticated) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof OidcUser oidcUser) {
+                // Для OIDC Spring сам объединяет claims из id_token и userinfo endpoint.
+                userInfo = oidcUser.getClaims();
+            } else {
+                userInfo = ((OAuth2AuthenticatedPrincipal) principal).getAttributes();
+            }
+        }
+
         AuthStateResponse response = authenticated
-                ? new AuthStateResponse(true, ((OAuth2AuthenticatedPrincipal) authentication.getPrincipal()).getAttributes())
-                : new AuthStateResponse(false, Collections.emptyMap());
+                ? new AuthStateResponse(true, userInfo)
+                : new AuthStateResponse(false, userInfo);
         HttpStatus status = authenticated ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
         return ResponseEntity.status(status).body(new UniversalResponse<>(response));
     }
