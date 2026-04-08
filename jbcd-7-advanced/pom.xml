@@ -16,7 +16,7 @@
 
     <modules>
         <module>jbcd-7a-session-auth</module>
-        <module>jbcd-7a-jwt-auth</module>
+        <module>jbcd-7a-sso-jwt-auth</module>
         <module>jbcd-7b-observability</module>
     </modules>
 

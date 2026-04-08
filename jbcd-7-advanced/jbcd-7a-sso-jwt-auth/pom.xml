@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-7a-jwt-auth</artifactId>
+    <artifactId>jbcd-7a-sso-jwt-auth</artifactId>
 
     <dependencies>
 
