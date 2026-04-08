@@ -2,9 +2,7 @@ version: '3.8'
 
 volumes:
   postgres_data:
-    # some configs
-  redis_data:
-    # some configs
+  # some configs
 
 services:
   postgres:
@@ -28,12 +26,3 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-
-  redis:
-    image: redis:8.6.0
-    restart: no
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis_data:/data
