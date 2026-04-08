@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: jbcd-7a-sso-jwt-to-session-auth
+  web:
+    error:
+      include-stacktrace: never
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: ${APP_DATABASE_SCHEMA}
+    show_sql: true
+    open-in-view: false
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
+  security:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+logging:
+  level:
+    root: INFO
+    com.karandashov: DEBUG
