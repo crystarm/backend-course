@@ -25,6 +25,7 @@ public class SecurityConfiguration {
                 .cors(spec -> spec.configurationSource(corsConfigurationSource))
                 // Для cookie-сессии нужна CSRF-защита с токеном в cookie.
                 .csrf(csrf -> csrf
+                        // CSRF cookie должен читаться из JS, поэтому оставляем для него HttpOnly=false
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 )
