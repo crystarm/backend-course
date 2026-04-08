@@ -42,7 +42,7 @@
         <redisson.version>4.3.0</redisson.version>
         <temporal.version>1.29.0</temporal.version>
 
-        <spring.dependencies.version>4.0.3</spring.dependencies.version>
+        <spring.dependencies.version>4.0.5</spring.dependencies.version>
         <spring.openapi.version>3.0.1</spring.openapi.version>
     </properties>
 
