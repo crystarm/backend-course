@@ -26,7 +26,7 @@
         <openapi.maven.plugin.version>7.20.0</openapi.maven.plugin.version>
 
         <junit.version>6.0.2</junit.version>
-        <jackson.version>3.0.4</jackson.version>
+        <jackson.version>3.1.1</jackson.version>
         <lombok.version>1.18.42</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
@@ -237,6 +237,12 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Плагин с дополнительными параметрами сборки (например настройка Lombok) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                </plugin>
                 <!-- Плагин для запуска тестов -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -248,6 +254,18 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${maven.shade.plugin.version}</version>
+                </plugin>
+                <!-- Дополнительные параметры сложной сборки -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${maven.build.helper.plugin.version}</version>
+                </plugin>
+                <!-- Плагин для кодогенерации по open api -->
+                <plugin>
+                    <groupId>org.openapitools</groupId>
+                    <artifactId>openapi-generator-maven-plugin</artifactId>
+                    <version>${openapi.maven.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
