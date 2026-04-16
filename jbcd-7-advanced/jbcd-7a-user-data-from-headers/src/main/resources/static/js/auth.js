@@ -1,37 +1,9 @@
 const AuthApi = (() => {
-    const CSRF_COOKIE_NAME = "XSRF-TOKEN";
-    const CSRF_HEADER_NAME = "X-XSRF-TOKEN";
-
-    function readCookie(name) {
-        const encodedName = `${name}=`;
-        return document.cookie
-            .split(";")
-            .map((item) => item.trim())
-            .find((item) => item.startsWith(encodedName))
-            ?.substring(encodedName.length) ?? null;
-    }
-
-    async function ensureCsrfCookie() {
-        if (readCookie(CSRF_COOKIE_NAME)) {
-            return;
-        }
-
-        await fetch("/api/auth/me", {
-            method: "GET",
-            credentials: "include"
-        });
-    }
-
     async function request(url, options = {}) {
         const method = options.method ?? "GET";
         const headers = new Headers(options.headers ?? {});
-
-        if (!["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase())) {
-            await ensureCsrfCookie();
-            const csrfToken = readCookie(CSRF_COOKIE_NAME);
-            if (csrfToken) {
-                headers.set(CSRF_HEADER_NAME, decodeURIComponent(csrfToken));
-            }
+        if (!headers.has("Accept")) {
+            headers.set("Accept", "application/json");
         }
 
         const response = await fetch(url, {
@@ -47,25 +19,23 @@ const AuthApi = (() => {
     }
 
     async function getCurrentUser() {
-        const {response, body} = await request("/api/auth/me");
+        const {response, body} = await request("/api/me");
         return {
             status: response.status,
             body
         };
     }
 
-    async function login() {
-        window.location.assign("/oauth2/authorization/dex");
+    function login(returnTo = "/") {
+        window.location.assign(`/oauth2/start?rd=${encodeURIComponent(returnTo)}`);
     }
 
-    async function logout() {
-        return request("/api/auth/logout", {
-            method: "POST"
-        });
+    function logout(returnTo = "/login?logout") {
+        window.location.assign(`/oauth2/sign_out?rd=${encodeURIComponent(returnTo)}`);
     }
 
     function extractDisplayName(userInfo = {}) {
-        return userInfo.email ?? userInfo.name ?? userInfo.preferred_username ?? userInfo.sub ?? "unknown";
+        return userInfo.email ?? userInfo.preferred_username ?? userInfo.user ?? "unknown";
     }
 
     function showAlert(targetId, type, message) {
@@ -82,7 +52,6 @@ const AuthApi = (() => {
     }
 
     return {
-        ensureCsrfCookie,
         getCurrentUser,
         login,
         logout,

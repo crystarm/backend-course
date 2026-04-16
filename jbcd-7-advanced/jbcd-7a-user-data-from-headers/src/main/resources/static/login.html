@@ -14,8 +14,8 @@
 <div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 px-4 py-8">
     <div class="flex items-center justify-between">
         <div>
-            <p class="text-sm uppercase tracking-[0.3em] text-primary">SSO Session Demo</p>
-            <h1 class="text-4xl font-black">Вход через Dex и локальную сессию</h1>
+            <p class="text-sm uppercase tracking-[0.3em] text-primary">OAuth2 Proxy Demo</p>
+            <h1 class="text-4xl font-black">Вход через Dex и oauth2-proxy</h1>
         </div>
         <a class="btn btn-outline" href="/">К новостям</a>
     </div>
@@ -25,9 +25,9 @@
     <section class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <article class="card bg-base-100 shadow-sm">
             <div class="card-body">
-                <h2 class="card-title">Логин через Spring Security</h2>
+                <h2 class="card-title">Логин через oauth2-proxy</h2>
                 <p class="text-sm text-base-content/70">
-                    Приложение перенаправит браузер в Dex, обменяет `authorization code` на токены на backend и создаст локальную HTTP-сессию.
+                    Браузер будет перенаправлен в Dex, а сессию на frontend-стороне создаст oauth2-proxy. Сам сервис только читает user info из заголовков.
                 </p>
                 <button id="login-button" class="btn btn-primary w-full sm:w-auto" type="button">Войти через Dex</button>
             </div>
@@ -59,7 +59,7 @@
         }
 
         loginButton.addEventListener("click", () => {
-            AuthApi.login();
+            AuthApi.login("/");
         });
     });
 </script>

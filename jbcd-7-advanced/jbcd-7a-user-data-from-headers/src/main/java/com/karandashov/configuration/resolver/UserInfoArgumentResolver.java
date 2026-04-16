@@ -3,15 +3,15 @@ package com.karandashov.configuration.resolver;
 import com.karandashov.dto.UserInfoHeaders;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.yaml.snakeyaml.util.UriEncoder;
-import tools.jackson.databind.ObjectMapper;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * resolver, упрощающий внедрение UserInfo в rest-контроллеры
@@ -19,7 +19,10 @@ import tools.jackson.databind.ObjectMapper;
 @Slf4j
 public class UserInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String USER_HEADER = "X-Forwarded-User";
+    private static final String EMAIL_HEADER = "X-Forwarded-Email";
+    private static final String PREFERRED_USERNAME_HEADER = "X-Forwarded-Preferred-Username";
+    private static final String GROUPS_HEADER = "X-Forwarded-Groups";
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -38,16 +41,44 @@ public class UserInfoArgumentResolver implements HandlerMethodArgumentResolver {
             return null;
         }
 
-        var userInfoEncodedJson = request.getHeader("user");
-        var userInfo = parseUserInfo(userInfoEncodedJson);
-        log.info("Получен пользователь: {}", userInfo);
-        return userInfo;
+        String user = readHeader(request, USER_HEADER);
+        String email = readHeader(request, EMAIL_HEADER);
+        String preferredUsername = readHeader(request, PREFERRED_USERNAME_HEADER);
+        List<String> groups = readGroups(request);
+
+        boolean authenticated = user != null || email != null || preferredUsername != null || !groups.isEmpty();
+
+        if (!authenticated) {
+            return UserInfoHeaders.anonymous();
+        }
+
+        return new UserInfoHeaders(
+                true,
+                user,
+                email,
+                preferredUsername,
+                groups
+        );
     }
 
-    @SneakyThrows
-    public static UserInfoHeaders parseUserInfo(String header) {
-        log.info("Получен header user = {}", header);
-        var userInfoJson = UriEncoder.decode(header);
-        return OBJECT_MAPPER.readValue(userInfoJson, UserInfoHeaders.class);
+    private String readHeader(HttpServletRequest request, String headerName) {
+        String value = request.getHeader(headerName);
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value;
+    }
+
+    private List<String> readGroups(HttpServletRequest request) {
+        String rawGroups = readHeader(request, GROUPS_HEADER);
+        if (rawGroups == null) {
+            return List.of();
+        }
+
+        return Arrays.stream(rawGroups.split(","))
+                .map(String::trim)
+                .filter(group -> !group.isEmpty())
+                .toList();
     }
 }

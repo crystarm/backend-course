@@ -16,16 +16,16 @@
     <header class="hero rounded-box bg-base-100 shadow-sm">
         <div class="hero-content w-full flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <p class="text-sm uppercase tracking-[0.3em] text-primary">SSO Session Demo</p>
-                <h1 class="text-4xl font-black">Новости с Dex SSO и серверной сессией</h1>
+                <p class="text-sm uppercase tracking-[0.3em] text-primary">OAuth2 Proxy Demo</p>
+                <h1 class="text-4xl font-black">Новости с user info из proxy headers</h1>
                 <p class="max-w-2xl text-base-content/70">
-                    Backend логинится в Dex как oauth2 client, создает свою сессию и дальше frontend работает только через cookie.
+                    Аутентификация полностью вынесена в oauth2-proxy: приложение не знает ни про Dex, ни про JWT и только читает `X-Forwarded-*` заголовки.
                 </p>
             </div>
             <div class="flex flex-col items-start gap-3 sm:items-end">
                 <div id="auth-state" class="badge badge-neutral badge-lg">Проверяем сессию...</div>
                 <div class="flex gap-3">
-                    <a class="btn btn-outline btn-primary" href="/login">Войти через Dex</a>
+                    <a class="btn btn-outline btn-primary" href="/login">Войти через oauth2-proxy</a>
                     <button id="logout-button" class="btn btn-neutral hidden" type="button">Выйти</button>
                 </div>
             </div>
@@ -45,7 +45,7 @@
             <div id="news-form-card" class="card bg-base-100 shadow-sm hidden">
                 <div class="card-body">
                     <h2 class="card-title">Добавить новость</h2>
-                    <p class="text-sm text-base-content/70">Форма доступна только после входа через Dex.</p>
+                    <p class="text-sm text-base-content/70">Форма доступна только после входа через oauth2-proxy.</p>
                     <div id="news-form-alert"></div>
                     <form id="news-form" class="space-y-4">
                         <label class="form-control w-full">
@@ -66,8 +66,8 @@
                     <h2 class="card-title">Как это работает</h2>
                     <ul class="list-disc space-y-2 pl-5 text-sm text-base-content/80">
                         <li>Публичны только GET-запросы к новостям.</li>
-                        <li>POST-запросы требуют локальную HTTP-сессию приложения.</li>
-                        <li>Frontend не хранит JWT и ходит только с cookie и CSRF token.</li>
+                        <li>POST-запросы проходят только через сессию oauth2-proxy.</li>
+                        <li>Frontend не хранит JWT, а backend получает пользователя из `X-Forwarded-*` заголовков.</li>
                     </ul>
                 </div>
             </div>
@@ -107,9 +107,7 @@
         }
 
         logoutButton.addEventListener("click", async () => {
-            await AuthApi.logout();
-            AuthApi.showAlert("news-form-alert", "alert-success", "Сессия завершена");
-            await refreshAuthState();
+            AuthApi.logout();
         });
 
         reloadNewsButton.addEventListener("click", refreshNews);
@@ -123,7 +121,7 @@
             AuthApi.showAlert(
                 "news-form-alert",
                 response.ok ? "alert-success" : "alert-error",
-                body?.message ?? (response.ok ? "Новость сохранена" : "Нужна активная сессия")
+                body?.message ?? (response.ok ? "Новость сохранена" : "Нужна активная сессия в oauth2-proxy")
             );
 
             if (response.ok) {
@@ -132,7 +130,6 @@
             }
         });
 
-        await AuthApi.ensureCsrfCookie();
         await refreshAuthState();
         await refreshNews();
     });

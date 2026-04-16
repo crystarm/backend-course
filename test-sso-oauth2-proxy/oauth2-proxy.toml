@@ -1,0 +1,64 @@
+provider = "oidc"
+http_address = "0.0.0.0:4180"
+
+client_id = "jbcd-oauth2-proxy"
+client_secret = "jbcd-oauth2-proxy-secret"
+redirect_url = "http://localhost:4180/oauth2/callback"
+oidc_issuer_url = "http://localhost:5556/dex"
+
+# Из контейнера discovery по localhost недоступен, поэтому endpoint'ы задаем явно.
+skip_oidc_discovery = true
+# Это browser redirect URL, поэтому здесь должен быть localhost, а не host.docker.internal.
+login_url = "http://localhost:5556/dex/auth"
+redeem_url = "http://host.docker.internal:5556/dex/token"
+oidc_jwks_url = "http://host.docker.internal:5556/dex/keys"
+profile_url = "http://host.docker.internal:5556/dex/userinfo"
+
+scope = "openid profile email"
+email_domains = ["*"]
+skip_provider_button = true
+
+upstreams = [
+  "http://host.docker.internal:8080/"
+]
+
+# Для API не делаем redirect на login, чтобы frontend получал 401.
+api_routes = [
+  "^/api/"
+]
+
+# GET-маршруты остаются публичными, но при наличии валидной сессии хедеры все равно будут добавлены.
+skip_auth_routes = [
+  "GET=^/$",
+  "GET=^/index\\.html$",
+  "GET=^/login$",
+  "GET=^/login\\.html$",
+  "GET=^/css/.*$",
+  "GET=^/js/.*$",
+  "GET=^/api/news$",
+  "GET=^/api/news/[^/]+$",
+  "GET=^/api/me$"
+]
+
+session_store_type = "redis"
+redis_connection_url = "redis://host.docker.internal:6379"
+
+pass_user_headers = true
+pass_basic_auth = false
+pass_access_token = false
+pass_authorization_header = false
+set_authorization_header = false
+set_xauthrequest = false
+
+cookie_name = "_oauth2_proxy_jbcd"
+cookie_secret = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+cookie_secure = false
+cookie_httponly = true
+cookie_samesite = "lax"
+cookie_csrf_expire = "15m"
+cookie_csrf_per_request = true
+cookie_csrf_samesite = "lax"
+
+whitelist_domains = [
+  "localhost:4180"
+]

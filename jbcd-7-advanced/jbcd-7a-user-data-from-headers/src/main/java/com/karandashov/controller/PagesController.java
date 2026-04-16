@@ -12,7 +12,7 @@ public class PagesController implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(@NonNull ViewControllerRegistry registry) {
-        // Отдаем отдельную статическую страницу, которая запускает oauth2Login flow.
+        // Страница логина остается статической, а сам вход полностью обслуживает oauth2-proxy.
         registry.addViewController("/login").setViewName("forward:/login.html");
     }
 }

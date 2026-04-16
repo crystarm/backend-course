@@ -4,6 +4,7 @@ import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
 import com.karandashov.dto.UniversalResponse;
+import com.karandashov.dto.UserInfoHeaders;
 import com.karandashov.service.NewsEventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,11 @@ public class NewsEventController {
     }
 
     @PostMapping
-    public UniversalResponse<NewsEvent> save(@Valid @RequestBody CreateNewsEventRequest request) {
-        log.info("Request to save news: {}", request);
+    public UniversalResponse<NewsEvent> save(UserInfoHeaders userInfoHeaders,
+                                             @Valid @RequestBody CreateNewsEventRequest request) {
+        log.info("Request to save news from user={} with payload={}",
+                userInfoHeaders.email() != null ? userInfoHeaders.email() : userInfoHeaders.user(),
+                request);
         return service.save(request);
     }
 }

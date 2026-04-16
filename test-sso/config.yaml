@@ -38,6 +38,11 @@ staticClients:
     name: JBCD SSO Session Client
     redirectURIs:
       - http://localhost:8080/login/oauth2/code/dex
+  - id: jbcd-oauth2-proxy
+    secret: jbcd-oauth2-proxy-secret
+    name: JBCD OAuth2 Proxy
+    redirectURIs:
+      - http://localhost:4180/oauth2/callback
 
 # Тестовый пользователь: student@example.com / password
 staticPasswords:

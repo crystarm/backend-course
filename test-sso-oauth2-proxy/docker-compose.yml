@@ -1,37 +1,14 @@
-volumes:
-  sso_data:
-  redis-data:
+# Не забываем запустить сам sso и redis, чтобы эта штука работала
 
 services:
-
-  redis:
-    image: redis:8.6.0
-    container_name: redis
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.2
     restart: no
-    command:
-      - redis-server
-      - --save 60 1                   # RDB: снимок каждые 60 сек, если изменился хотя бы 1 ключ
-      - --appendonly yes              # Включаем AOF (Append-Only File)
-      - --appendfsync everysec        # AOF: fsync каждую секунду (хороший баланс надёжности и производительности)
-      - --maxmemory 512mb             # Ограничение памяти
-      - --maxmemory-policy volatile-ttl   # При нехватке памяти удаляем ключи с TTL, у которых TTL ближе к истечению
-      - --maxmemory-samples 5         # Количество проверяемых ключей при eviction (по умолчанию 5)
-      - --port 6379
-      - --bind 0.0.0.0                # Слушаем на всех интерфейсах внутри контейнера
     ports:
-      - "6379:6379"                   # Пробрасываем порт мастера наружу (удобно для подключения)
+      - "4180:4180"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - redis-data:/data
-    deploy:
-      resources:
-        limits:
-          cpus: '2'                   # Ограничиваем cpu с запасом на дополнительные нужды
-          memory: 640M                # Жёсткий лимит памяти контейнера (больше maxmemory для служебных нужд)
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-
-  # todo oauth2-proxy quay.io/oauth2-proxy/oauth2-proxy:v7.15.2
+      - ./oauth2-proxy.toml:/etc/oauth2-proxy/oauth2-proxy.toml:ro
+    command:
+      - --config=/etc/oauth2-proxy/oauth2-proxy.toml
