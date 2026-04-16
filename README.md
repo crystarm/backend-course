@@ -135,8 +135,8 @@ java-backend-course-demo = jbcd
 - **jbcd-7a-session-auth**: Полноценный демонстрационный пример приложения с сессионной безопасностью.
 - **jbcd-7a-sso-jwt-auth + test-sso**: Пример аутентификации через JWT и выделенный sso.
 - **jbcd-7a-sso-jwt-to-session-auth + test-sso**: Пример аутентификации через выделенный sso с обменом jwt на сессию.
+- **jbcd-7a-user-data-from-headers + test-sso + test-sso-oauth2-proxy**: Пример получения данных пользователя из заголовков и аутентификации через oauth2-proxy.
 - **jbcd-7b-observability + test-observability**: metrics, logs and tracing в openobserve с помощью vector.
-- performance patterns и load testing (в разработке)
 
 ### Демонстрационный проект
 
