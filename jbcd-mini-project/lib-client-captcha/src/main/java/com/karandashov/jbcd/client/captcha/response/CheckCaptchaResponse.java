@@ -2,7 +2,7 @@ package com.karandashov.jbcd.client.captcha.response;
 
 public class CheckCaptchaResponse {
 
-    private Boolean valid;
+    private boolean valid;
 
     public CheckCaptchaResponse() {
     }

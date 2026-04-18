@@ -1,12 +1,12 @@
 package com.karandashov.jbcd.api.news.service;
 
-import com.karandashov.jbcd.api.news.dto.request.CreateNewsEventRequest;
 import com.karandashov.jbcd.api.news.dto.NewsEvent;
 import com.karandashov.jbcd.api.news.dto.NewsEventList;
+import com.karandashov.jbcd.api.news.dto.request.CreateNewsEventRequest;
 import com.karandashov.jbcd.api.news.entity.NewsEventEntity;
 import com.karandashov.jbcd.api.news.exceptions.BusinessError;
-import com.karandashov.jbcd.utils.web.exception.BaseException;
 import com.karandashov.jbcd.api.news.repository.NewsEventRepository;
+import com.karandashov.jbcd.utils.web.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,6 +23,8 @@ import java.util.stream.StreamSupport;
 public class NewsEventService {
 
     private final NewsEventRepository repository;
+
+    private final CaptchaService captchaService;
 
     @Cacheable(value = "news", key = "#id")
     public NewsEvent getById(UUID id) {
@@ -45,6 +47,8 @@ public class NewsEventService {
 
     @CacheEvict(value = {"news_list"}, allEntries = true)
     public NewsEvent save(CreateNewsEventRequest request) {
+        captchaService.checkSolvedCaptcha(request.getSolvedCaptchaId());
+
         NewsEventEntity entity = new NewsEventEntity(null, request.getTitle(), request.getMessage());
         entity = repository.save(entity);
         var response = map(entity);

@@ -1,5 +1,8 @@
 package com.karandashov.jbcd.api.news.service;
 
+import com.karandashov.jbcd.client.captcha.client.CaptchaClient;
+import com.karandashov.jbcd.client.captcha.client.CaptchaClientException;
+import com.karandashov.jbcd.client.captcha.response.CheckCaptchaResponse;
 import com.karandashov.jbcd.api.news.dto.NewsEvent;
 import com.karandashov.jbcd.api.news.dto.NewsEventList;
 import com.karandashov.jbcd.api.news.dto.request.CreateNewsEventRequest;
@@ -9,8 +12,9 @@ import com.karandashov.jbcd.utils.web.exception.BaseException;
 import com.karandashov.jbcd.api.news.repository.NewsEventRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.RestClientException;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,6 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,11 +35,12 @@ class NewsEventServiceTest {
     @Mock
     private NewsEventRepository repository;
 
-    @InjectMocks
-    private NewsEventService service;
+    @Mock
+    private CaptchaClient captchaClient;
 
     @Test
     void getByIdReturnsMappedNewsEvent() {
+        NewsEventService service = createService();
         UUID id = UUID.randomUUID();
         NewsEventEntity entity = new NewsEventEntity(id, "Title", "Message");
         when(repository.findById(id)).thenReturn(Optional.of(entity));
@@ -47,6 +53,7 @@ class NewsEventServiceTest {
 
     @Test
     void getByIdThrowsBusinessExceptionWhenNewsWasNotFound() {
+        NewsEventService service = createService();
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.empty());
 
@@ -62,6 +69,7 @@ class NewsEventServiceTest {
 
     @Test
     void getAllReturnsMappedNewsList() {
+        NewsEventService service = createService();
         UUID firstId = UUID.randomUUID();
         UUID secondId = UUID.randomUUID();
         List<NewsEventEntity> entities = List.of(
@@ -81,8 +89,11 @@ class NewsEventServiceTest {
 
     @Test
     void savePersistsRequestAndReturnsSavedNews() {
-        CreateNewsEventRequest request = new CreateNewsEventRequest("Breaking", "Something happened");
+        NewsEventService service = createService();
+        UUID captchaId = UUID.randomUUID();
+        CreateNewsEventRequest request = new CreateNewsEventRequest("Breaking", "Something happened", captchaId);
         UUID savedId = UUID.randomUUID();
+        when(captchaClient.checkAndExpire(captchaId)).thenReturn(new CheckCaptchaResponse(true));
         when(repository.save(any(NewsEventEntity.class)))
                 .thenAnswer(invocation -> {
                     NewsEventEntity entity = invocation.getArgument(0);
@@ -99,5 +110,55 @@ class NewsEventServiceTest {
         assertThat(savedEntity.getTitle()).isEqualTo("Breaking");
         assertThat(savedEntity.getMessage()).isEqualTo("Something happened");
         assertThat(result).isEqualTo(new NewsEvent(savedId, "Breaking", "Something happened"));
+        verify(captchaClient).checkAndExpire(captchaId);
+    }
+
+    @Test
+    void saveThrowsBusinessExceptionWhenCaptchaWasNotFoundOrExpired() {
+        NewsEventService service = createService();
+        UUID captchaId = UUID.randomUUID();
+        when(captchaClient.checkAndExpire(captchaId))
+                .thenThrow(new CaptchaClientException(HttpStatus.NOT_FOUND, 2000, "Captcha not found or expired"));
+
+        assertThatThrownBy(() -> service.save(new CreateNewsEventRequest("Breaking", "Something happened", captchaId)))
+                .isInstanceOf(BaseException.class)
+                .satisfies(exception -> assertThat(((BaseException) exception).getError())
+                        .isEqualTo(BusinessError.CAPTCHA_NOT_FOUND_OR_EXPIRED));
+
+        verify(repository, never()).save(any(NewsEventEntity.class));
+    }
+
+    @Test
+    void saveThrowsBusinessExceptionWhenCaptchaWasNotSolved() {
+        NewsEventService service = createService();
+        UUID captchaId = UUID.randomUUID();
+        when(captchaClient.checkAndExpire(captchaId))
+                .thenThrow(new CaptchaClientException(HttpStatus.BAD_REQUEST, 2001, "Captcha is not solved"));
+
+        assertThatThrownBy(() -> service.save(new CreateNewsEventRequest("Breaking", "Something happened", captchaId)))
+                .isInstanceOf(BaseException.class)
+                .satisfies(exception -> assertThat(((BaseException) exception).getError())
+                        .isEqualTo(BusinessError.CAPTCHA_NOT_SOLVED));
+
+        verify(repository, never()).save(any(NewsEventEntity.class));
+    }
+
+    @Test
+    void saveThrowsBusinessExceptionWhenCaptchaServiceWasUnavailable() {
+        NewsEventService service = createService();
+        UUID captchaId = UUID.randomUUID();
+        when(captchaClient.checkAndExpire(captchaId))
+                .thenThrow(new RestClientException("Connection refused"));
+
+        assertThatThrownBy(() -> service.save(new CreateNewsEventRequest("Breaking", "Something happened", captchaId)))
+                .isInstanceOf(BaseException.class)
+                .satisfies(exception -> assertThat(((BaseException) exception).getError())
+                        .isEqualTo(BusinessError.CAPTCHA_CHECK_FAILED));
+
+        verify(repository, never()).save(any(NewsEventEntity.class));
+    }
+
+    private NewsEventService createService() {
+        return new NewsEventService(repository, new CaptchaService(captchaClient));
     }
 }

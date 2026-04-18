@@ -1,5 +1,6 @@
-package com.karandashov;
+package com.karandashov.jbcd.api.news;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.karandashov.jbcd.api.news.repository.NewsEventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -17,10 +18,18 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Objects;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+
 @Slf4j
 @SpringBootTest
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseTest {
+
+    private static final WireMockServer CAPTCHA_API = new WireMockServer(wireMockConfig().dynamicPort());
+
+    static {
+        CAPTCHA_API.start();
+    }
 
     @Container
     private static final PostgreSQLContainer POSTGRES =
@@ -51,13 +60,21 @@ public abstract class BaseTest {
         registry.add("REDIS_HOST", REDIS::getHost);
         registry.add("REDIS_PORT", () -> REDIS.getMappedPort(6379));
 
+        registry.add("CAPTCHA_BASE_URL", CAPTCHA_API::baseUrl);
+
         log.info("Database started: {}", POSTGRES.getJdbcUrl());
         log.info("Redis started: {}:{}", REDIS.getHost(), REDIS.getMappedPort(6379));
+        log.info("Captcha api mock started: {}", CAPTCHA_API.baseUrl());
     }
 
     @AfterEach
     void tearDown() {
         newsEventRepository.deleteAll();
         cacheManager.getCacheNames().forEach(name -> Objects.requireNonNull(cacheManager.getCache(name)).clear());
+        CAPTCHA_API.resetAll();
+    }
+
+    protected WireMockServer captchaApiMock() {
+        return CAPTCHA_API;
     }
 }

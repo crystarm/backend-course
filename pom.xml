@@ -42,6 +42,7 @@
         <redisson.version>4.3.0</redisson.version>
         <temporal.version>1.29.0</temporal.version>
         <captcha.version>1.6.2</captcha.version>
+        <wiremock.version>3.13.2</wiremock.version>
 
         <spring.dependencies.version>4.0.5</spring.dependencies.version>
         <spring.openapi.version>3.0.1</spring.openapi.version>
@@ -221,6 +222,13 @@
                 <groupId>com.github.whvcse</groupId>
                 <artifactId>easy-captcha</artifactId>
                 <version>${captcha.version}</version>
+            </dependency>
+            <!-- wiremock -->
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-standalone</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!--  все версии зависимостей spring в одном пакете -->
