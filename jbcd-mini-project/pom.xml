@@ -15,7 +15,9 @@
 
     <modules>
         <module>lib-utils-web</module>
+        <module>lib-client-captcha</module>
         <module>api-news</module>
+        <module>api-captcha</module>
     </modules>
 
 </project>

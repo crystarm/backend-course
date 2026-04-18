@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: api-captcha
+  threads:
+    virtual:
+      enabled: true
+  web:
+    error:
+      include-stacktrace: never
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    root: INFO
+    com.karandashov: DEBUG

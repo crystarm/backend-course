@@ -1,9 +1,8 @@
 package com.karandashov;
 
-import com.karandashov.repository.NewsEventRepository;
+import com.karandashov.jbcd.api.captcha.repository.NewsEventRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
@@ -18,11 +17,10 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Objects;
 
+@Slf4j
 @SpringBootTest
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseTest {
-
-    private static final Logger log = LoggerFactory.getLogger(BaseTest.class);
 
     @Container
     private static final PostgreSQLContainer POSTGRES =
