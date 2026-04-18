@@ -36,7 +36,7 @@ services:
       resources:
         limits:
           cpus: 2
-          memory: 256M
+          memory: 64M
 
   api-captcha:
     image: registry.gitlab.com/vladkarandashov/java-backend-course-demo/api-captcha
@@ -60,7 +60,7 @@ services:
       resources:
         limits:
           cpus: 1
-          memory: 256M
+          memory: 512M
 
   api-news:
     image: registry.gitlab.com/vladkarandashov/java-backend-course-demo/api-news
@@ -86,7 +86,7 @@ services:
       resources:
         limits:
           cpus: 1
-          memory: 256M
+          memory: 512M
 
   view-news:
     image: registry.gitlab.com/vladkarandashov/java-backend-course-demo/view-news
@@ -103,7 +103,7 @@ services:
       resources:
         limits:
           cpus: 1
-          memory: 256M
+          memory: 64M
 
   postgres:
     image: postgres:18
@@ -128,7 +128,7 @@ services:
       resources:
         limits:
           cpus: 2
-          memory: 2G
+          memory: 1G
 
   redis:
     image: redis:8.6.0
@@ -182,8 +182,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
-          memory: 2G
+          cpus: 1
+          memory: 1G
 
   vector:
     image: timberio/vector:0.43.1-alpine
@@ -205,4 +205,4 @@ services:
       resources:
         limits:
           cpus: 1
-          memory: 256m
+          memory: 64m
