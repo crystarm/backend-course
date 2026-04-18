@@ -68,12 +68,23 @@ function goBack() {
   margin-bottom: 1rem;
 }
 
+.news-detail :deep(.p-card) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.news-detail :deep(.p-card-title) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .news-detail__body {
   margin: 0;
   color: var(--p-surface-800);
   line-height: 1.6;
   white-space: pre-wrap;
-  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .skeleton-stack {

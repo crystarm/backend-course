@@ -112,6 +112,9 @@ function goCreate() {
 .news-card {
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  /* защита от длинных токенов: не даём карточке растягиваться по содержимому */
+  min-width: 0;
+  overflow: hidden;
 }
 
 .news-card:hover {
@@ -119,11 +122,21 @@ function goCreate() {
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
 }
 
+/* PrimeVue рендерит заголовок как .p-card-title внутри карточки —
+   форсируем перенос и там, иначе длинный title без пробелов вылезет. */
+.news-card :deep(.p-card-title) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .news-card__preview {
   margin: 0;
   color: var(--p-surface-700);
   line-height: 1.5;
   white-space: pre-wrap;
+  /* ломаем длинные строки без пробелов (например, 100 подряд латинских букв). */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .skeleton-stack {

@@ -41,9 +41,13 @@ export const useCaptchaStore = defineStore('captcha', () => {
 
   const isActive = computed(() => id.value !== null && remainingSeconds.value > 0);
 
-  const imageSrc = computed(() =>
-    imageBase64.value ? `data:image/png;base64,${imageBase64.value}` : null,
-  );
+  const imageSrc = computed(() => {
+    const raw = imageBase64.value;
+    if (!raw) return null;
+    // Бэкенд (wf-captcha) отдаёт уже готовую data-URI; на всякий случай
+    // подстраховываемся, если придёт «чистый» base64 без префикса.
+    return raw.startsWith('data:') ? raw : `data:image/png;base64,${raw}`;
+  });
 
   async function generate() {
     loading.value = true;
