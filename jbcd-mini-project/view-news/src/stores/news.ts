@@ -23,6 +23,11 @@ export const useNewsStore = defineStore('news', () => {
     }
   }
 
+  async function silentRefresh() {
+    const response = await getAllNews();
+    list.value = response.events;
+  }
+
   async function fetchById(id: string) {
     loadingDetail.value = true;
     current.value = null;
@@ -43,6 +48,7 @@ export const useNewsStore = defineStore('news', () => {
     loadingList,
     loadingDetail,
     fetchAll,
+    silentRefresh,
     fetchById,
     create,
   };

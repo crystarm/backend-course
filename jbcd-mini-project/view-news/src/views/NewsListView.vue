@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
@@ -25,12 +25,26 @@ const items = computed(() =>
   })),
 );
 
+const POLL_INTERVAL_MS = 5000;
+
 onMounted(async () => {
   try {
     await newsStore.fetchAll();
   } catch (error) {
     showError(error);
   }
+});
+
+const pollTimer = setInterval(async () => {
+  try {
+    await newsStore.silentRefresh();
+  } catch {
+    // ошибки фонового обновления не показываем пользователю
+  }
+}, POLL_INTERVAL_MS);
+
+onUnmounted(() => {
+  clearInterval(pollTimer);
 });
 
 function openDetail(id: string) {
