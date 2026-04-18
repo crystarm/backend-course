@@ -1,0 +1,55 @@
+stages:
+  - publish
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+# Обращаю ваше внимание, что в целях экономии ресурсов, выполняется только сборка/тестирование/публикация для jbcd-mini-project.
+# То есть другие модули этого проекта не будут участвовать.
+
+# Главная цель — прогнать jbcd-mini-project и собрать необходимые docker-образы для деплоя на сервер.
+# Используется buildx, чтобы собирать под amd64 / arm64 (mac processors).
+# Образы публикуются в gitlab registry, их можно найти из репозитории.
+
+publish-images:
+  stage: publish
+  image: docker:27.4.1
+  services:
+    - name: docker:27.4.1-dind
+      command:
+        - --tls=false
+  rules:
+    - when: manual
+  before_script:
+    - apk add --no-cache bash curl git openjdk21-jdk
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
+    - docker run --privileged --rm tonistiigi/binfmt --install all
+    - docker buildx create --name mini-project-builder --driver docker-container --use || docker buildx use mini-project-builder
+    - docker buildx inspect --bootstrap
+  script:
+    - cd jbcd-mini-project
+    - mvn clean install
+    - cd "${CI_PROJECT_DIR}"
+    - |
+      build_and_push() {
+        CONTEXT="$1"
+        DOCKERFILE="$2"
+        IMAGE_NAME="$3"
+        IMAGE_TAG_SHA="${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CI_COMMIT_SHA}"
+        IMAGE_TAG_LATEST="${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+
+        docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          -f "${DOCKERFILE}" \
+          -t "${IMAGE_TAG_SHA}" \
+          -t "${IMAGE_TAG_LATEST}" \
+          --push \
+          "${CONTEXT}"
+      }
+
+      build_and_push "${CI_PROJECT_DIR}/jbcd-mini-project/view-news" "${CI_PROJECT_DIR}/jbcd-mini-project/view-news/Dockerfile" "view-news"
+      build_and_push "${CI_PROJECT_DIR}/jbcd-mini-project/api-news" "${CI_PROJECT_DIR}/jbcd-mini-project/api-news/Dockerfile" "api-news"
+      build_and_push "${CI_PROJECT_DIR}/jbcd-mini-project/api-captcha" "${CI_PROJECT_DIR}/jbcd-mini-project/api-captcha/Dockerfile" "api-captcha"
