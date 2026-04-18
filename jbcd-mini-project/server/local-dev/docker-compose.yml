@@ -67,11 +67,9 @@ services:
       - api-news.env
 
   view-news:
-    image: nginx:stable-alpine
+    build: ./../../view-news
     container_name: view-news
     restart: no
-    volumes:
-      - ./view-news:/usr/share/nginx/html:ro
     healthcheck:
       test: [ "CMD-SHELL", "wget -q --spider http://localhost/ || exit 1" ]
       interval: 10s
