@@ -1,0 +1,114 @@
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  app_logs:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+    include_containers:
+      - api-news
+      - api-captcha
+    exclude_containers:
+      - vector
+
+  app_metrics:
+    type: prometheus_scrape
+    endpoints:
+      - http://api-news:8081/actuator/prometheus
+      - http://api-captcha:8081/actuator/prometheus
+    scrape_interval_secs: 15
+
+transforms:
+  app_logs_normalized:
+    type: remap
+    inputs:
+      - app_logs
+    drop_on_error: false
+    source: |
+      # ---- базовые метки, которые должны быть у каждого события ----
+      .source_type = "docker"
+      .stack = "production"
+
+      # docker_logs кладёт исходную строку контейнера в .message
+      raw, raw_err = string(.message)
+      if raw_err != null {
+        raw = ""
+      }
+
+      parsed, parse_err = parse_json(raw)
+
+      if parse_err == null {
+        obj, cast_err = object(parsed)
+        if cast_err == null {
+          # Сливаем поля из Spring-Boot-лога в корень события.
+          # .message из docker'овской «обёртки» перезапишется осмысленным
+          # message из JSON (человекочитаемая строка лога).
+          . = merge(., obj)
+
+          # OpenObserve не индексирует вложенные объекты — он хранит их
+          # как JSON-строки и искать по ним нельзя. Плющим `log.level`
+          # → `log_level`, `process.thread.name` → `process_thread_name`,
+          # `service.name` → `service_name` и т.д.
+          . = flatten(., separator: "_")
+
+          # ECS-layout отдаёт время события в "@timestamp". Символ "@"
+          # в имени поля OpenObserve не любит (хранит как opaque-строку),
+          # поэтому переносим в _timestamp, который он использует нативно
+          # для сортировки и «live tail».
+          # В VRL к полям со спецсимволами обращаемся через ."имя".
+          ecs_ts = ."@timestamp"
+          if is_string(ecs_ts) {
+            parsed_ts, ts_err = parse_timestamp(ecs_ts, format: "%+")
+            if ts_err == null {
+              ._timestamp = to_unix_timestamp(parsed_ts, unit: "microseconds")
+            }
+          }
+          del(."@timestamp")
+        } else {
+          # Распарсилось, но это не объект (массив/скаляр) — оригинал в fallback.
+          .raw_message = raw
+        }
+      } else {
+        # Не JSON: JVM-стектрейс до старта logback, baseline-строки и т.п.
+        # Оставляем как есть, чтобы хоть что-то было видно.
+        .raw_message = raw
+        del(.message)
+      }
+
+      # service_name: берём из Spring-Boot-лога (после flatten он уже в корне),
+      # если приложение по какой-то причине его не прислало — падаем на docker container_name.
+      if !exists(.service_name) {
+        .service_name = .container_name
+      }
+
+sinks:
+  openobserve_logs_news:
+    type: http
+    inputs:
+      - app_logs_normalized
+    uri: http://openobserve:5080/api/news/backend-logs/_json
+    method: post
+    auth:
+      strategy: basic
+      user: root@example.com
+      password: rootpass123
+    compression: gzip
+    encoding:
+      codec: json
+      timestamp_format: rfc3339
+    healthcheck:
+      enabled: true
+      uri: http://openobserve:5080/healthz
+
+  openobserve_metrics_news:
+    type: prometheus_remote_write
+    inputs:
+      - app_metrics
+    endpoint: http://openobserve:5080/api/news/prometheus/api/v1/write
+    healthcheck:
+      enabled: false
+    auth:
+      strategy: basic
+      user: root@example.com
+      password: rootpass123

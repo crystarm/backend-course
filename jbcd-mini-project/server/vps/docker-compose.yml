@@ -1,0 +1,208 @@
+volumes:
+  caddy_data:
+  caddy_config:
+  caddy_logs:
+
+  postgres_data:
+  openobserve_data:
+  redis_data:
+
+# Обращаю ваше внимание, что наружу торчит только caddy-gateway.
+# Это немного увеличивает безопасность, поскольку не получится напрямую обратиться к внутренним сервисам postgresq/redis
+# и позволяет мне оставлять тестовые пароли.
+# Также все сервисы запускаются в режиме always, чтобы они автоматически перезапускались в случае падения.
+
+# Еще замечу, что я намеренно занижаю ресурсы у контейнеров, чтобы уместиться на маленький vps. Но это не очень рационально.
+
+services:
+
+  gateway: # caddy автоматически выпустит lets encrypt сертификат на домен, это не сработает локально!
+    image: caddy:2.11.2
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    # Сеть не указываем — compose положит все сервисы в одну дефолтную сеть,
+    # в ней резолвятся имена контейнеров (openobserve, api-news и т.д.).
+    # Наружу при этом торчит только этот контейнер — через ports.
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 256M
+
+  api-captcha:
+    image: registry.gitlab.com/vladkarandashov/java-backend-course-demo/api-captcha
+    pull_policy: always
+    container_name: api-captcha
+    restart: always
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8081/actuator/health" ]
+      interval: 10s
+      retries: 12
+      start_period: 40s
+      timeout: 5s
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - api-captcha.env
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 256M
+
+  api-news:
+    image: registry.gitlab.com/vladkarandashov/java-backend-course-demo/api-news
+    pull_policy: always
+    container_name: api-news
+    restart: always
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8081/actuator/health" ]
+      interval: 10s
+      retries: 12
+      start_period: 40s
+      timeout: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - api-news.env
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 256M
+
+  view-news:
+    image: registry.gitlab.com/vladkarandashov/java-backend-course-demo/view-news
+    pull_policy: always
+    container_name: view-news
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 256M
+
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: news_db
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    command: [ "postgres", "-c", "log_statement=all" ]
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - postgres_data:/var/lib/postgresql
+    entrypoint: [ "bash", "-c", "docker-entrypoint.sh postgres" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test -d news_db" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 2G
+
+  redis:
+    image: redis:8.6.0
+    container_name: redis
+    restart: always
+    command:
+      - redis-server
+      - --save 60 1
+      - --appendonly yes
+      - --appendfsync everysec
+      - --maxmemory 96mb
+      - --maxmemory-policy volatile-ttl
+      - --maxmemory-samples 5
+      - --port 6379
+      - --bind 0.0.0.0
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: 1.5
+          memory: 128m
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: openobserve
+    restart: always
+    environment:
+      ZO_ROOT_USER_EMAIL: root@example.com
+      ZO_ROOT_USER_PASSWORD: rootpass123
+      ZO_DATA_DIR: /data
+      # Публичный URL фронтенда OpenObserve. Нужен для share-links, отчётов и
+      # ссылок в алертах — без него часть UI-функций генерирует сломанные ссылки.
+      ZO_WEB_URL: https://openobserve.news.karandashov.com
+      # Отключаем анонимную телеметрию: для self-hosted это не нужно.
+      ZO_TELEMETRY: "false"
+    volumes:
+      - openobserve_data:/data
+    healthcheck:
+      test: [ "CMD", "/openobserve", "node", "status" ]
+      interval: 10s
+      retries: 20
+      start_period: 30s
+      timeout: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 2G
+
+  vector:
+    image: timberio/vector:0.43.1-alpine
+    container_name: vector
+    restart: always
+    user: "0:0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+    command: [ "--config", "/etc/vector/vector.yaml" ]
+    depends_on:
+      api-captcha:
+        condition: service_healthy
+      api-news:
+        condition: service_healthy
+      openobserve:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 256m
