@@ -1,0 +1,34 @@
+{
+    # Контакт-email для Let's Encrypt. ACME присылает сюда уведомления
+    email vlad.karandashov.tech@gmail.com
+}
+
+openobserve.news.karandashov.com {
+    reverse_proxy openobserve:5080 {
+        # OpenObserve поддерживает долгоживущие соединения (live tail через SSE/ws).
+        # Дефолтные таймауты Caddy могут рвать такие стримы — явно выключаем, чтобы прокси не закрывал соединение первым.
+        transport http {
+            read_timeout 0
+            write_timeout 0
+        }
+    }
+}
+
+news.karandashov.com {
+    @api_news path /api/news /api/news/*
+    handle @api_news {
+        uri strip_prefix /api
+        reverse_proxy api-news:8080
+    }
+
+    @api_captcha path /api/captcha /api/captcha/*
+    handle @api_captcha {
+        uri strip_prefix /api
+        reverse_proxy api-captcha:8080
+    }
+
+    # все остальные пути считаем как frontend
+    handle {
+        reverse_proxy view-news:80
+    }
+}

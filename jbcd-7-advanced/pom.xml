@@ -19,7 +19,6 @@
         <module>jbcd-7a-sso-jwt-auth</module>
         <module>jbcd-7a-sso-jwt-to-session-auth</module>
         <module>jbcd-7a-user-data-from-headers</module>
-        <module>jbcd-7b-observability</module>
     </modules>
 
 </project>

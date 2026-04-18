@@ -16,7 +16,7 @@ Could not find a valid Docker environment. Please see logs and check configurati
 ## Запуск программы
 
 ```text
-[main] ERROR com.karandashov.Main - Не заданы переменные окружения!
+[main] ERROR com.karandashov.jbcd.api.captcha.Main - Не заданы переменные окружения!
 ```
 Решение: вы не подложили local.env для внешнего сервиса.
 Перейдите Run/Debug Configurations -> Edit Configurations -> Modify options -> Environment Variables -> + -> Path -> /path/to/local.env
