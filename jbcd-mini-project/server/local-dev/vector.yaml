@@ -24,24 +24,63 @@ transforms:
     type: remap
     inputs:
       - app_logs
+    drop_on_error: false
     source: |
+      # ---- базовые метки, которые должны быть у каждого события ----
       .source_type = "docker"
-      .service_name = .container_name
       .stack = "local-dev"
 
-      raw_message = .message
-      parsed, err = parse_json(raw_message)
-
-      if err == null {
-        parsed_obj, object_err = object(parsed)
-
-        if object_err == null {
-          . = merge(., parsed_obj)
-        }
+      # docker_logs кладёт исходную строку контейнера в .message
+      raw, raw_err = string(.message)
+      if raw_err != null {
+        raw = ""
       }
 
-      .raw_message = raw_message
-      del(.message)
+      parsed, parse_err = parse_json(raw)
+
+      if parse_err == null {
+        obj, cast_err = object(parsed)
+        if cast_err == null {
+          # Сливаем поля из Spring-Boot-лога в корень события.
+          # .message из docker'овской «обёртки» перезапишется осмысленным
+          # message из JSON (человекочитаемая строка лога).
+          . = merge(., obj)
+
+          # OpenObserve не индексирует вложенные объекты — он хранит их
+          # как JSON-строки и искать по ним нельзя. Плющим `log.level`
+          # → `log_level`, `process.thread.name` → `process_thread_name`,
+          # `service.name` → `service_name` и т.д.
+          . = flatten(., separator: "_")
+
+          # ECS-layout отдаёт время события в "@timestamp". Символ "@"
+          # в имени поля OpenObserve не любит (хранит как opaque-строку),
+          # поэтому переносим в _timestamp, который он использует нативно
+          # для сортировки и «live tail».
+          # В VRL к полям со спецсимволами обращаемся через ."имя".
+          ecs_ts = ."@timestamp"
+          if is_string(ecs_ts) {
+            parsed_ts, ts_err = parse_timestamp(ecs_ts, format: "%+")
+            if ts_err == null {
+              ._timestamp = to_unix_timestamp(parsed_ts, unit: "microseconds")
+            }
+          }
+          del(."@timestamp")
+        } else {
+          # Распарсилось, но это не объект (массив/скаляр) — оригинал в fallback.
+          .raw_message = raw
+        }
+      } else {
+        # Не JSON: JVM-стектрейс до старта logback, baseline-строки и т.п.
+        # Оставляем как есть, чтобы хоть что-то было видно.
+        .raw_message = raw
+        del(.message)
+      }
+
+      # service_name: берём из Spring-Boot-лога (после flatten он уже в корне),
+      # если приложение по какой-то причине его не прислало — падаем на docker container_name.
+      if !exists(.service_name) {
+        .service_name = .container_name
+      }
 
 sinks:
   openobserve_logs_news:
