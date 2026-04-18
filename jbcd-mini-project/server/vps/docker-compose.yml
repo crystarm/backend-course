@@ -113,7 +113,24 @@ services:
       POSTGRES_DB: news_db
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-    command: [ "postgres", "-c", "log_statement=all" ]
+    command: [
+      "postgres",
+      "-c", "log_statement=all",
+
+      "-c", "max_connections=30",
+      "-c", "shared_buffers=256MB",
+      "-c", "effective_cache_size=768MB",
+      "-c", "maintenance_work_mem=64MB",
+      "-c", "checkpoint_completion_target=0.9",
+      "-c", "wal_buffers=7864kB",
+      "-c", "default_statistics_target=100",
+      "-c", "random_page_cost=1.1",
+      "-c", "effective_io_concurrency=200",
+      "-c", "work_mem=8967kB",
+      "-c", "huge_pages=off",
+      "-c", "min_wal_size=1GB",
+      "-c", "max_wal_size=4GB"
+    ]
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
       - postgres_data:/var/lib/postgresql
