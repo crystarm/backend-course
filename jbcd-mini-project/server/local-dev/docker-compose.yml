@@ -1,0 +1,116 @@
+volumes:
+  postgres_data:
+  openobserve_data:
+  redis_data:
+
+services:
+
+  # todo nginx test gateway for api-captcha/api-news/view-news/openobserve
+
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    restart: no
+    environment:
+      POSTGRES_DB: news_db
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - postgres_data:/var/lib/postgresql
+    entrypoint: ["bash", "-c", "docker-entrypoint.sh postgres"]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test -d news_db" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  redis:
+    image: redis:8.6.0
+    container_name: redis
+    restart: no
+    command:
+      - redis-server
+      - --save 60 1
+      - --appendonly yes
+      - --appendfsync everysec
+      - --maxmemory 512mb
+      - --maxmemory-policy volatile-ttl
+      - --maxmemory-samples 5
+      - --port 6379
+      - --bind 0.0.0.0
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  api-captcha:
+    build: ./../../api-captcha
+    container_name: api-captcha
+    restart: no
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8081/actuator/health | grep '\"status\":\"UP\"' || exit 1"]
+      interval: 10s
+      retries: 12
+      start_period: 40s
+      timeout: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - api-captcha.env
+
+  api-news:
+    build: ./../../api-news
+    container_name: api-news
+    restart: no
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8081/actuator/health | grep '\"status\":\"UP\"' || exit 1"]
+      interval: 10s
+      retries: 12
+      start_period: 40s
+      timeout: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - api-news.env
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: openobserve
+    environment:
+      ZO_ROOT_USER_EMAIL: root@example.com
+      ZO_ROOT_USER_PASSWORD: rootpass123
+    volumes:
+      - openobserve_data:/data
+
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    user: "0:0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+    command: [ "--config", "/etc/vector/vector.yaml" ]
+    depends_on:
+      api-captcha:
+        condition: service_healthy
+      api-news:
+        condition: service_healthy
+      openobserve:
+        condition: service_started
