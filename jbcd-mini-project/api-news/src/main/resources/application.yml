@@ -12,10 +12,12 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
+    hikari:
+      schema: ${APP_DATABASE_SCHEMA}
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
-    default-schema: ${APP_DATABASE_SCHEMA}
+    default-schema: ${spring.datasource.hikari.schema}
   data:
     redis:
       host: ${REDIS_HOST}
