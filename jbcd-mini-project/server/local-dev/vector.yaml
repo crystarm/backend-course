@@ -5,61 +5,71 @@ api:
 sources:
   app_logs:
     type: docker_logs
+    docker_host: unix:///var/run/docker.sock
     include_containers:
-      - app   # имя контейнера из docker-compose
+      - api-news
+      - api-captcha
+    exclude_containers:
+      - vector
 
   app_metrics:
     type: prometheus_scrape
     endpoints:
-      - http://app:8080/actuator/prometheus
+      - http://api-news:8081/actuator/prometheus
+      - http://api-captcha:8081/actuator/prometheus
     scrape_interval_secs: 15
 
 transforms:
-  app_logs_parsed:
+  app_logs_normalized:
     type: remap
     inputs:
       - app_logs
     source: |
-      .service_name = "spring-boot-web-demo"
       .source_type = "docker"
+      .service_name = .container_name
+      .stack = "local-dev"
 
       raw_message = .message
       parsed, err = parse_json(raw_message)
 
       if err == null {
-        parsed_obj, err = object(parsed)
+        parsed_obj, object_err = object(parsed)
 
-        if err == null {
+        if object_err == null {
           . = merge(., parsed_obj)
-          .raw_message = raw_message
         }
       }
 
+      .raw_message = raw_message
+      del(.message)
+
 sinks:
-  openobserve_logs:
+  openobserve_logs_news:
     type: http
     inputs:
-      - app_logs_parsed
-    uri: "http://openobserve:5080/api/default/spring-boot-web-demo-logs/_json"
+      - app_logs_normalized
+    uri: http://openobserve:5080/api/news/backend-logs/_json
     method: post
     auth:
       strategy: basic
-      user: "root@example.com"
-      password: "rootpass123"
+      user: root@example.com
+      password: rootpass123
     compression: gzip
     encoding:
       codec: json
       timestamp_format: rfc3339
     healthcheck:
       enabled: true
-      uri: "http://openobserve:5080/healthz"
+      uri: http://openobserve:5080/healthz
 
-  openobserve_metrics:
+  openobserve_metrics_news:
     type: prometheus_remote_write
     inputs:
       - app_metrics
-    endpoint: "http://openobserve:5080/api/default/prometheus/api/v1/write"
+    endpoint: http://openobserve:5080/api/news/prometheus/api/v1/write
+    healthcheck:
+      enabled: false
     auth:
       strategy: basic
-      user: "root@example.com"
-      password: "rootpass123"
+      user: root@example.com
+      password: rootpass123
