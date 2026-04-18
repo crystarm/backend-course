@@ -55,6 +55,7 @@
         <module>jbcd-5-docs</module>
         <module>jbcd-6-tools</module>
         <module>jbcd-7-advanced</module>
+        <module>jbcd-mini-project</module>
     </modules>
 
     <!--  Перечисляем все внешние зависимости с указанием версий из properties  -->
