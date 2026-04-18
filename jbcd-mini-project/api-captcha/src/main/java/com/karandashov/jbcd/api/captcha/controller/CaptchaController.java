@@ -20,13 +20,13 @@ public class CaptchaController {
 
     private final CaptchaService service;
 
-    @PostMapping
-    public CaptchaResponse generateCaptcha() {
+    @PostMapping("/generate")
+    public CaptchaResponse generate() {
         log.info("Request new captcha");
-        return service.generateCaptcha();
+        return service.generate();
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/solve")
     public SolveResponse solve(
             @Valid @NotNull @PathVariable UUID id,
             @Valid @RequestBody SolveRequest request

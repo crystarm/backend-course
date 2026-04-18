@@ -1,6 +1,6 @@
 package com.karandashov;
 
-import com.karandashov.jbcd.api.captcha.repository.NewsEventRepository;
+import com.karandashov.jbcd.api.news.repository.NewsEventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;

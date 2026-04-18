@@ -9,5 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SolveResponse {
 
-    // todo
+    private boolean solved;
+
+    private String message;
 }

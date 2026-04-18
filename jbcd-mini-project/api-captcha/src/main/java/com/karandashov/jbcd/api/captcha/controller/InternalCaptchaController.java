@@ -21,9 +21,9 @@ public class InternalCaptchaController {
 
     private final CaptchaService service;
 
-    @PostMapping("/{id}")
-    public CheckCaptchaResponse checkAndExpireCaptcha(@Valid @NotNull @PathVariable UUID id) {
+    @PostMapping("/{id}/checkAndExpire")
+    public CheckCaptchaResponse checkAndExpire(@Valid @NotNull @PathVariable UUID id) {
         log.info("Request check captcha {}", id);
-        return service.checkAndExpireCaptcha();
+        return service.checkAndExpire(id);
     }
 }

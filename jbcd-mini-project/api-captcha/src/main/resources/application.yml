@@ -12,6 +12,11 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+captcha:
+  ttl:
+    created: 5m
+    solved: 10s
+
 management:
   server:
     port: 8081

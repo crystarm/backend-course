@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 
 public enum BusinessError implements ErrorInfo {
 
-    // todo needed exceptions
+    CAPTCHA_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "Captcha not found or expired"),
+
+    CAPTCHA_NOT_SOLVED(HttpStatus.BAD_REQUEST, 2001, "Captcha is not solved");
 
     private final HttpStatus httpStatusCode;
 
