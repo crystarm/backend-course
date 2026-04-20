@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class NewsEventService {
 
     private final CaptchaService captchaService;
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "news", key = "#id")
     public NewsEvent getById(UUID id) {
         NewsEventEntity entity = repository.findById(id).orElseThrow(() -> {
@@ -37,6 +39,7 @@ public class NewsEventService {
         return response;
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "news_list")
     public NewsEventList getAll() {
         List<NewsEvent> events = StreamSupport
@@ -47,6 +50,7 @@ public class NewsEventService {
         return new NewsEventList(events);
     }
 
+    @Transactional
     @CacheEvict(value = {"news_list"}, allEntries = true)
     public NewsEvent save(CreateNewsEventRequest request) {
         captchaService.checkSolvedCaptcha(request.getSolvedCaptchaId());

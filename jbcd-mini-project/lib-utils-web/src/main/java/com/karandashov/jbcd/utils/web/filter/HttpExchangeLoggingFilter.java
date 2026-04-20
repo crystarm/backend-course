@@ -21,10 +21,9 @@ public class HttpExchangeLoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         log.info(
-                "--> Request: {} {} {}",
+                "--> Request: {} {}",
                 request.getMethod(),
-                request.getRequestURI(),
-                request.getQueryString()
+                request.getRequestURI()
         );
 
         try {
