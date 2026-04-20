@@ -28,8 +28,10 @@ public class NewsEventService {
 
     @Cacheable(value = "news", key = "#id")
     public NewsEvent getById(UUID id) {
-        NewsEventEntity entity = repository.findById(id)
-                .orElseThrow(() -> new BaseException(BusinessError.NEWS_NOT_FOUND));
+        NewsEventEntity entity = repository.findById(id).orElseThrow(() -> {
+            log.warn("News {} not found", id);
+            return new BaseException(BusinessError.NEWS_NOT_FOUND);
+        });
         var response = map(entity);
         log.info("Success get news by id: {}", response);
         return response;

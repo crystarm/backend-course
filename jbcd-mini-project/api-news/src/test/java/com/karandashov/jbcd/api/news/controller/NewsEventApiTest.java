@@ -28,6 +28,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,6 +49,7 @@ class NewsEventApiTest extends BaseTest {
         NewsEventEntity savedEntity = newsEventRepository.save(new NewsEventEntity(null, "Title", "Message"));
 
         mockMvc.perform(get("/news"))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.events[0].id").value(savedEntity.getId().toString()))
                 .andExpect(jsonPath("$.events[0].title").value("Title"))
@@ -59,6 +61,7 @@ class NewsEventApiTest extends BaseTest {
         newsEventRepository.save(new NewsEventEntity(null, "Title", "Message"));
 
         mockMvc.perform(get("/news"))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         assertThat(Objects.requireNonNull(cacheManager.getCache("news_list")).get(SimpleKey.EMPTY, NewsEventList.class)).isNotNull();
@@ -71,6 +74,7 @@ class NewsEventApiTest extends BaseTest {
         newsEventRepository.deleteAll();
 
         mockMvc.perform(get("/news"))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.events[0].id").value(savedEntity.getId().toString()))
                 .andExpect(jsonPath("$.events[0].title").value("Cached title"))
@@ -82,6 +86,7 @@ class NewsEventApiTest extends BaseTest {
         NewsEventEntity savedEntity = newsEventRepository.save(new NewsEventEntity(null, "Title", "Message"));
 
         mockMvc.perform(get("/news/{id}", savedEntity.getId()))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedEntity.getId().toString()))
                 .andExpect(jsonPath("$.title").value("Title"))
@@ -93,6 +98,7 @@ class NewsEventApiTest extends BaseTest {
         NewsEventEntity savedEntity = newsEventRepository.save(new NewsEventEntity(null, "Title", "Message"));
 
         mockMvc.perform(get("/news/{id}", savedEntity.getId()))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         assertThat(Objects.requireNonNull(cacheManager.getCache("news")).get(savedEntity.getId(), NewsEvent.class))
@@ -106,6 +112,7 @@ class NewsEventApiTest extends BaseTest {
         newsEventRepository.deleteAll();
 
         mockMvc.perform(get("/news/{id}", savedEntity.getId()))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedEntity.getId().toString()))
                 .andExpect(jsonPath("$.title").value("Cached title"))
@@ -121,6 +128,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value("Breaking"))
@@ -137,6 +145,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         captchaApiMock().verify(postRequestedFor(urlEqualTo(captchaCheckPath(captchaId)))
@@ -155,6 +164,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         assertCacheBecomesEmpty();
@@ -169,6 +179,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         assertThat(prometheusMeterRegistry.get("business.news.count").gauge().value()).isEqualTo(2.0d);
@@ -183,6 +194,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(1001))
                 .andExpect(jsonPath("$.message").value("Captcha not found or expired"));
@@ -196,6 +208,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(1002))
                 .andExpect(jsonPath("$.message").value("Captcha is not solved"));
@@ -210,6 +223,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                .andDo(print())
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.code").value(1003))
                 .andExpect(jsonPath("$.message").value("Failed to check captcha"));
@@ -218,6 +232,7 @@ class NewsEventApiTest extends BaseTest {
     @Test
     void getByIdReturns404WhenNewsWasNotFound() throws Exception {
         mockMvc.perform(get("/news/{id}", UUID.randomUUID()))
+                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(1000))
                 .andExpect(jsonPath("$.message").value("News not found"));
@@ -229,6 +244,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(4000))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Validation error")))
@@ -240,6 +256,7 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", null))))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(4000));
 

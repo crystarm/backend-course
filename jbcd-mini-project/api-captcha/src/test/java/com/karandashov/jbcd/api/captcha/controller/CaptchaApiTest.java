@@ -15,6 +15,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +28,7 @@ class CaptchaApiTest extends BaseTest {
     @Test
     void generateReturnsCaptchaIdAndImage() throws Exception {
         String response = mockMvc.perform(post("/captcha/generate"))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.imageBase64").value(org.hamcrest.Matchers.startsWith("data:image/png;base64,")))
@@ -50,6 +52,7 @@ class CaptchaApiTest extends BaseTest {
         mockMvc.perform(post("/captcha/{id}/solve", id)
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new SolveRequest("AbC12"))))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.solved").value(true))
                 .andExpect(jsonPath("$.message").value("Captcha solved successfully"));
@@ -67,6 +70,7 @@ class CaptchaApiTest extends BaseTest {
         mockMvc.perform(post("/captcha/{id}/solve", id)
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new SolveRequest("wrong"))))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.solved").value(false))
                 .andExpect(jsonPath("$.message").value("Captcha answer is incorrect"));
@@ -79,6 +83,7 @@ class CaptchaApiTest extends BaseTest {
         mockMvc.perform(post("/captcha/{id}/solve", UUID.randomUUID())
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new SolveRequest("abc12"))))
+                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(2000))
                 .andExpect(jsonPath("$.message").value("Captcha not found or expired"));
@@ -89,6 +94,7 @@ class CaptchaApiTest extends BaseTest {
         mockMvc.perform(post("/captcha/{id}/solve", UUID.randomUUID())
                 .contentType(APPLICATION_JSON)
                 .content(jsonMapper.writeValueAsString(new SolveRequest(" "))))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(4000))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Validation error")));
@@ -100,6 +106,7 @@ class CaptchaApiTest extends BaseTest {
         saveCaptcha(new CaptchaEntity(id, "abc12", CaptchaStatus.SOLVED), Duration.ofSeconds(10));
 
         mockMvc.perform(post("/internal/captcha/{id}/checkAndExpire", id))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(true));
 
@@ -112,6 +119,7 @@ class CaptchaApiTest extends BaseTest {
         saveCaptcha(new CaptchaEntity(id, "abc12", CaptchaStatus.CREATED), Duration.ofMinutes(5));
 
         mockMvc.perform(post("/internal/captcha/{id}/checkAndExpire", id))
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(2001))
                 .andExpect(jsonPath("$.message").value("Captcha is not solved"));
@@ -120,6 +128,7 @@ class CaptchaApiTest extends BaseTest {
     @Test
     void internalCheckAndExpireReturns404WhenCaptchaWasNotFound() throws Exception {
         mockMvc.perform(post("/internal/captcha/{id}/checkAndExpire", UUID.randomUUID()))
+                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(2000))
                 .andExpect(jsonPath("$.message").value("Captcha not found or expired"));

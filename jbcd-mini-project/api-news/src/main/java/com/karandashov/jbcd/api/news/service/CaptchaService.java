@@ -21,12 +21,16 @@ public class CaptchaService {
 
     public void checkSolvedCaptcha(UUID solvedCaptchaId) {
         try {
+            log.info("Send checkSolvedCaptcha request by id={}", solvedCaptchaId);
             CheckCaptchaResponse response = captchaClient.checkAndExpire(solvedCaptchaId);
+            log.info("Get response: {}", response);
             if (!response.isValid()) {
+                log.warn("Captcha was not solved");
                 throw new BaseException(BusinessError.CAPTCHA_NOT_SOLVED);
             }
         } catch (CaptchaClientException exception) {
             Integer errorCode = exception.getCode();
+            log.warn("Error code: {}", errorCode);
             if (Integer.valueOf(2000).equals(errorCode)) {
                 throw new BaseException(BusinessError.CAPTCHA_NOT_FOUND_OR_EXPIRED, exception);
             }
