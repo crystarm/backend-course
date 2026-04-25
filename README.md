@@ -6,6 +6,7 @@ java-backend-course-demo = jbcd
 * Vk: https://vk.com/good_vladik — для организационных вопросов
 * Tg: `@VVKarandashov` — для любых вопросов по java/backend/лабораторным/проектам
 * Email: `vlad.karandashov.tech@gmail.com` — для обратной связи по курсу
+* оставьте обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
 * * Любая обратная связь приветствуется и поощряется!
 * * Вы можете рассчитывать на анонимность и непредвзятость.
 * * Можете зарегистрировать временный email.
