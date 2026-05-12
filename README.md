@@ -14,6 +14,8 @@ java-backend-course-demo = jbcd
 
 Описание лабораторных работ и проекта [читай здесь](assignments/README.md).
 
+Памятку по автоматам и экзамену [читай здесь](assignments/exam.md).
+
 ## Работа с репозиторием
 
 - установите на компьютер ide для разработки (рекомендуются: intellij idea, OpenIDE)
