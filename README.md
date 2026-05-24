@@ -5,12 +5,10 @@ java-backend-course-demo = jbcd
 Контакты преподавателя: 
 * Vk: https://vk.com/good_vladik — для организационных вопросов
 * Tg: `@VVKarandashov` — для любых вопросов по java/backend/лабораторным/проектам
-* Email: `vlad.karandashov.tech@gmail.com` — для обратной связи по курсу
-* оставьте обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
+* Email: `vlad.karandashov.tech@gmail.com`
+* Оставьте обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
 * * Любая обратная связь приветствуется и поощряется!
-* * Вы можете рассчитывать на анонимность и непредвзятость.
-* * Можете зарегистрировать временный email.
-* * На каждое письмо постараюсь ответить!
+* * Вы можете рассчитывать на анонимность и непредвзятость!
 
 Описание лабораторных работ и проекта [читай здесь](assignments/README.md).
 
@@ -46,20 +44,16 @@ java-backend-course-demo = jbcd
 
 ## Оглавление
 
-### test-database
-Пример запуска локальной базы данных PostgreSQL с помощью docker compose.
+### infra
 
-### test-kafka
-Пример запуска локального кластера Apache Kafka с помощью docker compose.
-
-### test-debezium
-Пример реализации паттерна transactional outbox с помощью debezium. Пример запуска и конфигурации debezium.
-
-### test-redis
-Пример запуска локального Redis с помощью docker compose.
-
-### test-s3
-Пример запуска локального S3-совместимого хранилища с помощью docker compose.
+- [database](infra/database): Пример запуска **актуальной версии** базы данных PostgreSQL с автоматическим созданием схем.
+- [kafka](infra/kafka): Пример запуска локального кластера Apache Kafka с помощью docker compose.
+- [debezium](infra/debezium): Пример реализации паттерна transactional outbox с помощью debezium. Пример запуска и конфигурации debezium.
+- [redis](infra/redis): Пример запуска локального Redis (master + replica).
+- [s3](infra/s3): Пример запуска локального S3-совместимого хранилища.
+- [sso](infra/sso): Пример запуска отладочного локального SSO-сервера.
+- [sso-oauth2-proxy](infra/sso-oauth2-proxy): Пример конфигурации OAuth2-прокси.
+- [temporal](infra/temporal): Пример запуска и настройки Temporal.
 
 ### jbcd-1-core
 

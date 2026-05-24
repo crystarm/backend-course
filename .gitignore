@@ -3,7 +3,7 @@ tmp/
 
 **/dependency-reduced-pom.xml
 
-test-s3/data
+/infra/s3/data/
 
 ### IntelliJ IDEA ###
 .idea

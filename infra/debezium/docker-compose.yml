@@ -33,7 +33,7 @@ services:
       timeout: 10s
 
   app:
-    build: ./../jbcd-6-tools/jbcd-6b-kafka-transactional-outbox
+    build: ../../jbcd-6-tools/jbcd-6b-kafka-transactional-outbox
     container_name: app
     restart: no
     ports:
