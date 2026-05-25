@@ -11,7 +11,7 @@
 * Intellij idea (достаточно бесплатной версии)
 * OpenIde (это импортозамещенный форк Intellij idea)
 
-При установке ide (или при первом запуске) она предложит тебе установить git (соглашайся) и JDK (выбирай любую 21).
+При установке ide (или при первом запуске) она предложит тебе установить git (соглашайся) и JDK (выбирай любую 25).
 Maven уже будет внутри, отдельной установки не требуется. 
 
 Если вы не работали до этого с github/gitlab с вашего пк, то скорее всего не добавили ssh ключ. Как это сделать читай в 
@@ -71,7 +71,7 @@ target/
     <packaging>pom</packaging>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
         <maven.shade.plugin.version>3.4.1</maven.shade.plugin.version>

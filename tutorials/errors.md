@@ -6,7 +6,7 @@
 Fatal error compiling: error: invalid target release
 ```
 Решение: вы пытаетесь использовать старый JDK.
-Перейдите: File -> Project Structure -> Project -> SDK -> любой JDK 21+
+Перейдите: File -> Project Structure -> Project -> SDK -> любой JDK 25
 
 ```text
 Could not find a valid Docker environment. Please see logs and check configuration
@@ -23,7 +23,7 @@ Could not find a valid Docker environment. Please see logs and check configurati
 
 ## Просто все красное и не работает
 
-1) Проверь версию JDK: File -> Project Structure -> Project -> SDK -> должен стоять любой JDK 21+
+1) Проверь версию JDK: File -> Project Structure -> Project -> SDK -> должен стоять любой JDK 25
 2) Проверь maven: Maven Settings -> maven home path -> установи значение Bundled
 3) Нажми Reload All Maven Projects
 4) File -> invalidate caches -> выбрать все галочки -> invalidate and restart
