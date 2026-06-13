@@ -56,6 +56,8 @@ services:
         condition: service_healthy
     env_file:
       - api-captcha.env
+    volumes:
+      - ./api-captcha.yml:/application/config/application.yml:ro
     deploy:
       resources:
         limits:
@@ -82,6 +84,8 @@ services:
         condition: service_healthy
     env_file:
       - api-news.env
+    volumes:
+      - ./api-news.yml:/application/config/application.yml:ro
     deploy:
       resources:
         limits:

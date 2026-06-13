@@ -1,36 +1,21 @@
 spring:
   application:
-    name: api-news
+    name: api-captcha
   threads:
     virtual:
       enabled: true
   web:
     error:
       include-stacktrace: never
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/lectures_java_course_demo
-    username: test
-    password: test
-    hikari:
-      schema: jbcd_lesson
-  flyway:
-    enabled: true
-    schemas: jbcd_lesson
-    default-schema: jbcd_lesson
   data:
     redis:
-      host: localhost
-      port: 6379
-  cache:
-    type: redis
-    redis:
-      cache-null-values: false
-      time-to-live: 5m
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
-client:
-  captcha:
-    base-url: http://localhost:8082
+captcha:
+  ttl:
+    created: 5m
+    solved: 10s
 
 management:
   server:
