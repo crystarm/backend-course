@@ -6,8 +6,7 @@ const AuthApi = (() => {
 
     async function fetchOidcConfiguration() {
         const response = await fetch("/api/auth/config");
-        const body = await response.json();
-        return body.data;
+        return response.json();
     }
 
     async function getUserManager() {

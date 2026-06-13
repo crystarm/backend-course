@@ -22,18 +22,17 @@ public class SecurityTest extends BaseTest {
     void configShouldReturnOidcSettings() throws Exception {
         mockMvc.perform(get("/api/auth/config"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.issuerUri").value("http://localhost:5556/dex"))
-                .andExpect(jsonPath("$.data.clientId").value("jbcd-jwt-frontend"))
-                .andExpect(jsonPath("$.data.redirectUri").value("http://localhost:8080/login.html"));
+                .andExpect(jsonPath("$.issuerUri").value("http://localhost:5556/dex"))
+                .andExpect(jsonPath("$.clientId").value("jbcd-jwt-frontend"))
+                .andExpect(jsonPath("$.redirectUri").value("http://localhost:8080/login.html"));
     }
 
     @Test
     void meShouldReturnUnauthorizedForAnonymousUser() throws Exception {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.authenticated").value(false))
-                .andExpect(jsonPath("$.data.claims", aMapWithSize(0)));
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.claims", aMapWithSize(0)));
     }
 
     @Test
@@ -41,10 +40,9 @@ public class SecurityTest extends BaseTest {
         mockMvc.perform(get("/api/auth/me")
                         .with(AuthUtils.jwtUser()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.authenticated").value(true))
-                .andExpect(jsonPath("$.data.claims.email").value("student@example.com"))
-                .andExpect(jsonPath("$.data.claims.preferred_username").value("student"));
+                .andExpect(jsonPath("$.authenticated").value(true))
+                .andExpect(jsonPath("$.claims.email").value("student@example.com"))
+                .andExpect(jsonPath("$.claims.preferred_username").value("student"));
     }
 
     @Test

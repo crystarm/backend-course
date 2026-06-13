@@ -3,7 +3,6 @@ package com.karandashov.service;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.exceptions.NotFoundException;
 import com.karandashov.mapper.NewsMapper;
@@ -28,31 +27,28 @@ public class NewsEventService {
     private final NewsMapper mapper;
 
     @Transactional(readOnly = true)
-    public UniversalResponse<NewsEvent> getById(UUID id) {
+    public NewsEvent getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
-        NewsEvent newsEventDto = mapper.toDto(event);
-        return new UniversalResponse<>(newsEventDto);
+        return mapper.toDto(event);
     }
 
     @Transactional(readOnly = true)
-    public UniversalResponse<NewsEventList> getAll() {
+    public NewsEventList getAll() {
         List<NewsEvent> events = StreamSupport
                 .stream(repository.findAll().spliterator(), false)
                 .map(mapper::toDto)
                 .toList();
-        NewsEventList newsEventList = new NewsEventList(events);
-        return new UniversalResponse<>(newsEventList);
+        return new NewsEventList(events);
     }
 
     @Transactional
-    public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
+    public NewsEvent save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
                 .title(request.getTitle())
                 .message(request.getMessage())
                 .build();
         entity = repository.save(entity);
-        NewsEvent newsEventDto = mapper.toDto(entity);
-        return new UniversalResponse<>(newsEventDto);
+        return mapper.toDto(entity);
     }
 }

@@ -1,7 +1,7 @@
 package com.karandashov.controller;
 
 import com.karandashov.dto.CreateNewsEventRequest;
-import com.karandashov.dto.UniversalResponse;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.exceptions.BaseException;
 import com.karandashov.service.NewsEventService;
 import io.netty.buffer.ByteBuf;
@@ -53,32 +53,30 @@ public class NewsEventController {
             }
 
             return createResponse(HttpResponseStatus.NOT_FOUND,
-                    new UniversalResponse<>(404, "Not Found: " + method + " " + uri));
+                    new ErrorResponse("not.found", "Not found"));
         } catch (BaseException e) {
-            e.printStackTrace();
             return createResponse(HttpResponseStatus.valueOf(e.getHttpCode()),
-                    new UniversalResponse<>(e.getCode(), e.getMessage()));
+                    new ErrorResponse(e.getCode(), e.getMessage()));
         } catch (Exception e) {
-            e.printStackTrace();
             return createResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                    new UniversalResponse<>(500, "Internal Server Error: " + e.getMessage()));
+                    new ErrorResponse("internal.server.error", "Internal server error"));
         }
     }
 
     private FullHttpResponse handleGetById(UUID id) {
-        UniversalResponse<?> response = service.getById(id);
+        Object response = service.getById(id);
         return createResponse(HttpResponseStatus.OK, response);
     }
 
     private FullHttpResponse handleGetAll() {
-        UniversalResponse<?> response = service.getAll();
+        Object response = service.getAll();
         return createResponse(HttpResponseStatus.OK, response);
     }
 
     private FullHttpResponse handleCreate(FullHttpRequest request) {
         String content = request.content().toString(CharsetUtil.UTF_8);
         CreateNewsEventRequest createRequest = jsonMapper.readValue(content, CreateNewsEventRequest.class);
-        UniversalResponse<?> response = service.save(createRequest);
+        Object response = service.save(createRequest);
         return createResponse(HttpResponseStatus.CREATED, response);
     }
 

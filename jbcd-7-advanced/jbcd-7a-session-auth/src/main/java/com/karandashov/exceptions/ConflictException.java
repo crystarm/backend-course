@@ -4,7 +4,7 @@ public class ConflictException extends BaseException {
 
     public static final int HTTP_CODE = 409;
 
-    public static final int CODE = 4002;
+    public static final String CODE = "conflict";
 
     public ConflictException(String message) {
         super(message);
@@ -16,7 +16,7 @@ public class ConflictException extends BaseException {
     }
 
     @Override
-    public int getCode() {
+    public String getCode() {
         return CODE;
     }
 }

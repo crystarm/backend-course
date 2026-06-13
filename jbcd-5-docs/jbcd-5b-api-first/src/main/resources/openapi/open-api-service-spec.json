@@ -35,7 +35,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/NewsEventList"
                 }
               }
             }
@@ -64,7 +64,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/NewsEvent"
                 }
               }
             }
@@ -96,7 +96,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/NewsEvent"
                 }
               }
             }
@@ -106,7 +106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -136,25 +136,6 @@
         "required": [
           "message",
           "title"
-        ]
-      },
-      "UniversalResponse": {
-        "type": "object",
-        "description": "Universal response dto",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Business error code"
-          },
-          "message": {
-            "type": "string",
-            "description": "Message"
-          },
-          "data": {}
-        },
-        "required": [
-          "code"
         ]
       },
       "NewsEvent": {
@@ -197,6 +178,24 @@
         },
         "required": [
           "events"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error response dto",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Business error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "User-facing error details"
+          }
+        },
+        "required": [
+          "code",
+          "message"
         ]
       }
     }

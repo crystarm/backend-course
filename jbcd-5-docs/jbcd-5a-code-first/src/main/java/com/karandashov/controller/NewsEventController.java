@@ -1,9 +1,9 @@
 package com.karandashov.controller;
 
 import com.karandashov.dto.CreateNewsEventRequest;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.service.NewsEventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,9 +31,9 @@ public class NewsEventController {
     @Operation(summary = "Get all news")
     @ApiResponse(responseCode = "200", description = "List of news", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = UniversalResponse.class)
+            schema = @Schema(implementation = NewsEventList.class)
     ))
-    public UniversalResponse<NewsEventList> getAll() {
+    public NewsEventList getAll() {
         log.info("Request to get all news");
         return service.getAll();
     }
@@ -42,13 +42,13 @@ public class NewsEventController {
     @Operation(summary = "Get news by id")
     @ApiResponse(responseCode = "200", description = "News found", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = UniversalResponse.class)
+            schema = @Schema(implementation = NewsEvent.class)
     ))
     @ApiResponse(responseCode = "404", description = "News not found", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = UniversalResponse.class)
+            schema = @Schema(implementation = ErrorResponse.class)
     ))
-    public UniversalResponse<NewsEvent> getById(@PathVariable UUID id) {
+    public NewsEvent getById(@PathVariable UUID id) {
         log.info("Request to get news by id: {}", id);
         return service.getById(id);
     }
@@ -57,9 +57,9 @@ public class NewsEventController {
     @Operation(summary = "Create news")
     @ApiResponse(responseCode = "200", description = "News created", content = @Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = @Schema(implementation = UniversalResponse.class)
+            schema = @Schema(implementation = NewsEvent.class)
     ))
-    public UniversalResponse<NewsEvent> save(@Valid @RequestBody CreateNewsEventRequest request) {
+    public NewsEvent save(@Valid @RequestBody CreateNewsEventRequest request) {
         log.info("Request to save news: {}", request);
         return service.save(request);
     }

@@ -1,14 +1,13 @@
 package com.karandashov.exceptions;
 
-/**
- * Универсальное исключение, чтобы преобразовывать ошибки в {@link com.karandashov.dto.UniversalResponse}
+/** * Универсальное исключение
  */
 @SuppressWarnings("unused")
 public abstract class BaseException extends RuntimeException {
 
     public static final int HTTP_CODE = 500;
 
-    public static final int CODE = 5000;
+    public static final String CODE = "internal.server.error";
 
     public BaseException(String message) {
         super(message);
@@ -22,7 +21,7 @@ public abstract class BaseException extends RuntimeException {
         return HTTP_CODE;
     }
 
-    public int getCode() {
+    public String getCode() {
         return CODE;
     }
 }

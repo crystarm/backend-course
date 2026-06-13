@@ -36,7 +36,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4001))
+                .andExpect(jsonPath("$.code").value("validation.error"))
                 .andExpect(jsonPath("$.message").exists());
     }
 
@@ -48,7 +48,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4001))
+                .andExpect(jsonPath("$.code").value("validation.error"))
                 .andExpect(jsonPath("$.message").value("title: Заголовок не может быть пустым"));
     }
 
@@ -60,7 +60,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4001))
+                .andExpect(jsonPath("$.code").value("validation.error"))
                 .andExpect(jsonPath("$.message").value("message: Сообщение не может быть пустым"));
     }
 
@@ -73,7 +73,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4001))
+                .andExpect(jsonPath("$.code").value("validation.error"))
                 .andExpect(jsonPath("$.message").value(containsString("size must be between 1 and 100")));
     }
 
@@ -86,8 +86,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.title").value(maxTitle));
+                .andExpect(jsonPath("$.title").value(maxTitle));
     }
 
     @Test
@@ -98,8 +97,7 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.title").value("a"));
+                .andExpect(jsonPath("$.title").value("a"));
     }
 
     @Test
@@ -119,10 +117,9 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(get("/news"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.events", hasSize(2)))
-                .andExpect(jsonPath("$.data.events[0].title").value("Title 1"))
-                .andExpect(jsonPath("$.data.events[1].title").value("Title 2"));
+                .andExpect(jsonPath("$.events", hasSize(2)))
+                .andExpect(jsonPath("$.events[0].title").value("Title 1"))
+                .andExpect(jsonPath("$.events[1].title").value("Title 2"));
     }
 
     @Test
@@ -137,16 +134,15 @@ public class NewsEventControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(get("/news/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.id").value(id.toString()))
-                .andExpect(jsonPath("$.data.title").value("Title"));
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.title").value("Title"));
     }
 
     @Test
     void testGetNewsByIdNotFound() throws Exception {
         mockMvc.perform(get("/news/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(4000))
+                .andExpect(jsonPath("$.code").value("news.not.found"))
                 .andExpect(jsonPath("$.message").value("Не смог найти новость по id"));
     }
 }

@@ -6,7 +6,7 @@ public class RepositoryException extends BaseException {
 
     public static final int HTTP_CODE = 500;
 
-    public static final int CODE = 5000;
+    public static final String CODE = "database.error";
 
     public RepositoryException(String message, Throwable cause) {
         super(message, cause);
@@ -18,7 +18,7 @@ public class RepositoryException extends BaseException {
     }
 
     @Override
-    public int getCode() {
+    public String getCode() {
         return CODE;
     }
 }

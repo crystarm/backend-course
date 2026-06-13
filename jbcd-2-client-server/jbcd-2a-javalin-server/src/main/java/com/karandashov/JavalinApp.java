@@ -1,7 +1,7 @@
 package com.karandashov;
 
 import com.karandashov.dto.CreateNewsEventRequest;
-import com.karandashov.dto.UniversalResponse;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.exceptions.BaseException;
 import com.karandashov.repository.InMemoryNewsEventRepository;
 import com.karandashov.repository.NewsEventRepository;
@@ -40,12 +40,12 @@ public class JavalinApp {
             config.routes.exception(BaseException.class, (e, ctx) -> {
                 log.error("Business error: {}", e.getMessage());
                 ctx.status(e.getHttpCode());
-                ctx.json(new UniversalResponse<>(e.getCode(), e.getMessage()));
+                ctx.json(new ErrorResponse(e.getCode(), e.getMessage()));
             });
             config.routes.exception(Exception.class, (e, ctx) -> {
                 log.error("Unexpected error", e);
                 ctx.status(500);
-                ctx.json(new UniversalResponse<>(5000, "Неизвестная ошибка: " + e.getMessage()));
+                ctx.json(new ErrorResponse("internal.server.error", "Internal server error"));
             });
         });
     }

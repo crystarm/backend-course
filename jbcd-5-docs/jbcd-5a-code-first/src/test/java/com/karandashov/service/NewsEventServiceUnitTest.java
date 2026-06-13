@@ -3,7 +3,6 @@ package com.karandashov.service;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.exceptions.NotFoundException;
 import com.karandashov.mapper.NewsMapper;
@@ -43,12 +42,10 @@ public class NewsEventServiceUnitTest {
         when(repository.findById(id)).thenReturn(Optional.of(entity));
         when(mapper.toDto(entity)).thenReturn(dto);
 
-        UniversalResponse<NewsEvent> response = service.getById(id);
+        NewsEvent response = service.getById(id);
 
         assertNotNull(response);
-        assertEquals(0, response.getCode());
-        assertEquals("SUCCESS", response.getMessage());
-        assertEquals(dto, response.getData());
+        assertEquals(dto, response);
 
         verify(repository).findById(id);
         verify(mapper).toDto(entity);
@@ -77,12 +74,11 @@ public class NewsEventServiceUnitTest {
         when(repository.findAll()).thenReturn(entities);
         when(mapper.toDtoList(entities)).thenReturn(dtos);
 
-        UniversalResponse<NewsEventList> response = service.getAll();
+        NewsEventList response = service.getAll();
 
         assertNotNull(response);
-        assertEquals(0, response.getCode());
-        assertEquals(1, response.getData().getEvents().size());
-        assertTrue(response.getData().getEvents().contains(dto));
+        assertEquals(1, response.getEvents().size());
+        assertTrue(response.getEvents().contains(dto));
 
         verify(repository).findAll();
         verify(mapper).toDtoList(entities);
@@ -101,10 +97,10 @@ public class NewsEventServiceUnitTest {
         when(repository.save(any(NewsEventEntity.class))).thenReturn(savedEntity);
         when(mapper.toDto(savedEntity)).thenReturn(dto);
 
-        UniversalResponse<NewsEvent> response = service.save(request);
+        NewsEvent response = service.save(request);
 
         assertNotNull(response);
-        assertEquals(dto, response.getData());
+        assertEquals(dto, response);
 
         verify(repository).save(argThat(entity ->
                 entity.getTitle().equals(request.getTitle()) &&

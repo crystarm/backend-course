@@ -3,7 +3,6 @@ package com.karandashov.controller;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.mapper.NewsMapperImpl;
 import com.karandashov.repository.NewsEventRepository;
@@ -34,9 +33,6 @@ public class NewsEventControllerTest {
     private NewsEventRepository repository;
 
     @Autowired
-    private NewsEventService service;
-
-    @Autowired
     private NewsEventController controller;
 
     @Test
@@ -45,13 +41,12 @@ public class NewsEventControllerTest {
         NewsEventEntity entity = new NewsEventEntity(id, "Title", "Message");
         when(repository.findAll()).thenReturn(List.of(entity));
 
-        UniversalResponse<NewsEventList> actualResponse = controller.getAll();
+        NewsEventList actualResponse = controller.getAll();
 
         assertNotNull(actualResponse);
-        NewsEventList list = actualResponse.getData();
-        assertNotNull(list);
-        assertEquals(1, list.getEvents().size());
-        NewsEvent dto = list.getEvents().iterator().next();
+        assertNotNull(actualResponse);
+        assertEquals(1, actualResponse.getEvents().size());
+        NewsEvent dto = actualResponse.getEvents().iterator().next();
         assertEquals(id, dto.getId());
         assertEquals("Title", dto.getTitle());
         assertEquals("Message", dto.getMessage());
@@ -65,13 +60,12 @@ public class NewsEventControllerTest {
         NewsEventEntity entity = new NewsEventEntity(id, "Title", "Message");
         when(repository.findById(id)).thenReturn(Optional.of(entity));
 
-        UniversalResponse<NewsEvent> actualResponse = controller.getById(id);
+        NewsEvent actualResponse = controller.getById(id);
 
         assertNotNull(actualResponse);
-        NewsEvent dto = actualResponse.getData();
-        assertEquals(id, dto.getId());
-        assertEquals("Title", dto.getTitle());
-        assertEquals("Message", dto.getMessage());
+        assertEquals(id, actualResponse.getId());
+        assertEquals("Title", actualResponse.getTitle());
+        assertEquals("Message", actualResponse.getMessage());
 
         verify(repository).findById(id);
     }
@@ -84,13 +78,12 @@ public class NewsEventControllerTest {
 
         when(repository.save(any(NewsEventEntity.class))).thenReturn(entity);
 
-        UniversalResponse<NewsEvent> actualResponse = controller.save(request);
+        NewsEvent actualResponse = controller.save(request);
 
         assertNotNull(actualResponse);
-        NewsEvent dto = actualResponse.getData();
-        assertEquals(id, dto.getId());
-        assertEquals("Title", dto.getTitle());
-        assertEquals("Message", dto.getMessage());
+        assertEquals(id, actualResponse.getId());
+        assertEquals("Title", actualResponse.getTitle());
+        assertEquals("Message", actualResponse.getMessage());
 
         verify(repository).save(any(NewsEventEntity.class));
     }

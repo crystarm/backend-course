@@ -1,8 +1,8 @@
 package com.karandashov;
 
 import com.karandashov.dto.CreateNewsEventRequest;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.dto.NewsEvent;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.exceptions.BaseException;
 import com.karandashov.exceptions.NotFoundException;
 import com.karandashov.repository.InMemoryNewsEventRepository;
@@ -40,7 +40,7 @@ public class JoobyApp extends Jooby {
 
         // Определяем маршруты через Script API
         path("/news", () -> {
-            get("/", ctx -> service.getAll());
+            get("/", _ -> service.getAll());
 
             get("/{id}", ctx -> {
                 String id = ctx.path("id").value();
@@ -50,11 +50,11 @@ public class JoobyApp extends Jooby {
             post("/", ctx -> {
                 CreateNewsEventRequest request = ctx.body(CreateNewsEventRequest.class);
                 var newsEvent = service.save(request);
-                QUEUE.add(newsEvent.getData());
+                QUEUE.add(newsEvent);
                 return newsEvent;
             });
 
-            get("/listen", ctx -> {
+            get("/listen", _ -> {
                 // Ожидаем сообщение в очереди с timeout (например, 15 секунд)
                 NewsEvent event = QUEUE.poll(15, TimeUnit.SECONDS);
                 if (event == null) {
@@ -65,18 +65,18 @@ public class JoobyApp extends Jooby {
         });
 
         // Обработка бизнес-исключений
-        error(BaseException.class, (ctx, cause, statusCode) -> {
+        error(BaseException.class, (ctx, cause, _) -> {
             BaseException e = (BaseException) cause;
             log.error("Business error: {}", e.getMessage());
             ctx.setResponseCode(StatusCode.valueOf(e.getHttpCode()));
-            ctx.render(new UniversalResponse<>(e.getCode(), e.getMessage()));
+            ctx.render(new ErrorResponse(e.getCode(), e.getMessage()));
         });
 
         // Обработка остальных исключений
-        error(Exception.class, (ctx, cause, statusCode) -> {
+        error(Exception.class, (ctx, cause, _) -> {
             log.error("Unexpected error", cause);
             ctx.setResponseCode(StatusCode.SERVER_ERROR);
-            ctx.render(new UniversalResponse<>(5000, "Неизвестная ошибка: " + cause.getMessage()));
+            ctx.render(new ErrorResponse("internal.server.error", "Internal server error"));
         });
     }
 }

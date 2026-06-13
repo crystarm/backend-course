@@ -15,11 +15,11 @@ public class Main {
 
         var news = service.save(new CreateNewsEventRequest("Test Title", "Test Message"));
         assert news != null;
-        assert "Test Title".equals(news.getData().getTitle());
-        var id = news.getData().getId();
+        assert "Test Title".equals(news.getTitle());
+        var id = news.getId();
 
         var sameNews = service.getById(id);
         assert sameNews != null;
-        assert "Test Message".equals(sameNews.getData().getMessage());
+        assert "Test Message".equals(sameNews.getMessage());
     }
 }

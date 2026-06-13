@@ -3,7 +3,6 @@ package com.karandashov.service;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.exceptions.NotFoundException;
 import com.karandashov.repository.NewsEventRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,15 +37,13 @@ public class NewsEventServiceTest {
         when(repository.getById(id)).thenReturn(Optional.of(event));
 
         // Act
-        UniversalResponse<NewsEvent> response = service.getById(id);
+        NewsEvent response = service.getById(id);
 
         // Assert
-        assertEquals(0, response.getCode());
-        assertEquals("SUCCESS", response.getMessage());
-        assertNotNull(response.getData());
-        assertEquals(id, response.getData().getId());
-        assertEquals("Title", response.getData().getTitle());
-        assertEquals("Message", response.getData().getMessage());
+        assertNotNull(response);
+        assertEquals(id, response.getId());
+        assertEquals("Title", response.getTitle());
+        assertEquals("Message", response.getMessage());
         verify(repository, times(1)).getById(id);
         verifyNoMoreInteractions(repository);
     }
@@ -71,16 +68,14 @@ public class NewsEventServiceTest {
         when(repository.getAll()).thenReturn(List.of(e1, e2));
 
         // Act
-        UniversalResponse<NewsEventList> response = service.getAll();
+        NewsEventList response = service.getAll();
 
         // Assert
-        assertEquals(0, response.getCode());
-        assertEquals("SUCCESS", response.getMessage());
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().getEvents());
-        assertEquals(2, response.getData().getEvents().size());
-        assertTrue(response.getData().getEvents().stream().anyMatch(e -> e.getId().equals(e1.getId())));
-        assertTrue(response.getData().getEvents().stream().anyMatch(e -> e.getId().equals(e2.getId())));
+        assertNotNull(response);
+        assertNotNull(response.getEvents());
+        assertEquals(2, response.getEvents().size());
+        assertTrue(response.getEvents().stream().anyMatch(e -> e.getId().equals(e1.getId())));
+        assertTrue(response.getEvents().stream().anyMatch(e -> e.getId().equals(e2.getId())));
         verify(repository, times(1)).getAll();
         verifyNoMoreInteractions(repository);
     }
@@ -93,20 +88,18 @@ public class NewsEventServiceTest {
         doNothing().when(repository).save(captor.capture());
 
         // Act
-        UniversalResponse<NewsEvent> response = service.save(request);
+        NewsEvent response = service.save(request);
 
         // Assert
-        assertEquals(0, response.getCode());
-        assertEquals("SUCCESS", response.getMessage());
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().getId());
-        assertEquals("New Title", response.getData().getTitle());
-        assertEquals("New Message", response.getData().getMessage());
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals("New Title", response.getTitle());
+        assertEquals("New Message", response.getMessage());
 
         // The same instance created inside service should be passed to repo and returned in response
         NewsEvent saved = captor.getValue();
         assertNotNull(saved);
-        assertSame(saved, response.getData());
+        assertSame(saved, response);
         verify(repository, times(1)).save(any(NewsEvent.class));
         verifyNoMoreInteractions(repository);
     }

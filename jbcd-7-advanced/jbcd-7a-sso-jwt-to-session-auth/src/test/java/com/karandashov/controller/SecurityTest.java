@@ -29,9 +29,8 @@ public class SecurityTest extends BaseTest {
     void meShouldReturnUnauthorizedForAnonymousUser() throws Exception {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.authenticated").value(false))
-                .andExpect(jsonPath("$.data.userInfo", aMapWithSize(0)));
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.userInfo", aMapWithSize(0)));
     }
 
     @Test
@@ -39,11 +38,10 @@ public class SecurityTest extends BaseTest {
         mockMvc.perform(get("/api/auth/me")
                         .with(AuthUtils.oidcUser()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.authenticated").value(true))
-                .andExpect(jsonPath("$.data.userInfo.email").value("student@example.com"))
-                .andExpect(jsonPath("$.data.userInfo.preferred_username").value("student"))
-                .andExpect(jsonPath("$.data.userInfo.groups[0]").value("students"));
+                .andExpect(jsonPath("$.authenticated").value(true))
+                .andExpect(jsonPath("$.userInfo.email").value("student@example.com"))
+                .andExpect(jsonPath("$.userInfo.preferred_username").value("student"))
+                .andExpect(jsonPath("$.userInfo.groups[0]").value("students"));
     }
 
     @Test
