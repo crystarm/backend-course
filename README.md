@@ -80,9 +80,6 @@ java-backend-course-demo = jbcd
 - **jbcd-2b-long-polling**: Реализация технологии Long Polling.
 - **jbcd-2b-sse**: Пример использования Server-Sent Events (SSE).
 - **jbcd-2b-websocket**: Двусторонний обмен данными через WebSockets.
-- **jbcd-2b-grpc-contract-lib**: Описание gRPC контракта через Protocol Buffers.
-- **jbcd-2b-grpc-server**: Реализация gRPC сервера.
-- **jbcd-2b-grpc-client**: Реализация gRPC клиента.
 
 ### jbcd-3-database
 
