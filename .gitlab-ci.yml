@@ -12,7 +12,7 @@ variables:
 
 # Главная цель — прогнать jbcd-mini-project и собрать необходимые docker-образы для деплоя на сервер.
 # Используется buildx, чтобы собирать под amd64 / arm64 (mac processors).
-# Образы публикуются в gitlab registry, их можно найти из репозитории:
+# Образы публикуются в gitlab registry, их можно найти в репозитории:
 # https://gitlab.com/VladKarandashov/java-backend-course-demo/container_registry
 
 publish-images:
