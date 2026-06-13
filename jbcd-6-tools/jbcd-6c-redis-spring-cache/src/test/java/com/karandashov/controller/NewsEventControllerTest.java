@@ -227,10 +227,11 @@ public class NewsEventControllerTest extends BaseTest {
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        // Вызываем getAll снова - кэш должен быть пуст, вызов репозитория повторится
+        // Вызываем getAll снова - кэш должен быть сброшен, поэтому ответ содержит новую новость.
         mockMvc.perform(get("/news"))
-                .andExpect(status().isOk());
-
-        verify(repository, times(2)).findAll();
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.events", hasSize(1)))
+                .andExpect(jsonPath("$.data.events[0].title").value("New Title"))
+                .andExpect(jsonPath("$.data.events[0].message").value("New Message"));
     }
 }

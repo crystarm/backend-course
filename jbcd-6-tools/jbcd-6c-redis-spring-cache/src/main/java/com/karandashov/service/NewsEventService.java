@@ -46,7 +46,7 @@ public class NewsEventService {
         return new UniversalResponse<>(newsEventList);
     }
 
-    @CacheEvict(value = {"news", "news_list"}, allEntries = true)
+    @CacheEvict(value = {"news", "news_list"}, allEntries = true, beforeInvocation = true)
     public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
                 .id(UUID.randomUUID())
