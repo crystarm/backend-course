@@ -11,6 +11,8 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+  jackson:
+    default-property-inclusion: non_empty
 
 captcha:
   ttl:

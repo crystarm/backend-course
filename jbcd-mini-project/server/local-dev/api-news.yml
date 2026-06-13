@@ -27,6 +27,8 @@ spring:
     redis:
       cache-null-values: false
       time-to-live: 5m
+  jackson:
+    default-property-inclusion: non_empty
 
 client:
   captcha:
