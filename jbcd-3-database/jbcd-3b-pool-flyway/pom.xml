@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-3b-tools</artifactId>
+    <artifactId>jbcd-3b-pool-flyway</artifactId>
 
     <dependencies>
 
@@ -26,11 +26,7 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
 
-        <!-- liquibase для миграций в базе данных -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
+
 
         <!-- библиотека легкого создания web-сервера -->
         <dependency>
