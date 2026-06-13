@@ -18,9 +18,24 @@ management:
   endpoint:
     health:
       show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
   tracing:
     sampling:
       probability: 1.0
+    export:
+      otlp:
+        enabled: true
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://victoria-traces:10428/insert/opentelemetry/v1/traces
+  logging:
+    export:
+      otlp:
+        enabled: false
   otlp:
     metrics:
       export:

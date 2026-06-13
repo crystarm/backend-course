@@ -26,9 +26,8 @@ transforms:
       - app_logs
     drop_on_error: false
     source: |
-      # ---- базовые метки, которые должны быть у каждого события ----
       .source_type = "docker"
-      .stack = "local-dev"
+      .stack = "mini-project"
 
       # docker_logs кладёт исходную строку контейнера в .message
       raw, raw_err = string(.message)
@@ -46,34 +45,29 @@ transforms:
           # message из JSON (человекочитаемая строка лога).
           . = merge(., obj)
 
-          # OpenObserve не индексирует вложенные объекты — он хранит их
-          # как JSON-строки и искать по ним нельзя. Плющим `log.level`
+          # Плющим `log.level`
           # → `log_level`, `process.thread.name` → `process_thread_name`,
           # `service.name` → `service_name` и т.д.
           . = flatten(., separator: "_")
 
-          # ECS-layout отдаёт время события в "@timestamp". Символ "@"
-          # в имени поля OpenObserve не любит (хранит как opaque-строку),
-          # поэтому переносим в _timestamp, который он использует нативно
-          # для сортировки и «live tail».
-          # В VRL к полям со спецсимволами обращаемся через ."имя".
+          # ECS-layout отдаёт время события в "@timestamp". Для VictoriaLogs
+          # перекладываем его в обычное timestamp-поле.
           ecs_ts = ."@timestamp"
           if is_string(ecs_ts) {
             parsed_ts, ts_err = parse_timestamp(ecs_ts, format: "%+")
             if ts_err == null {
-              ._timestamp = to_unix_timestamp(parsed_ts, unit: "microseconds")
+              .timestamp = parsed_ts
             }
           }
           del(."@timestamp")
         } else {
           # Распарсилось, но это не объект (массив/скаляр) — оригинал в fallback.
-          .raw_message = raw
+          .message = raw
         }
       } else {
         # Не JSON: JVM-стектрейс до старта logback, baseline-строки и т.п.
         # Оставляем как есть, чтобы хоть что-то было видно.
-        .raw_message = raw
-        del(.message)
+        .message = raw
       }
 
       # service_name: берём из Spring-Boot-лога (после flatten он уже в корне),
@@ -83,32 +77,25 @@ transforms:
       }
 
 sinks:
-  openobserve_logs_news:
-    type: http
+  victoria_logs:
+    type: elasticsearch
     inputs:
       - app_logs_normalized
-    uri: http://openobserve:5080/api/news/backend-logs/_json
-    method: post
-    auth:
-      strategy: basic
-      user: root@example.com
-      password: rootpass123
+    endpoints:
+      - http://victoria-logs:9428/insert/elasticsearch/
+    api_version: v8
     compression: gzip
-    encoding:
-      codec: json
-      timestamp_format: rfc3339
     healthcheck:
-      enabled: true
-      uri: http://openobserve:5080/healthz
+      enabled: false
+    query:
+      _msg_field: message
+      _time_field: timestamp
+      _stream_fields: service_name,container_name,stack
 
-  openobserve_metrics_news:
+  victoria_metrics:
     type: prometheus_remote_write
     inputs:
       - app_metrics
-    endpoint: http://openobserve:5080/api/news/prometheus/api/v1/write
+    endpoint: http://victoria-metrics:8428/api/v1/write
     healthcheck:
       enabled: false
-    auth:
-      strategy: basic
-      user: root@example.com
-      password: rootpass123

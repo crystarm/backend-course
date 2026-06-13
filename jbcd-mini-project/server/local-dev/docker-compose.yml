@@ -1,13 +1,16 @@
 volumes:
   postgres_data:
-  openobserve_data:
+  victoria_metrics_data:
+  victoria_logs_data:
+  victoria_traces_data:
+  grafana_data:
   redis_data:
 
 services:
   gateway:
     image: nginx:stable-alpine
     container_name: gateway
-    restart: no
+    restart: always
     ports:
       - "8080:80"
     volumes:
@@ -16,8 +19,6 @@ services:
       api-captcha:
         condition: service_healthy
       api-news:
-        condition: service_healthy
-      openobserve:
         condition: service_healthy
       view-news:
         condition: service_healthy
@@ -31,7 +32,7 @@ services:
   api-captcha:
     build: ./../../api-captcha
     container_name: api-captcha
-    restart: no
+    restart: always
     tmpfs:
       - /tmp
     healthcheck:
@@ -43,6 +44,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      victoria-traces:
+        condition: service_started
     env_file:
       - api-captcha.env
     environment:
@@ -54,7 +57,7 @@ services:
   api-news:
     build: ./../../api-news
     container_name: api-news
-    restart: no
+    restart: always
     tmpfs:
       - /tmp
     healthcheck:
@@ -68,6 +71,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      victoria-traces:
+        condition: service_started
     env_file:
       - api-news.env
     environment:
@@ -79,7 +84,7 @@ services:
   view-news:
     build: ./../../view-news
     container_name: view-news
-    restart: no
+    restart: always
     healthcheck:
       test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1" ]
       interval: 10s
@@ -90,7 +95,7 @@ services:
   postgres:
     image: postgres:18
     container_name: postgres
-    restart: no
+    restart: always
     environment:
       POSTGRES_DB: news_db
       POSTGRES_USER: test
@@ -110,7 +115,7 @@ services:
   redis:
     image: redis:8.6.0
     container_name: redis
-    restart: no
+    restart: always
     command:
       - redis-server
       - --save 60 1
@@ -130,29 +135,68 @@ services:
       retries: 3
       start_period: 20s
 
-  openobserve:
-    image: public.ecr.aws/zinclabs/openobserve:latest
-    container_name: openobserve
-    restart: no
-    environment:
-      ZO_ROOT_USER_EMAIL: root@example.com
-      ZO_ROOT_USER_PASSWORD: rootpass123
-      ZO_DATA_DIR: /data
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.144.0
+    container_name: victoria-metrics
+    restart: always
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:8428
     ports:
-      - "5080:5080"
+      - "8428:8428"
     volumes:
-      - openobserve_data:/data
-    healthcheck:
-      test: [ "CMD", "/openobserve", "node", "status" ]
-      interval: 10s
-      retries: 20
-      start_period: 30s
-      timeout: 5s
+      - victoria_metrics_data:/storage
+
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v1.50.0
+    container_name: victoria-logs
+    restart: always
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:9428
+    ports:
+      - "9428:9428"
+    volumes:
+      - victoria_logs_data:/storage
+
+  victoria-traces:
+    image: victoriametrics/victoria-traces:v0.9.2
+    container_name: victoria-traces
+    restart: always
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:10428
+    ports:
+      - "10428:10428"
+    volumes:
+      - victoria_traces_data:/storage
+
+  grafana:
+    image: grafana/grafana:13.0.2-slim
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: victoriametrics-logs-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./../grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./../grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      victoria-metrics:
+        condition: service_started
+      victoria-logs:
+        condition: service_started
+      victoria-traces:
+        condition: service_started
 
   vector:
     image: timberio/vector:0.43.1-alpine
     container_name: vector
-    restart: no
+    restart: always
     user: "0:0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -163,5 +207,7 @@ services:
         condition: service_healthy
       api-news:
         condition: service_healthy
-      openobserve:
-        condition: service_healthy
+      victoria-metrics:
+        condition: service_started
+      victoria-logs:
+        condition: service_started

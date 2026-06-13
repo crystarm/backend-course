@@ -3,15 +3,8 @@
     email vlad.karandashov.tech@gmail.com
 }
 
-openobserve.news.karandashov.com {
-    reverse_proxy openobserve:5080 {
-        # OpenObserve поддерживает долгоживущие соединения (live tail через SSE/ws).
-        # Дефолтные таймауты Caddy могут рвать такие стримы — явно выключаем, чтобы прокси не закрывал соединение первым.
-        transport http {
-            read_timeout 0
-            write_timeout 0
-        }
-    }
+grafana.news.karandashov.com {
+    reverse_proxy grafana:3000
 }
 
 news.karandashov.com {
