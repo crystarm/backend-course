@@ -18,6 +18,7 @@
         <module>jbcd-2-base-server-lib</module>
         <module>jbcd-2a-netty-server</module>
         <module>jbcd-2a-jooby-server</module>
+        <module>jbcd-2a-javalin-server</module>
         <module>jbcd-2a-http-client</module>
         <module>jbcd-2b-long-polling</module>
         <module>jbcd-2b-sse</module>

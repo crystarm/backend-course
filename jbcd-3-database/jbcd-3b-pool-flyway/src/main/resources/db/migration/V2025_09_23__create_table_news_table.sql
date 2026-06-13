@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS news_table
+(
+    id UUID PRIMARY KEY,
+    title VARCHAR(256) NOT NULL,
+    message TEXT NOT NULL
+);

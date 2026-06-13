@@ -24,7 +24,7 @@ public class JdbcNewsEventRepository implements NewsEventRepository {
         this.connectionFactory = connectionFactory;
         this.schema = '"' + schema + '"';
         this.table = this.schema + "." + '"' + table + '"';
-        // createTables(); // Больше не требуется, заменили на liquibase
+        // createTables(); // Больше не требуется, заменили на flyway
     }
 
     @Override
@@ -80,7 +80,7 @@ public class JdbcNewsEventRepository implements NewsEventRepository {
         }
     }
 
-//  Больше не требуется, заменили на liquibase
+//  Больше не требуется, заменили на flyway
 
 //    private void createTables() {
 //        String createSchema = "CREATE SCHEMA IF NOT EXISTS " + schema;

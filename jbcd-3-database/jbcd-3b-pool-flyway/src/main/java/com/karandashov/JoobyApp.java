@@ -42,7 +42,7 @@ public class JoobyApp extends Jooby {
         NewsEventRepository repository = new JdbcNewsEventRepository(connectionFactory, databaseSchema, "news_table");
         NewsEventService service = new NewsEventService(repository);
 
-        DatabaseMigrator databaseMigrator = new DatabaseMigrator(connectionFactory);
+        DatabaseMigrator databaseMigrator = new DatabaseMigrator(databaseUrl, databaseUser, databasePassword, databaseSchema);
         databaseMigrator.runMigrations();
 
         // Определяем маршруты через Script API
