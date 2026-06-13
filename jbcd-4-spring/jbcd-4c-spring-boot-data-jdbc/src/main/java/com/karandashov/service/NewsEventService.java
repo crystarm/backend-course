@@ -10,6 +10,7 @@ import com.karandashov.mapper.NewsMapper;
 import com.karandashov.repository.NewsEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class NewsEventService {
 
     private final NewsMapper mapper;
 
+    @Transactional(readOnly = true)
     public UniversalResponse<NewsEvent> getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
@@ -33,6 +35,7 @@ public class NewsEventService {
         return new UniversalResponse<>(newsEventDto);
     }
 
+    @Transactional(readOnly = true)
     public UniversalResponse<NewsEventList> getAll() {
         List<NewsEvent> events = StreamSupport
                 .stream(repository.findAll().spliterator(), false)
@@ -42,6 +45,7 @@ public class NewsEventService {
         return new UniversalResponse<>(newsEventList);
     }
 
+    @Transactional
     public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
                 .title(request.getTitle())

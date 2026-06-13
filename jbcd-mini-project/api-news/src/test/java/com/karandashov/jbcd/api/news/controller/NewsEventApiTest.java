@@ -19,15 +19,22 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.matching;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.karandashov.jbcd.api.news.WiremockUtils.CAPTCHA_CHECK_FAILED_ID;
+import static com.karandashov.jbcd.api.news.WiremockUtils.CAPTCHA_NOT_FOUND_ID;
+import static com.karandashov.jbcd.api.news.WiremockUtils.CAPTCHA_NOT_SOLVED_ID;
+import static com.karandashov.jbcd.api.news.WiremockUtils.SOLVED_CAPTCHA_ID;
+import static com.karandashov.jbcd.api.news.WiremockUtils.stubCaptchaCheckFailed;
+import static com.karandashov.jbcd.api.news.WiremockUtils.stubCaptchaNotFoundOrExpired;
+import static com.karandashov.jbcd.api.news.WiremockUtils.stubCaptchaNotSolved;
+import static com.karandashov.jbcd.api.news.WiremockUtils.stubSolvedCaptcha;
+import static com.karandashov.jbcd.api.news.WiremockUtils.verifyCaptchaCheckRequested;
+import static com.karandashov.jbcd.api.news.WiremockUtils.verifyCaptchaCheckRequestedWithTraceparent;
+import static com.karandashov.jbcd.api.news.WiremockUtils.verifyCaptchaCheckWasNotRequested;
+import static com.karandashov.jbcd.api.news.WiremockUtils.wiremockFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -121,49 +128,44 @@ class NewsEventApiTest extends BaseTest {
 
     @Test
     void saveCreatesNews() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        stubSolvedCaptcha(captchaId);
-        CreateNewsEventRequest request = new CreateNewsEventRequest("Breaking", "Something happened", captchaId);
+        stubSolvedCaptcha(captchaApiMock());
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(request)))
+                        .content(wiremockFile("news/create/request/success.json")))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value("Breaking"))
                 .andExpect(jsonPath("$.message").value("Something happened"));
 
-        captchaApiMock().verify(postRequestedFor(urlEqualTo(captchaCheckPath(captchaId))));
+        verifyCaptchaCheckRequested(captchaApiMock(), SOLVED_CAPTCHA_ID);
     }
 
     @Test
     void savePropagatesTraceparentHeaderToCaptchaService() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        stubSolvedCaptcha(captchaId);
+        stubSolvedCaptcha(captchaApiMock());
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                        .content(wiremockFile("news/create/request/success.json")))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        captchaApiMock().verify(postRequestedFor(urlEqualTo(captchaCheckPath(captchaId)))
-                .withHeader("traceparent", matching(".+")));
+        verifyCaptchaCheckRequestedWithTraceparent(captchaApiMock(), SOLVED_CAPTCHA_ID);
     }
 
     @Test
     void saveEvictsNewsListCache() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        stubSolvedCaptcha(captchaId);
+        stubSolvedCaptcha(captchaApiMock());
         Objects.requireNonNull(cacheManager.getCache("news_list")).put(
                 SimpleKey.EMPTY,
                 new NewsEventList(java.util.List.of(new NewsEvent(UUID.randomUUID(), "Old", "Old message")))
         );
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                        .content(wiremockFile("news/create/request/success.json")))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -172,13 +174,12 @@ class NewsEventApiTest extends BaseTest {
 
     @Test
     void saveUpdatesNewsCountMetric() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        stubSolvedCaptcha(captchaId);
+        stubSolvedCaptcha(captchaApiMock());
         newsEventRepository.save(new NewsEventEntity(null, "Existing", "Already here"));
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                        .content(wiremockFile("news/create/request/success.json")))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -188,45 +189,47 @@ class NewsEventApiTest extends BaseTest {
 
     @Test
     void saveReturns400WhenCaptchaWasNotFoundOrExpired() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        stubCaptchaError(captchaId, 404, 2000, "Captcha not found or expired");
+        stubCaptchaNotFoundOrExpired(captchaApiMock());
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                        .content(wiremockFile("news/create/request/captcha-not-found.json")))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(1001))
                 .andExpect(jsonPath("$.message").value("Captcha not found or expired"));
+
+        verifyCaptchaCheckRequested(captchaApiMock(), CAPTCHA_NOT_FOUND_ID);
     }
 
     @Test
     void saveReturns400WhenCaptchaWasNotSolved() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        stubCaptchaError(captchaId, 400, 2001, "Captcha is not solved");
+        stubCaptchaNotSolved(captchaApiMock());
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                        .content(wiremockFile("news/create/request/captcha-not-solved.json")))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(1002))
                 .andExpect(jsonPath("$.message").value("Captcha is not solved"));
+
+        verifyCaptchaCheckRequested(captchaApiMock(), CAPTCHA_NOT_SOLVED_ID);
     }
 
     @Test
     void saveReturns502WhenCaptchaCheckFailed() throws Exception {
-        UUID captchaId = UUID.randomUUID();
-        captchaApiMock().stubFor(post(urlEqualTo(captchaCheckPath(captchaId)))
-                .willReturn(aResponse().withStatus(500)));
+        stubCaptchaCheckFailed(captchaApiMock());
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", captchaId))))
+                        .content(wiremockFile("news/create/request/captcha-check-failed.json")))
                 .andDo(print())
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.code").value(1003))
                 .andExpect(jsonPath("$.message").value("Failed to check captcha"));
+
+        verifyCaptchaCheckRequested(captchaApiMock(), CAPTCHA_CHECK_FAILED_ID);
     }
 
     @Test
@@ -241,7 +244,7 @@ class NewsEventApiTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("invalidCreateRequests")
     void saveReturns400ForInvalidRequest(CreateNewsEventRequest request, String expectedMessagePart) throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -253,14 +256,14 @@ class NewsEventApiTest extends BaseTest {
 
     @Test
     void saveDoesNotCallCaptchaServiceWhenRequestWasInvalid() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/news")
+        mockMvc.perform(post("/news")
                         .contentType(APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", null))))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(4000));
 
-        captchaApiMock().verify(0, postRequestedFor(urlPathMatching("/internal/captcha/.+/checkAndExpire")));
+        verifyCaptchaCheckWasNotRequested(captchaApiMock());
     }
 
     private static Stream<Arguments> invalidCreateRequests() {
@@ -271,25 +274,6 @@ class NewsEventApiTest extends BaseTest {
                 Arguments.of(new CreateNewsEventRequest("Valid title", "a".repeat(4001), UUID.randomUUID()), "message"),
                 Arguments.of(new CreateNewsEventRequest("Valid title", "Valid message", null), "solvedCaptchaId")
         );
-    }
-
-    private void stubSolvedCaptcha(UUID captchaId) {
-        captchaApiMock().stubFor(post(urlEqualTo(captchaCheckPath(captchaId)))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", APPLICATION_JSON.toString())
-                        .withBody("{\"valid\":true}")));
-    }
-
-    private void stubCaptchaError(UUID captchaId, int status, int code, String message) {
-        captchaApiMock().stubFor(post(urlEqualTo(captchaCheckPath(captchaId)))
-                .willReturn(aResponse()
-                        .withStatus(status)
-                        .withHeader("Content-Type", APPLICATION_JSON.toString())
-                        .withBody("{\"code\":" + code + ",\"message\":\"" + message + "\"}")));
-    }
-
-    private String captchaCheckPath(UUID captchaId) {
-        return "/internal/captcha/" + captchaId + "/checkAndExpire";
     }
 
     private void assertCacheBecomesEmpty() throws InterruptedException {

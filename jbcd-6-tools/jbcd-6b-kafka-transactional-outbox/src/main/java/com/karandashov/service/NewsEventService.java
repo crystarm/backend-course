@@ -28,6 +28,7 @@ public class NewsEventService {
 
     private final TransactionalOutboxService transactionalOutboxService;
 
+    @Transactional(readOnly = true)
     public UniversalResponse<NewsEvent> getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
@@ -35,6 +36,7 @@ public class NewsEventService {
         return new UniversalResponse<>(newsEventDto);
     }
 
+    @Transactional(readOnly = true)
     public UniversalResponse<NewsEventList> getAll() {
         List<NewsEventEntity> events = repository.findAll();
         List<NewsEvent> newsEventDtoList = mapper.toDtoList(events);

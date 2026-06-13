@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class NewsEventService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "news", key = "#id")
     public UniversalResponse<NewsEvent> getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
@@ -38,6 +40,7 @@ public class NewsEventService {
         return new UniversalResponse<>(newsEventDto);
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "news_list")
     public UniversalResponse<NewsEventList> getAll() {
         List<NewsEventEntity> events = repository.findAll();
@@ -46,6 +49,7 @@ public class NewsEventService {
         return new UniversalResponse<>(newsEventList);
     }
 
+    @Transactional
     @CacheEvict(value = {"news", "news_list"}, allEntries = true, beforeInvocation = true)
     public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
