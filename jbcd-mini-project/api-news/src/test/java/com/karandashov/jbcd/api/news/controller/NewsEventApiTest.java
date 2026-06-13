@@ -196,8 +196,8 @@ class NewsEventApiTest extends BaseTest {
                         .content(wiremockFile("news/create/request/captcha-not-found.json")))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(1001))
-                .andExpect(jsonPath("$.message").value("Captcha not found or expired"));
+                .andExpect(jsonPath("$.code").value("captcha.not.found.or.expired"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
 
         verifyCaptchaCheckRequested(captchaApiMock(), CAPTCHA_NOT_FOUND_ID);
     }
@@ -211,8 +211,8 @@ class NewsEventApiTest extends BaseTest {
                         .content(wiremockFile("news/create/request/captcha-not-solved.json")))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(1002))
-                .andExpect(jsonPath("$.message").value("Captcha is not solved"));
+                .andExpect(jsonPath("$.code").value("captcha.not.solved"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
 
         verifyCaptchaCheckRequested(captchaApiMock(), CAPTCHA_NOT_SOLVED_ID);
     }
@@ -226,8 +226,8 @@ class NewsEventApiTest extends BaseTest {
                         .content(wiremockFile("news/create/request/captcha-check-failed.json")))
                 .andDo(print())
                 .andExpect(status().isBadGateway())
-                .andExpect(jsonPath("$.code").value(1003))
-                .andExpect(jsonPath("$.message").value("Failed to check captcha"));
+                .andExpect(jsonPath("$.code").value("captcha.check.failed"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
 
         verifyCaptchaCheckRequested(captchaApiMock(), CAPTCHA_CHECK_FAILED_ID);
     }
@@ -237,8 +237,8 @@ class NewsEventApiTest extends BaseTest {
         mockMvc.perform(get("/news/{id}", UUID.randomUUID()))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(1000))
-                .andExpect(jsonPath("$.message").value("News not found"));
+                .andExpect(jsonPath("$.code").value("news.not.found"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @ParameterizedTest
@@ -249,7 +249,7 @@ class NewsEventApiTest extends BaseTest {
                         .content(jsonMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4000))
+                .andExpect(jsonPath("$.code").value("bad.request"))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Validation error")))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString(expectedMessagePart)));
     }
@@ -261,7 +261,7 @@ class NewsEventApiTest extends BaseTest {
                         .content(jsonMapper.writeValueAsString(new CreateNewsEventRequest("Breaking", "Something happened", null))))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4000));
+                .andExpect(jsonPath("$.code").value("bad.request"));
 
         verifyCaptchaCheckWasNotRequested(captchaApiMock());
     }

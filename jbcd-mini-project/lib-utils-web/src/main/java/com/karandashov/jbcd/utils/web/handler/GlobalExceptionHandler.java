@@ -26,29 +26,29 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         log.warn("Validation error: " + message, ex);
-        ErrorResponse response = new ErrorResponse(BAD_REQUEST.getErrorCode(), "Validation error: " + message);
+        ErrorResponse response = new ErrorResponse(BAD_REQUEST.getCode(), "Validation error: " + message);
         return ResponseEntity.status(BAD_REQUEST.getHttpStatusCode()).body(response);
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
         log.warn("Validation error: " + ex.getMessage(), ex);
-        ErrorResponse response = new ErrorResponse(BAD_REQUEST.getErrorCode(), "Validation error: " + ex.getMessage());
+        ErrorResponse response = new ErrorResponse(BAD_REQUEST.getCode(), "Validation error: " + ex.getMessage());
         return ResponseEntity.status(BAD_REQUEST.getHttpStatusCode()).body(response);
     }
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
-        var errorLog = "Handling base exception " + ex.getError().getErrorCode() + " " + ex.getError().getMessage();
+        var errorLog = "Handling base exception " + ex.getError().getCode() + " " + ex.getError().getMessage();
         log.warn(errorLog, ex);
-        ErrorResponse response = new ErrorResponse(ex.getError().getErrorCode(), ex.getError().getMessage());
+        ErrorResponse response = new ErrorResponse(ex.getError().getCode(), ex.getError().getMessage());
         return ResponseEntity.status(ex.getError().getHttpStatusCode()).body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Handling unexpected exception: ", ex);
-        ErrorResponse response = new ErrorResponse(INTERNAL_SERVER_ERROR.getErrorCode(), INTERNAL_SERVER_ERROR.getMessage());
+        ErrorResponse response = new ErrorResponse(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMessage());
         return ResponseEntity.status(INTERNAL_SERVER_ERROR.getHttpStatusCode()).body(response);
     }
 }

@@ -5,19 +5,23 @@ import org.springframework.http.HttpStatus;
 
 public enum BusinessError implements ErrorInfo {
 
-    CAPTCHA_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "Captcha not found or expired"),
+    CAPTCHA_NOT_FOUND(HttpStatus.NOT_FOUND, "captcha.not.found.or.expired"),
 
-    CAPTCHA_NOT_SOLVED(HttpStatus.BAD_REQUEST, 2001, "Captcha is not solved");
+    CAPTCHA_NOT_SOLVED(HttpStatus.BAD_REQUEST, "captcha.not.solved");
 
     private final HttpStatus httpStatusCode;
 
-    private final int errorCode;
+    private final String code;
 
     private final String message;
 
-    BusinessError(HttpStatus httpStatusCode, int errorCode, String message) {
+    BusinessError(HttpStatus httpStatusCode, String code) {
+        this(httpStatusCode, code, null);
+    }
+
+    BusinessError(HttpStatus httpStatusCode, String code, String message) {
         this.httpStatusCode = httpStatusCode;
-        this.errorCode = errorCode;
+        this.code = code;
         this.message = message;
     }
 
@@ -27,8 +31,8 @@ public enum BusinessError implements ErrorInfo {
     }
 
     @Override
-    public int getErrorCode() {
-        return errorCode;
+    public String getCode() {
+        return code;
     }
 
     @Override

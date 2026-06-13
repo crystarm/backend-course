@@ -85,8 +85,8 @@ class CaptchaApiTest extends BaseTest {
                         .content(jsonMapper.writeValueAsString(new SolveRequest("abc12"))))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(2000))
-                .andExpect(jsonPath("$.message").value("Captcha not found or expired"));
+                .andExpect(jsonPath("$.code").value("captcha.not.found.or.expired"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test
@@ -96,7 +96,7 @@ class CaptchaApiTest extends BaseTest {
                 .content(jsonMapper.writeValueAsString(new SolveRequest(" "))))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(4000))
+                .andExpect(jsonPath("$.code").value("bad.request"))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Validation error")));
     }
 
@@ -121,8 +121,8 @@ class CaptchaApiTest extends BaseTest {
         mockMvc.perform(post("/internal/captcha/{id}/checkAndExpire", id))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(2001))
-                .andExpect(jsonPath("$.message").value("Captcha is not solved"));
+                .andExpect(jsonPath("$.code").value("captcha.not.solved"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test
@@ -130,7 +130,7 @@ class CaptchaApiTest extends BaseTest {
         mockMvc.perform(post("/internal/captcha/{id}/checkAndExpire", UUID.randomUUID()))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(2000))
-                .andExpect(jsonPath("$.message").value("Captcha not found or expired"));
+                .andExpect(jsonPath("$.code").value("captcha.not.found.or.expired"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()));
     }
 }

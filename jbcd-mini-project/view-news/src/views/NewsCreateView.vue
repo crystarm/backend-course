@@ -110,9 +110,9 @@ async function submit() {
     router.push({ name: 'news-list' });
   } catch (error) {
     toast.show(error);
-    // на CAPTCHA_*-ошибках регенерируем капчу, чтобы пользователь мог повторить
+    // На captcha-ошибках регенерируем капчу, чтобы пользователь мог повторить.
     if (error instanceof BackendError) {
-      if (error.code === 1001 || error.code === 1002 || error.code === 2000) {
+      if (error.code === 'captcha.not.found.or.expired' || error.code === 'captcha.not.solved') {
         await regenerateCaptcha();
       }
     }

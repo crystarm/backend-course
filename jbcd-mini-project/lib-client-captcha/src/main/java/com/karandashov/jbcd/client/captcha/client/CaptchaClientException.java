@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatusCode;
 public class CaptchaClientException extends RuntimeException {
 
     private final HttpStatusCode statusCode;
-    private final Integer code;
+    private final String code;
 
-    public CaptchaClientException(HttpStatusCode statusCode, Integer code, String message) {
+    public CaptchaClientException(HttpStatusCode statusCode, String code, String message) {
         super(message);
         this.statusCode = statusCode;
         this.code = code;
@@ -17,7 +17,7 @@ public class CaptchaClientException extends RuntimeException {
         return statusCode;
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 }

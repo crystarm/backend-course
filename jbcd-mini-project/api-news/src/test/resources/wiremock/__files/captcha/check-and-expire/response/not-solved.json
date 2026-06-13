@@ -1,4 +1,3 @@
 {
-  "code": 2001,
-  "message": "Captcha is not solved"
+  "code": "captcha.not.solved"
 }

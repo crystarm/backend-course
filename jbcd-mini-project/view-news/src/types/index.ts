@@ -31,18 +31,33 @@ export interface SolveResponse {
 }
 
 export interface BackendErrorBody {
-  code: number;
-  message: string;
+  code: string;
+  message?: string | null;
 }
 
 export class BackendError extends Error {
-  code: number;
+  code: string;
   status: number;
+  backendMessage: string | null;
 
   constructor(body: BackendErrorBody, status: number) {
-    super(body.message);
+    const message = body.message ?? backendErrorMessageByCode(body.code);
+    super(message);
     this.code = body.code;
     this.status = status;
+    this.backendMessage = body.message ?? null;
     this.name = 'BackendError';
   }
+}
+
+export function backendErrorMessageByCode(code: string): string {
+  const messages: Record<string, string> = {
+    'bad.request': 'Некорректный запрос',
+    'internal.server.error': 'Внутренняя ошибка сервера',
+    'news.not.found': 'Новость не найдена',
+    'captcha.not.found.or.expired': 'Капча не найдена или истекла',
+    'captcha.not.solved': 'Капча не пройдена',
+    'captcha.check.failed': 'Не удалось проверить капчу',
+  };
+  return messages[code] ?? 'Запрос завершился ошибкой';
 }

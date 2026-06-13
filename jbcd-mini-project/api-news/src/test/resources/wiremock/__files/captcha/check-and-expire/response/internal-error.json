@@ -1,4 +1,3 @@
 {
-  "code": 5000,
-  "message": "Internal error"
+  "code": "internal.server.error"
 }
