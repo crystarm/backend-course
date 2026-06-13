@@ -6,11 +6,12 @@ import com.karandashov.exceptions.BaseException;
 import com.karandashov.repository.ConnectionFactory;
 import com.karandashov.repository.JdbcNewsEventRepository;
 import com.karandashov.repository.NewsEventRepository;
+import com.karandashov.repository.PropertiesService;
 import com.karandashov.service.NewsEventService;
 import io.jooby.Jooby;
 import io.jooby.StatusCode;
 import io.jooby.handler.AccessLogHandler;
-import io.jooby.jackson.JacksonModule;
+import io.jooby.jackson.Jackson2Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,20 +22,16 @@ public class JoobyApp extends Jooby {
 
     public JoobyApp() {
         // Использование Jackson для JSON
-        install(new JacksonModule());
+        install(new Jackson2Module());
 
         // Логирование запросов
         use(new AccessLogHandler());
 
-        String databaseUrl = System.getenv("DATABASE_URL");
-        String databaseUser = System.getenv("DATABASE_USERNAME");
-        String databasePassword = System.getenv("DATABASE_PASSWORD");
-        String databaseSchema = System.getenv("APP_DATABASE_SCHEMA");
-
-        if (databaseUrl == null || databaseUser == null || databasePassword == null || databaseSchema == null) {
-            log.error("Не заданы переменные окружения для подключения к БД!");
-            throw new RuntimeException("Не заданы переменные окружения для подключения к БД!");
-        }
+        PropertiesService propertiesService = new PropertiesService();
+        String databaseUrl = propertiesService.get("database.url");
+        String databaseUser = propertiesService.get("database.username");
+        String databasePassword = propertiesService.get("database.password");
+        String databaseSchema = propertiesService.get("database.schema");
 
         // Создаем дерево наших классов, начиная с нижнего слоя
         ConnectionFactory connectionFactory = new ConnectionFactory(databaseUrl, databaseUser, databasePassword);

@@ -9,13 +9,13 @@ spring:
       include-stacktrace: never
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/lectures_java_course_demo
+    username: test
+    password: test
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: localhost
+      port: 6379
   cache:
     type: redis
     redis:
@@ -27,13 +27,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        default_schema: ${APP_DATABASE_SCHEMA}
+        default_schema: jbcd_lesson
     show_sql: true
     open-in-view: false
-  liquibase:
+  flyway:
     enabled: true
-    change-log: classpath:/db/changelog/db.changelog-master.xml
-    default-schema: ${spring.jpa.properties.hibernate.default_schema}
+    schemas: jbcd_lesson
+    default-schema: jbcd_lesson
 
 logging:
   level:

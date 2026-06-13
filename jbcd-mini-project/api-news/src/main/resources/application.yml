@@ -9,19 +9,19 @@ spring:
       include-stacktrace: never
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/lectures_java_course_demo
+    username: test
+    password: test
     hikari:
-      schema: ${APP_DATABASE_SCHEMA}
-  liquibase:
+      schema: jbcd_lesson
+  flyway:
     enabled: true
-    change-log: classpath:/db/changelog/db.changelog-master.xml
-    default-schema: ${spring.datasource.hikari.schema}
+    schemas: jbcd_lesson
+    default-schema: jbcd_lesson
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: localhost
+      port: 6379
   cache:
     type: redis
     redis:
@@ -30,7 +30,7 @@ spring:
 
 client:
   captcha:
-    base-url: ${CAPTCHA_BASE_URL}
+    base-url: http://localhost:8082
 
 management:
   server:

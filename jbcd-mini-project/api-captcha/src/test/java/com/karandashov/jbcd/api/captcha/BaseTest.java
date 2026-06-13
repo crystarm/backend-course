@@ -41,8 +41,8 @@ public abstract class BaseTest {
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
 
-        registry.add("REDIS_HOST", REDIS::getHost);
-        registry.add("REDIS_PORT", () -> REDIS.getMappedPort(6379));
+        registry.add("spring.data.redis.host", REDIS::getHost);
+        registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
 
         log.info("Redis started: {}:{}", REDIS.getHost(), REDIS.getMappedPort(6379));
     }

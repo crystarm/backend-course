@@ -3,7 +3,7 @@ spring:
     name: jbcd-6a-kafka-spring
   kafka:
     start: false
-    bootstrap-servers: ${BOOTSTRAP_SERVERS}
+    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

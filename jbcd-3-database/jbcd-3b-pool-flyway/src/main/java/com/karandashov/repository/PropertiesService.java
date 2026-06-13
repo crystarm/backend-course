@@ -16,10 +16,13 @@ public class PropertiesService {
     public PropertiesService() {
         this.properties = new Properties();
         try (InputStream in = PropertiesService.class.getResourceAsStream("/application.properties")) {
+            if (in == null) {
+                throw new IOException("application.properties not found");
+            }
             properties.load(in);
         } catch (IOException e) {
-            log.error("В ресурсах не обнаружен application.properties файл с настройками");
-            throw new RuntimeException("В ресурсах не обнаружен application.properties файл с настройками");
+            log.error("В ресурсах не обнаружен application.properties файл с настройками", e);
+            throw new RuntimeException("В ресурсах не обнаружен application.properties файл с настройками", e);
         }
     }
 

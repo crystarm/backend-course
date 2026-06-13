@@ -16,10 +16,19 @@ Could not find a valid Docker environment. Please see logs and check configurati
 ## Запуск программы
 
 ```text
-[main] ERROR com.karandashov.jbcd.api.captcha.Main - Не заданы переменные окружения!
+application.properties not found
 ```
-Решение: вы не подложили local.env для внешнего сервиса.
-Перейдите Run/Debug Configurations -> Edit Configurations -> Modify options -> Environment Variables -> + -> Path -> /path/to/local.env
+или
+```text
+В ресурсах не обнаружен application.properties файл с настройками
+```
+или
+```text
+В application.properties файле не задано значение для ключа
+```
+
+Проверьте наличие `application.properties` или `application.yml` внутри ресурсов запускаемого примера.
+Если меняли настройки подключения в docker compose, то пропишите изменения.
 
 ## Просто все красное и не работает
 

@@ -9,8 +9,8 @@ spring:
       include-stacktrace: never
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: localhost
+      port: 6379
 
 captcha:
   ttl:

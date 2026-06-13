@@ -13,13 +13,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String redisHost = System.getenv("REDIS_HOST");
-        String redisPort = System.getenv("REDIS_PORT");
-
-        if (redisHost == null || redisPort == null) {
-            log.error("Не заданы переменные окружения!");
-            return;
-        }
+        PropertiesService propertiesService = new PropertiesService();
+        String redisHost = propertiesService.get("redis.host");
+        String redisPort = propertiesService.get("redis.port");
 
         try (
                 RedisClient redisClient = RedisClient.create(

@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8081}
+  port: 8081
 
 spring:
   application:
@@ -10,7 +10,7 @@ spring:
   temporal:
     namespace: default
     connection:
-      target: ${TEMPORAL_TARGET:localhost:7233}
+      target: localhost:7233
     workers:
       - name: news-worker
         task-queue: news-event-task-queue

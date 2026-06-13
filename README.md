@@ -29,9 +29,9 @@ java-backend-course-demo = jbcd
 - - или через вкладку maven в ide -> lifecycle -> clean && install
 - запускайте сервисы из класса Main или `java -jar example.jar`
 - если для запуска требуется внешние БД или сервисы:
-- - перейдите в папку с примерами (test-database, test-kafka, test-redis, test-s3)
+- - перейдите в подходящую папку внутри `infra` (`database`, `kafka`, `redis`, `s3`, `sso`, `temporal`)
 - - выполните `docker compose up -d`
-- - при запуске приложения подложите в него local.env файл из соответствующей папки
+- - запускайте приложение, параметры подключения лежат в `application.properties` или `application.yml`в ресурсах соответствующего примера
 
 Возможные ошибки [смотри здесь](tutorials/errors.md)
 
@@ -75,7 +75,7 @@ java-backend-course-demo = jbcd
 - **jbcd-2-base-server-lib**: Общая библиотека с DTO, моделями и сервисами, используемая в примерах модуля.
 - **jbcd-2a-netty-server**: Реализация HTTP-сервера на фреймворке Netty.
 - **jbcd-2a-jooby-server**: Пример создания REST API с использованием фреймворка Jooby.
-- **jbcd-2a-jooby-server-mvc**: Использование MVC-подхода в Jooby.
+- **jbcd-2a-javalin-server**: Пример создания REST API с использованием фреймворка Javalin.
 - **jbcd-2a-http-client**: Примеры использования стандартного Java HttpClient.
 - **jbcd-2b-long-polling**: Реализация технологии Long Polling.
 - **jbcd-2b-sse**: Пример использования Server-Sent Events (SSE).
@@ -86,8 +86,9 @@ java-backend-course-demo = jbcd
 Модуль для демонстрации работы с БД:
 
 - **jbcd-3a-jdbc**: Пример работы с БД с помощью чистого JDBC.
-- **jbcd-3b-tools**: Использование connection pool Hikari и инструмента миграции Liquibase.
-- **jbcd-3c-jdbi**: Пример работы с простейшим ORM: Jdbi.
+- **jbcd-3b-pool-flyway**: Использование connection pool Hikari и инструмента миграции Flyway.
+- **jbcd-3b-pool-liquibase**: Аналогичный пример с Liquibase, оставлен для сравнения подходов к миграциям.
+- **jbcd-3c-jdbi**: Пример работы с простейшим ORM: Jdbi и миграциями Flyway.
 
 ### jbcd-4-spring
 
@@ -96,7 +97,8 @@ java-backend-course-demo = jbcd
 - **jbcd-4a1-spring-core-configuration**: Конфигурация чистого Spring Core с использованием Java Config.
 - **jbcd-4a2-spring-core-annotation**: Использование аннотаций (`@Component`, `@Service`, `@Repository` и др.) для управления бинами в Spring.
 - **jbcd-4b-spring-boot-web**: Создание веб-приложений с использованием Spring Boot Starter Web + использование AOP.
-- **jbcd-4c-spring-boot-jpa-hibernate**: Работа с базами данных через Spring Data JPA и Hibernate + liquibase.
+- **jbcd-4c-spring-boot-data-jdbc**: Работа с базами данных через Spring Data JDBC и миграции Flyway.
+- **jbcd-4c-spring-boot-jpa-hibernate**: Работа с базами данных через Spring Data JPA, Hibernate и миграции Flyway.
 
 ### jbcd-5-docs
 
