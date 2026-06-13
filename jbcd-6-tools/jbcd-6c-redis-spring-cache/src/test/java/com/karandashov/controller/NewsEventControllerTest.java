@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,11 +42,18 @@ public class NewsEventControllerTest extends BaseTest {
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
     @BeforeEach
     void tearDown() {
         repository.deleteAll();
-        clearInvocations(repository);
         cacheManager.getCacheNames().forEach(name -> Objects.requireNonNull(cacheManager.getCache(name)).clear());
+        stringRedisTemplate.execute((RedisCallback<Void>) connection -> {
+            connection.serverCommands().flushAll();
+            return null;
+        });
+        clearInvocations(repository);
     }
 
     @Test
@@ -200,6 +209,12 @@ public class NewsEventControllerTest extends BaseTest {
     void testCacheEvictionOnSave() throws Exception {
         clearInvocations(repository);
         // Заполняем кэш getAll
+        mockMvc.perform(get("/news"))
+                .andExpect(status().isOk());
+
+        verify(repository, times(1)).findAll();
+
+        // Повторный вызов должен прийти из кэша.
         mockMvc.perform(get("/news"))
                 .andExpect(status().isOk());
 

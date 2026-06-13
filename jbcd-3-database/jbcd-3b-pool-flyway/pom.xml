@@ -129,6 +129,9 @@
                                         <exclude>META-INF/versions/**/module-info.class</exclude>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                         <exclude>META-INF/io.netty.versions.properties</exclude>
+                                        <exclude>META-INF/FastDoubleParser-LICENSE</exclude>
+                                        <exclude>META-INF/FastDoubleParser-NOTICE</exclude>
+                                        <exclude>META-INF/thirdparty-LICENSE</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

@@ -11,7 +11,7 @@ import io.jooby.Session;
 import io.jooby.StatusCode;
 import io.jooby.WebSocket;
 import io.jooby.handler.AccessLogHandler;
-import io.jooby.jackson.JacksonModule;
+import io.jooby.jackson.Jackson2Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class JoobyApp extends Jooby {
 
     public JoobyApp() {
         // Использование Jackson для JSON
-        install(new JacksonModule());
+        install(new Jackson2Module());
 
         // Логирование запросов
         use(new AccessLogHandler());
