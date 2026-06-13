@@ -11,7 +11,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       api-captcha:
         condition: service_healthy
@@ -45,8 +45,11 @@ services:
         condition: service_healthy
     env_file:
       - api-captcha.env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/application/config/application.yml,optional:file:/application/config/api-captcha.yml
     volumes:
-      - ./api-captcha.yml:/application/config/application.yml:ro
+      - ./../application.yml:/application/config/application.yml:ro
+      - ./../api-captcha.yml:/application/config/api-captcha.yml:ro
 
   api-news:
     build: ./../../api-news
@@ -67,8 +70,11 @@ services:
         condition: service_healthy
     env_file:
       - api-news.env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/application/config/application.yml,optional:file:/application/config/api-news.yml
     volumes:
-      - ./api-news.yml:/application/config/application.yml:ro
+      - ./../application.yml:/application/config/application.yml:ro
+      - ./../api-news.yml:/application/config/api-news.yml:ro
 
   view-news:
     build: ./../../view-news
@@ -91,7 +97,7 @@ services:
       POSTGRES_PASSWORD: test
     command: [ "postgres", "-c", "log_statement=all" ]
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./../init.sql:/docker-entrypoint-initdb.d/init-db.sql
       - postgres_data:/var/lib/postgresql
     entrypoint: [ "bash", "-c", "docker-entrypoint.sh postgres" ]
     healthcheck:
@@ -150,7 +156,7 @@ services:
     user: "0:0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - ./../vector.yaml:/etc/vector/vector.yaml:ro
     command: [ "--config", "/etc/vector/vector.yaml" ]
     depends_on:
       api-captcha:

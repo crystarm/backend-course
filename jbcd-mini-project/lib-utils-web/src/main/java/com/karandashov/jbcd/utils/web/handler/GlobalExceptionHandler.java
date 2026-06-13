@@ -2,6 +2,8 @@ package com.karandashov.jbcd.utils.web.handler;
 
 import com.karandashov.jbcd.utils.web.exception.BaseException;
 import com.karandashov.jbcd.utils.web.response.ErrorResponse;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,12 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    private final MeterRegistry meterRegistry;
+
+    public GlobalExceptionHandler(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
@@ -27,6 +35,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
         log.warn("Validation error: " + message, ex);
         ErrorResponse response = new ErrorResponse(BAD_REQUEST.getCode(), "Validation error: " + message);
+        incrementErrorCounter(response);
         return ResponseEntity.status(BAD_REQUEST.getHttpStatusCode()).body(response);
     }
 
@@ -34,6 +43,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
         log.warn("Validation error: " + ex.getMessage(), ex);
         ErrorResponse response = new ErrorResponse(BAD_REQUEST.getCode(), "Validation error: " + ex.getMessage());
+        incrementErrorCounter(response);
         return ResponseEntity.status(BAD_REQUEST.getHttpStatusCode()).body(response);
     }
 
@@ -42,6 +52,7 @@ public class GlobalExceptionHandler {
         var errorLog = "Handling base exception " + ex.getError().getCode() + " " + ex.getError().getMessage();
         log.warn(errorLog, ex);
         ErrorResponse response = new ErrorResponse(ex.getError().getCode(), ex.getError().getMessage());
+        incrementErrorCounter(response);
         return ResponseEntity.status(ex.getError().getHttpStatusCode()).body(response);
     }
 
@@ -49,6 +60,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Handling unexpected exception: ", ex);
         ErrorResponse response = new ErrorResponse(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMessage());
+        incrementErrorCounter(response);
         return ResponseEntity.status(INTERNAL_SERVER_ERROR.getHttpStatusCode()).body(response);
+    }
+
+    private void incrementErrorCounter(ErrorResponse errorResponse) {
+        Counter counter = Counter.builder("business.error.count")
+                .description("Counter of errors")
+                .tag("type", errorResponse.code())
+                .register(meterRegistry);
+        counter.increment();
     }
 }

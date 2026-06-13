@@ -1,23 +1,12 @@
 spring:
-  application:
-    name: api-captcha
   threads:
     virtual:
       enabled: true
   web:
     error:
       include-stacktrace: never
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
   jackson:
-    default-property-inclusion: non_empty
-
-captcha:
-  ttl:
-    created: 5m
-    solved: 10s
+    default-property-inclusion: non_null
 
 management:
   server:

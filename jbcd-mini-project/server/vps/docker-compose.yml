@@ -56,8 +56,11 @@ services:
         condition: service_healthy
     env_file:
       - api-captcha.env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/application/config/application.yml,optional:file:/application/config/api-captcha.yml
     volumes:
-      - ./api-captcha.yml:/application/config/application.yml:ro
+      - ./../application.yml:/application/config/application.yml:ro
+      - ./../api-captcha.yml:/application/config/api-captcha.yml:ro
     deploy:
       resources:
         limits:
@@ -84,8 +87,11 @@ services:
         condition: service_healthy
     env_file:
       - api-news.env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/application/config/application.yml,optional:file:/application/config/api-news.yml
     volumes:
-      - ./api-news.yml:/application/config/application.yml:ro
+      - ./../application.yml:/application/config/application.yml:ro
+      - ./../api-news.yml:/application/config/api-news.yml:ro
     deploy:
       resources:
         limits:
@@ -136,7 +142,7 @@ services:
       "-c", "max_wal_size=4GB"
     ]
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./../init.sql:/docker-entrypoint-initdb.d/init-db.sql
       - postgres_data:/var/lib/postgresql
     entrypoint: [ "bash", "-c", "docker-entrypoint.sh postgres" ]
     healthcheck:
@@ -213,7 +219,7 @@ services:
     user: "0:0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - ./../vector.yaml:/etc/vector/vector.yaml:ro
     command: [ "--config", "/etc/vector/vector.yaml" ]
     depends_on:
       api-captcha:

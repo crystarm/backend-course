@@ -10,6 +10,7 @@ import com.karandashov.jbcd.api.captcha.exceptions.BusinessError;
 import com.karandashov.jbcd.api.captcha.repository.CaptchaRepository;
 import com.karandashov.jbcd.client.captcha.response.CheckCaptchaResponse;
 import com.karandashov.jbcd.utils.web.exception.BaseException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,10 +32,22 @@ class CaptchaServiceTest {
     @Mock
     private CaptchaRepository repository;
 
+    @Mock
+    private MetricService metricService;
+
+    private CaptchaService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new CaptchaService(
+                repository,
+                new CaptchaTtlProperties(Duration.ofMinutes(5), Duration.ofSeconds(10)),
+                metricService
+        );
+    }
+
     @Test
     void generateCreatesCaptchaInCreatedStatus() {
-        CaptchaService service = createService();
-
         CaptchaResponse response = service.generate();
 
         ArgumentCaptor<CaptchaEntity> entityCaptor = ArgumentCaptor.forClass(CaptchaEntity.class);
@@ -51,8 +64,6 @@ class CaptchaServiceTest {
 
     @Test
     void solveMarksCaptchaAsSolvedWhenAnswerMatches() {
-        CaptchaService service = createService();
-
         UUID id = UUID.randomUUID();
         CaptchaEntity entity = new CaptchaEntity(id, "abc12", CaptchaStatus.CREATED);
         when(repository.findById(id)).thenReturn(Optional.of(entity));
@@ -69,8 +80,6 @@ class CaptchaServiceTest {
 
     @Test
     void solveDeletesCaptchaWhenAnswerDoesNotMatch() {
-        CaptchaService service = createService();
-
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.of(new CaptchaEntity(id, "abc12", CaptchaStatus.CREATED)));
 
@@ -82,8 +91,6 @@ class CaptchaServiceTest {
 
     @Test
     void solveThrowsWhenCaptchaWasNotFound() {
-        CaptchaService service = createService();
-
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.empty());
 
@@ -94,8 +101,6 @@ class CaptchaServiceTest {
 
     @Test
     void checkAndExpireReturnsSuccessForSolvedCaptcha() {
-        CaptchaService service = createService();
-
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.of(new CaptchaEntity(id, "abc12", CaptchaStatus.SOLVED)));
 
@@ -107,8 +112,6 @@ class CaptchaServiceTest {
 
     @Test
     void checkAndExpireThrowsWhenCaptchaWasNotSolved() {
-        CaptchaService service = createService();
-
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.of(new CaptchaEntity(id, "abc12", CaptchaStatus.CREATED)));
 
@@ -119,20 +122,11 @@ class CaptchaServiceTest {
 
     @Test
     void checkAndExpireThrowsWhenCaptchaWasNotFound() {
-        CaptchaService service = createService();
-
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.checkAndExpire(id))
                 .isInstanceOf(BaseException.class)
                 .satisfies(exception -> assertThat(((BaseException) exception).getError()).isEqualTo(BusinessError.CAPTCHA_NOT_FOUND));
-    }
-
-    private CaptchaService createService() {
-        return new CaptchaService(
-                repository,
-                new CaptchaTtlProperties(Duration.ofMinutes(5), Duration.ofSeconds(10))
-        );
     }
 }
