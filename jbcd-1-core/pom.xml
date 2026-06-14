@@ -16,9 +16,11 @@
 
     <modules>
         <module>jbcd-1a-first-program</module>
-        <module>jbcd-1b-java-core</module>
-        <module>jbcd-1b-oop-exceptions-io</module>
-        <module>jbcd-1c-io-collections</module>
+        <module>jbcd-1b-core</module>
+        <module>jbcd-1b-oop</module>
+        <module>jbcd-1b-exceptions</module>
+        <module>jbcd-1c-io</module>
+        <module>jbcd-1c-collections</module>
         <module>jbcd-1d-reflection-annotation</module>
         <module>jbcd-1d-lombok</module>
         <module>jbcd-1d-mapstruct</module>
