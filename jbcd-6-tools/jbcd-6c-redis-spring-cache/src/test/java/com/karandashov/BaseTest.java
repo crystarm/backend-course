@@ -26,13 +26,16 @@ public abstract class BaseTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("DATABASE_URL", POSTGRES::getJdbcUrl);
-        registry.add("DATABASE_USERNAME", POSTGRES::getUsername);
-        registry.add("DATABASE_PASSWORD", POSTGRES::getPassword);
-        registry.add("APP_DATABASE_SCHEMA", () -> "public");
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.jpa.properties.hibernate.default_schema", () -> "public");
+        registry.add("spring.datasource.hikari.schema", () -> "public");
+        registry.add("spring.flyway.schemas", () -> "public");
+        registry.add("spring.flyway.default-schema", () -> "public");
 
-        registry.add("REDIS_HOST", REDIS::getHost);
-        registry.add("REDIS_PORT", () -> REDIS.getMappedPort(6379));
+        registry.add("spring.data.redis.host", REDIS::getHost);
+        registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
 
         log.info("Database started: {}", POSTGRES.getJdbcUrl());
         log.info("Redis started: {}:{}", REDIS.getHost(), REDIS.getMappedPort(6379));

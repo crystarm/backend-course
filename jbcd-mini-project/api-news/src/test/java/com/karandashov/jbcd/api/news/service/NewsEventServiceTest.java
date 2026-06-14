@@ -118,7 +118,11 @@ class NewsEventServiceTest {
         NewsEventService service = createService();
         UUID captchaId = UUID.randomUUID();
         when(captchaClient.checkAndExpire(captchaId))
-                .thenThrow(new CaptchaClientException(HttpStatus.NOT_FOUND, 2000, "Captcha not found or expired"));
+                .thenThrow(new CaptchaClientException(
+                        HttpStatus.NOT_FOUND,
+                        "captcha.not.found.or.expired",
+                        null
+                ));
 
         assertThatThrownBy(() -> service.save(new CreateNewsEventRequest("Breaking", "Something happened", captchaId)))
                 .isInstanceOf(BaseException.class)
@@ -133,7 +137,11 @@ class NewsEventServiceTest {
         NewsEventService service = createService();
         UUID captchaId = UUID.randomUUID();
         when(captchaClient.checkAndExpire(captchaId))
-                .thenThrow(new CaptchaClientException(HttpStatus.BAD_REQUEST, 2001, "Captcha is not solved"));
+                .thenThrow(new CaptchaClientException(
+                        HttpStatus.BAD_REQUEST,
+                        "captcha.not.solved",
+                        null
+                ));
 
         assertThatThrownBy(() -> service.save(new CreateNewsEventRequest("Breaking", "Something happened", captchaId)))
                 .isInstanceOf(BaseException.class)

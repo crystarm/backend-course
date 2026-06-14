@@ -6,8 +6,11 @@
 graph TD
     User((Пользователь))
     Browser[Frontend: WEB SPA]
+    ViewApi(view-news)
 
-    subgraph "Backend"
+    subgraph "Services"
+        Gateway(gateway)
+        ViewApi(view-news)
         NewsAPI[api-news]
         CaptchaAPI[api-captcha]
     end
@@ -18,9 +21,11 @@ graph TD
     end
 
     User --> Browser
-    Browser -- " HTTP REST API " --> NewsAPI
+    Browser --> Gateway
+    ViewApi --> Gateway
+    Gateway -- " HTTP REST API " --> NewsAPI
     NewsAPI -- " Internal call " --> CaptchaAPI
-    Browser -- " HTTP REST API " --> CaptchaAPI
+    Gateway -- " HTTP REST API " --> CaptchaAPI
     NewsAPI -- " Spring Data JDBC " --> PostgreSQL
     NewsAPI -- " Spring Cache " --> Redis
     CaptchaAPI -- " Spring Data Redis " --> Redis
@@ -73,8 +78,9 @@ sequenceDiagram
 
 ### Деплой
 
+Прочитайте страничку [про развертывание](server/README.md)
+
 Для локальной разработки необходимо пользоваться [local-dev](server/local-dev/docker-compose.yml).
 Роль gateway выполняет простой nginx-reverse-proxy. Openobserve торчит портом 5080 наружу.
 
-Для развертывания на сервере необходимо пользоваться [vps](server/vps) конфигурацией
-и [вот этим туториалом](server/README.md).
+Для развертывания на сервере необходимо пользоваться [vps](server/vps) конфигурацией.

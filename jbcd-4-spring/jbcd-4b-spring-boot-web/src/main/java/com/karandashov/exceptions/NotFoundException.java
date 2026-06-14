@@ -4,7 +4,7 @@ public class NotFoundException extends BaseException {
 
     public static final int HTTP_CODE = 404;
 
-    public static final int CODE = 4000;
+    public static final String CODE = "news.not.found";
 
     public NotFoundException(String message) {
         super(message);
@@ -16,7 +16,7 @@ public class NotFoundException extends BaseException {
     }
 
     @Override
-    public int getCode() {
+    public String getCode() {
         return CODE;
     }
 }

@@ -1,6 +1,6 @@
 package com.karandashov.controller;
 
-import com.karandashov.dto.UniversalResponse;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.exceptions.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,26 +15,26 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<UniversalResponse<Object>> handleBaseException(BaseException ex) {
+    public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
         log.error("Handling BaseException: {}", ex.getMessage());
-        UniversalResponse<Object> response = new UniversalResponse<>(ex.getCode(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(ex.getCode(), ex.getMessage());
         return ResponseEntity.status(ex.getHttpCode()).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<UniversalResponse<Object>> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         log.error("Validation error: {}", message);
-        UniversalResponse<Object> response = new UniversalResponse<>(4001, message);
+        ErrorResponse response = new ErrorResponse("validation.error", message);
         return ResponseEntity.status(400).body(response);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<UniversalResponse<Object>> handleGeneralException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Handling general exception", ex);
-        UniversalResponse<Object> response = new UniversalResponse<>(5000, "Internal Server Error: " + ex.getMessage());
+        ErrorResponse response = new ErrorResponse("internal.server.error", "Internal server error");
         return ResponseEntity.status(500).body(response);
     }
 }

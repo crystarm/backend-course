@@ -1,6 +1,5 @@
 package com.karandashov.controller;
 
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.dto.auth.AuthStateResponse;
 import com.karandashov.dto.auth.RegisterUserRequest;
 import com.karandashov.dto.auth.RegisterUserResponse;
@@ -27,7 +26,7 @@ public class SecurityController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UniversalResponse<AuthStateResponse>> currentUser(
+    public ResponseEntity<AuthStateResponse> currentUser(
             Authentication authentication,
             CsrfToken csrfToken
     ) {
@@ -38,11 +37,11 @@ public class SecurityController {
 
         AuthStateResponse response = new AuthStateResponse(authenticated, authenticated ? authentication.getName() : null);
         HttpStatus status = authenticated ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
-        return ResponseEntity.status(status).body(new UniversalResponse<>(response));
+        return ResponseEntity.status(status).body(response);
     }
 
     @PostMapping("/registration")
-    public UniversalResponse<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
+    public RegisterUserResponse register(@Valid @RequestBody RegisterUserRequest request) {
         log.info("Request to register user with email={}", request.getEmail());
         return userService.register(request);
     }

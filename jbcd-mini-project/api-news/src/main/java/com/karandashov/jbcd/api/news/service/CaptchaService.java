@@ -29,12 +29,12 @@ public class CaptchaService {
                 throw new BaseException(BusinessError.CAPTCHA_NOT_SOLVED);
             }
         } catch (CaptchaClientException exception) {
-            Integer errorCode = exception.getCode();
+            String errorCode = exception.getCode();
             log.warn("Error code: {}", errorCode);
-            if (Integer.valueOf(2000).equals(errorCode)) {
+            if ("captcha.not.found.or.expired".equals(errorCode)) {
                 throw new BaseException(BusinessError.CAPTCHA_NOT_FOUND_OR_EXPIRED, exception);
             }
-            if (Integer.valueOf(2001).equals(errorCode)) {
+            if ("captcha.not.solved".equals(errorCode)) {
                 throw new BaseException(BusinessError.CAPTCHA_NOT_SOLVED, exception);
             }
             throw new BaseException(BusinessError.CAPTCHA_CHECK_FAILED, exception);

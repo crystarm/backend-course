@@ -1,6 +1,5 @@
 package com.karandashov.controller;
 
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.dto.auth.AuthStateResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,7 @@ import java.util.Map;
 public class SecurityController {
 
     @GetMapping("/me")
-    public ResponseEntity<UniversalResponse<AuthStateResponse>> currentUser(
+    public ResponseEntity<AuthStateResponse> currentUser(
             Authentication authentication,
             CsrfToken csrfToken
     ) {
@@ -50,6 +49,6 @@ public class SecurityController {
                 ? new AuthStateResponse(true, userInfo)
                 : new AuthStateResponse(false, userInfo);
         HttpStatus status = authenticated ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
-        return ResponseEntity.status(status).body(new UniversalResponse<>(response));
+        return ResponseEntity.status(status).body(response);
     }
 }

@@ -65,3 +65,18 @@ To                         Action      From
 
 Запускаем `docker compose up -d --force-recreate`. 
 Проверяем через `docker ps` и `docker logs <container_id>` работоспособность.
+
+## Observability
+
+В docker-compose включена связка Vector + VictoriaMetrics + VictoriaLogs + VictoriaTraces + Grafana.
+
+Vector собирает только логи и метрики сервисов `api-news` и `api-captcha`:
+* логи из Docker stdout отправляются в VictoriaLogs;
+* метрики берутся с `/actuator/prometheus` и отправляются в VictoriaMetrics;
+* трейсы сервисы отправляют напрямую в VictoriaTraces через OTLP HTTP.
+
+Локально Grafana доступна на `http://localhost:3000`, логин/пароль: `admin`/`admin`.
+На VPS Grafana проксируется через `https://grafana.news.karandashov.com`.
+
+Datasource'ы и provisioned dashboards создаются автоматически при старте Grafana.
+JSON-дашборды лежат в `server/grafana/dashboards`.

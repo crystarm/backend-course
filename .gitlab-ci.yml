@@ -12,7 +12,7 @@ variables:
 
 # Главная цель — прогнать jbcd-mini-project и собрать необходимые docker-образы для деплоя на сервер.
 # Используется buildx, чтобы собирать под amd64 / arm64 (mac processors).
-# Образы публикуются в gitlab registry, их можно найти из репозитории:
+# Образы публикуются в gitlab registry, их можно найти в репозитории:
 # https://gitlab.com/VladKarandashov/java-backend-course-demo/container_registry
 
 publish-images:
@@ -25,7 +25,7 @@ publish-images:
   rules:
     - when: manual
   before_script:
-    - apk add --no-cache bash curl git openjdk21-jdk maven fontconfig ttf-dejavu
+    - apk add --no-cache bash curl git openjdk25-jdk maven fontconfig ttf-dejavu
     - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin "${CI_REGISTRY}"
     - docker run --privileged --rm tonistiigi/binfmt --install all
     - docker buildx create --name mini-project-builder --driver docker-container --use || docker buildx use mini-project-builder

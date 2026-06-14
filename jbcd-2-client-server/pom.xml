@@ -18,14 +18,11 @@
         <module>jbcd-2-base-server-lib</module>
         <module>jbcd-2a-netty-server</module>
         <module>jbcd-2a-jooby-server</module>
-        <module>jbcd-2a-jooby-server-mvc</module>
+        <module>jbcd-2a-javalin-server</module>
         <module>jbcd-2a-http-client</module>
         <module>jbcd-2b-long-polling</module>
         <module>jbcd-2b-sse</module>
         <module>jbcd-2b-websocket</module>
-        <module>jbcd-2b-grpc-contract-lib</module>
-        <module>jbcd-2b-grpc-server</module>
-        <module>jbcd-2b-grpc-client</module>
     </modules>
 
 </project>

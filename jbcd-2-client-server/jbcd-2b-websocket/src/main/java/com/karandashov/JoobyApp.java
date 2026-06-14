@@ -1,7 +1,7 @@
 package com.karandashov;
 
 import com.karandashov.dto.CreateNewsEventRequest;
-import com.karandashov.dto.UniversalResponse;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.exceptions.BaseException;
 import com.karandashov.repository.InMemoryNewsEventRepository;
 import com.karandashov.repository.NewsEventRepository;
@@ -11,7 +11,7 @@ import io.jooby.Session;
 import io.jooby.StatusCode;
 import io.jooby.WebSocket;
 import io.jooby.handler.AccessLogHandler;
-import io.jooby.jackson.JacksonModule;
+import io.jooby.jackson.Jackson2Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class JoobyApp extends Jooby {
 
     public JoobyApp() {
         // Использование Jackson для JSON
-        install(new JacksonModule());
+        install(new Jackson2Module());
 
         // Логирование запросов
         use(new AccessLogHandler());
@@ -39,7 +39,7 @@ public class JoobyApp extends Jooby {
 
         // Определяем маршруты через Script API
         path("/news", () -> {
-            get("/", ctx -> service.getAll());
+            get("/", _ -> service.getAll());
 
             get("/{id}", ctx -> {
                 String id = ctx.path("id").value();
@@ -51,7 +51,7 @@ public class JoobyApp extends Jooby {
                 var newsEvent = service.save(request);
                 // при добавлении новой записи - асинхронно сообщаем всем открытым каналам
                 CompletableFuture.runAsync(() ->
-                        CLIENTS.forEach((session, ws) -> ws.send(newsEvent.getData().getId().toString()))
+                        CLIENTS.forEach((_, ws) -> ws.send(newsEvent.getId().toString()))
                 );
                 return newsEvent;
             });
@@ -60,14 +60,14 @@ public class JoobyApp extends Jooby {
                 configurer.onConnect(ws -> {
                     CLIENTS.put(ctx.session(), ws);
                     var response = service.getAll();
-                    response.getData().getEvents().forEach(event -> ctx.send(event.getId().toString()));
+                    response.getEvents().forEach(event -> ctx.send(event.getId().toString()));
                 });
 
-                configurer.onMessage((ws, message) -> log.info("Received message: {}", message));
+                configurer.onMessage((_, message) -> log.info("Received message: {}", message));
 
-                configurer.onClose((ws, statusCode) -> CLIENTS.remove(ctx.session()));
+                configurer.onClose((_, _) -> CLIENTS.remove(ctx.session()));
 
-                configurer.onError((ws, cause) -> {
+                configurer.onError((_, cause) -> {
                     CLIENTS.remove(ctx.session());
                     log.error("WebSocket error", cause);
                 });
@@ -75,18 +75,18 @@ public class JoobyApp extends Jooby {
         });
 
         // Обработка бизнес-исключений
-        error(BaseException.class, (ctx, cause, statusCode) -> {
+        error(BaseException.class, (ctx, cause, _) -> {
             BaseException e = (BaseException) cause;
             log.error("Business error: {}", e.getMessage());
             ctx.setResponseCode(StatusCode.valueOf(e.getHttpCode()));
-            ctx.render(new UniversalResponse<>(e.getCode(), e.getMessage()));
+            ctx.render(new ErrorResponse(e.getCode(), e.getMessage()));
         });
 
         // Обработка остальных исключений
-        error(Exception.class, (ctx, cause, statusCode) -> {
+        error(Exception.class, (ctx, cause, _) -> {
             log.error("Unexpected error", cause);
             ctx.setResponseCode(StatusCode.SERVER_ERROR);
-            ctx.render(new UniversalResponse<>(5000, "Неизвестная ошибка: " + cause.getMessage()));
+            ctx.render(new ErrorResponse("internal.server.error", "Internal server error"));
         });
     }
 }

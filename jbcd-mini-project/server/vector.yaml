@@ -1,0 +1,101 @@
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  app_logs:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+    include_containers:
+      - api-news
+      - api-captcha
+    exclude_containers:
+      - vector
+
+  app_metrics:
+    type: prometheus_scrape
+    endpoints:
+      - http://api-news:8081/actuator/prometheus
+      - http://api-captcha:8081/actuator/prometheus
+    scrape_interval_secs: 15
+
+transforms:
+  app_logs_normalized:
+    type: remap
+    inputs:
+      - app_logs
+    drop_on_error: false
+    source: |
+      .source_type = "docker"
+      .stack = "mini-project"
+
+      # docker_logs кладёт исходную строку контейнера в .message
+      raw, raw_err = string(.message)
+      if raw_err != null {
+        raw = ""
+      }
+
+      parsed, parse_err = parse_json(raw)
+
+      if parse_err == null {
+        obj, cast_err = object(parsed)
+        if cast_err == null {
+          # Сливаем поля из Spring-Boot-лога в корень события.
+          # .message из docker'овской «обёртки» перезапишется осмысленным
+          # message из JSON (человекочитаемая строка лога).
+          . = merge(., obj)
+
+          # Плющим `log.level`
+          # → `log_level`, `process.thread.name` → `process_thread_name`,
+          # `service.name` → `service_name` и т.д.
+          . = flatten(., separator: "_")
+
+          # ECS-layout отдаёт время события в "@timestamp". Для VictoriaLogs
+          # перекладываем его в обычное timestamp-поле.
+          ecs_ts = ."@timestamp"
+          if is_string(ecs_ts) {
+            parsed_ts, ts_err = parse_timestamp(ecs_ts, format: "%+")
+            if ts_err == null {
+              .timestamp = parsed_ts
+            }
+          }
+          del(."@timestamp")
+        } else {
+          # Распарсилось, но это не объект (массив/скаляр) — оригинал в fallback.
+          .message = raw
+        }
+      } else {
+        # Не JSON: JVM-стектрейс до старта logback, baseline-строки и т.п.
+        # Оставляем как есть, чтобы хоть что-то было видно.
+        .message = raw
+      }
+
+      # service_name: берём из Spring-Boot-лога (после flatten он уже в корне),
+      # если приложение по какой-то причине его не прислало — падаем на docker container_name.
+      if !exists(.service_name) {
+        .service_name = .container_name
+      }
+
+sinks:
+  victoria_logs:
+    type: elasticsearch
+    inputs:
+      - app_logs_normalized
+    endpoints:
+      - http://victoria-logs:9428/insert/elasticsearch/
+    api_version: v8
+    compression: gzip
+    healthcheck:
+      enabled: false
+    query:
+      _msg_field: message
+      _time_field: timestamp
+      _stream_fields: service_name,container_name,stack
+
+  victoria_metrics:
+    type: prometheus_remote_write
+    inputs:
+      - app_metrics
+    endpoint: http://victoria-metrics:8428/api/v1/write
+    healthcheck:
+      enabled: false

@@ -35,7 +35,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/NewsEventList"
                 }
               }
             }
@@ -64,7 +64,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/NewsEvent"
                 }
               }
             }
@@ -96,7 +96,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/NewsEvent"
                 }
               }
             }
@@ -106,7 +106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniversalResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -130,7 +130,8 @@
           },
           "message": {
             "type": "string",
-            "description": "News description"
+            "description": "News description",
+            "minLength": 1
           }
         },
         "required": [
@@ -138,24 +139,53 @@
           "title"
         ]
       },
-      "UniversalResponse": {
+      "NewsEvent": {
         "type": "object",
-        "description": "Universal response dto",
+        "description": "Main news dto",
         "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Business error code"
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "News ID",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "title": {
+            "type": "string",
+            "description": "News title",
+            "pattern": "^[\\s\\S]{1,100}$"
           },
           "message": {
             "type": "string",
-            "description": "Message"
-          },
-          "data": {}
+            "description": "News description"
+          }
         },
         "required": [
-          "code"
+          "id",
+          "title"
         ]
+      },
+      "NewsEventList": {
+        "type": "object",
+        "description": "News list dto",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewsEvent"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
       }
     }
   }

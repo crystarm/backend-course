@@ -16,7 +16,8 @@
 
     <modules>
         <module>jbcd-3a-jdbc</module>
-        <module>jbcd-3b-tools</module>
+        <module>jbcd-3b-pool-flyway</module>
+        <module>jbcd-3b-pool-liquibase</module>
         <module>jbcd-3c-jdbi</module>
     </modules>
 

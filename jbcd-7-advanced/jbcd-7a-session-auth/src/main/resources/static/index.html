@@ -85,13 +85,13 @@
 
         async function refreshAuthState() {
             const {status, body} = await AuthApi.getCurrentUser();
-            const authenticated = status === 200 && body?.data?.authenticated;
+            const authenticated = status === 200 && body?.authenticated;
 
             authStateBadge.className = authenticated
                 ? "badge badge-success badge-lg"
                 : "badge badge-warning badge-lg";
             authStateBadge.textContent = authenticated
-                ? `Вы вошли как ${body.data.email}`
+                ? `Вы вошли как ${body.email}`
                 : "Гостевой режим";
 
             newsFormCard.classList.toggle("hidden", !authenticated);
@@ -100,7 +100,7 @@
 
         async function refreshNews() {
             const {body} = await NewsApi.getAllNews();
-            NewsApi.renderNewsList("news-list", body?.data?.events ?? []);
+            NewsApi.renderNewsList("news-list", body?.events ?? []);
         }
 
         logoutButton.addEventListener("click", async () => {

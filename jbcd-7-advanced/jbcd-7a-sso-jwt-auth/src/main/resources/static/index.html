@@ -87,8 +87,8 @@
 
         async function refreshAuthState() {
             const {status, body} = await AuthApi.getCurrentUser();
-            const claims = body?.data?.claims ?? {};
-            const authenticated = status === 200 && body?.data?.authenticated;
+            const claims = body?.claims ?? {};
+            const authenticated = status === 200 && body?.authenticated;
 
             authStateBadge.className = authenticated
                 ? "badge badge-success badge-lg"
@@ -103,7 +103,7 @@
 
         async function refreshNews() {
             const {body} = await NewsApi.getAllNews();
-            NewsApi.renderNewsList("news-list", body?.data?.events ?? []);
+            NewsApi.renderNewsList("news-list", body?.events ?? []);
         }
 
         logoutButton.addEventListener("click", async () => {

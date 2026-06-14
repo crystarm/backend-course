@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: api-captcha
+  threads:
+    virtual:
+      enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+captcha:
+  ttl:
+    created: 5m
+    solved: 10s
+
+logging:
+  level:
+    root: INFO
+    com.karandashov: DEBUG

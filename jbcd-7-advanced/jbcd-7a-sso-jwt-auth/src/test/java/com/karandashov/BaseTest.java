@@ -31,15 +31,20 @@ public abstract class BaseTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("CORS_ALLOWED_ORIGINS", () -> "http://localhost:8080");
-        registry.add("OIDC_ISSUER_URI", () -> "http://localhost:5556/dex");
-        registry.add("OIDC_CLIENT_ID", () -> "jbcd-jwt-frontend");
-        registry.add("FRONTEND_BASE_URL", () -> "http://localhost:8080");
+        registry.add("spring.security.cors.allowed-origins", () -> "http://localhost:8080");
+        registry.add("app.security.oidc.issuer-uri", () -> "http://localhost:5556/dex");
+        registry.add("spring.security.oauth2.client.provider.dex.issuer-uri", () -> "http://localhost:5556/dex");
+        registry.add("app.security.oidc.client-id", () -> "jbcd-jwt-frontend");
+        registry.add("spring.security.oauth2.client.registration.dex.client-id", () -> "jbcd-jwt-frontend");
+        registry.add("app.security.oidc.frontend-base-url", () -> "http://localhost:8080");
 
-        registry.add("DATABASE_URL", POSTGRES::getJdbcUrl);
-        registry.add("DATABASE_USERNAME", POSTGRES::getUsername);
-        registry.add("DATABASE_PASSWORD", POSTGRES::getPassword);
-        registry.add("APP_DATABASE_SCHEMA", () -> "public");
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.jpa.properties.hibernate.default_schema", () -> "public");
+        registry.add("spring.datasource.hikari.schema", () -> "public");
+        registry.add("spring.flyway.schemas", () -> "public");
+        registry.add("spring.flyway.default-schema", () -> "public");
 
         log.info("Database started: {}", POSTGRES.getJdbcUrl());
     }

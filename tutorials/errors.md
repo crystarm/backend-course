@@ -6,7 +6,7 @@
 Fatal error compiling: error: invalid target release
 ```
 Решение: вы пытаетесь использовать старый JDK.
-Перейдите: File -> Project Structure -> Project -> SDK -> любой JDK 21+
+Перейдите: File -> Project Structure -> Project -> SDK -> любой JDK 25
 
 ```text
 Could not find a valid Docker environment. Please see logs and check configuration
@@ -16,14 +16,23 @@ Could not find a valid Docker environment. Please see logs and check configurati
 ## Запуск программы
 
 ```text
-[main] ERROR com.karandashov.jbcd.api.captcha.Main - Не заданы переменные окружения!
+application.properties not found
 ```
-Решение: вы не подложили local.env для внешнего сервиса.
-Перейдите Run/Debug Configurations -> Edit Configurations -> Modify options -> Environment Variables -> + -> Path -> /path/to/local.env
+или
+```text
+В ресурсах не обнаружен application.properties файл с настройками
+```
+или
+```text
+В application.properties файле не задано значение для ключа
+```
+
+Проверьте наличие `application.properties` или `application.yml` внутри ресурсов запускаемого примера.
+Если меняли настройки подключения в docker compose, то пропишите изменения.
 
 ## Просто все красное и не работает
 
-1) Проверь версию JDK: File -> Project Structure -> Project -> SDK -> должен стоять любой JDK 21+
+1) Проверь версию JDK: File -> Project Structure -> Project -> SDK -> должен стоять любой JDK 25
 2) Проверь maven: Maven Settings -> maven home path -> установи значение Bundled
 3) Нажми Reload All Maven Projects
 4) File -> invalidate caches -> выбрать все галочки -> invalidate and restart

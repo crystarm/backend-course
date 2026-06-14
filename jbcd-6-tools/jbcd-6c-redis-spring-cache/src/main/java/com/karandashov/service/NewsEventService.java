@@ -3,7 +3,6 @@ package com.karandashov.service;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.exceptions.NotFoundException;
 import com.karandashov.mapper.NewsMapper;
@@ -13,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,24 +30,25 @@ public class NewsEventService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "news", key = "#id")
-    public UniversalResponse<NewsEvent> getById(UUID id) {
+    public NewsEvent getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
-        NewsEvent newsEventDto = mapper.toDto(event);
-        return new UniversalResponse<>(newsEventDto);
+        return mapper.toDto(event);
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "news_list")
-    public UniversalResponse<NewsEventList> getAll() {
+    public NewsEventList getAll() {
         List<NewsEventEntity> events = repository.findAll();
         List<NewsEvent> newsEventDtoList = mapper.toDtoList(events);
-        NewsEventList newsEventList = new NewsEventList(newsEventDtoList);
-        return new UniversalResponse<>(newsEventList);
+        return new NewsEventList(newsEventDtoList);
     }
 
-    @CacheEvict(value = {"news", "news_list"}, allEntries = true)
-    public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
+    @Transactional
+    @CacheEvict(value = {"news", "news_list"}, allEntries = true, beforeInvocation = true)
+    public NewsEvent save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
                 .id(UUID.randomUUID())
                 .title(request.getTitle())
@@ -56,6 +57,6 @@ public class NewsEventService {
         entity = repository.save(entity);
         NewsEvent newsEventDto = mapper.toDto(entity);
         redisTemplate.convertAndSend("news-events", newsEventDto);
-        return new UniversalResponse<>(newsEventDto);
+        return newsEventDto;
     }
 }

@@ -33,10 +33,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     } catch {
       // пустое / невалидное тело — пойдёт fallback ниже
     }
-    throw new BackendError(
-      errorBody ?? { code: response.status, message: response.statusText || 'Request failed' },
-      response.status,
-    );
+    throw new BackendError(normalizeErrorBody(errorBody, response), response.status);
   }
 
   if (response.status === 204) {
@@ -44,4 +41,18 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   return (await response.json()) as T;
+}
+
+function normalizeErrorBody(errorBody: BackendErrorBody | null, response: Response): BackendErrorBody {
+  if (errorBody && typeof errorBody.code === 'string') {
+    return {
+      code: errorBody.code,
+      message: typeof errorBody.message === 'string' ? errorBody.message : null,
+    };
+  }
+
+  return {
+    code: `http.${response.status}`,
+    message: response.statusText || 'Request failed',
+  };
 }

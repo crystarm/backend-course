@@ -25,10 +25,14 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class BaseTest {
 
-    private static final WireMockServer CAPTCHA_API = new WireMockServer(wireMockConfig().dynamicPort());
+    private static final WireMockServer WIREMOCK = new WireMockServer(
+            wireMockConfig()
+                    .dynamicPort()
+                    .usingFilesUnderClasspath("wiremock")
+    );
 
     static {
-        CAPTCHA_API.start();
+        WIREMOCK.start();
     }
 
     @Container
@@ -60,21 +64,21 @@ public abstract class BaseTest {
         registry.add("REDIS_HOST", REDIS::getHost);
         registry.add("REDIS_PORT", () -> REDIS.getMappedPort(6379));
 
-        registry.add("CAPTCHA_BASE_URL", CAPTCHA_API::baseUrl);
+        registry.add("CAPTCHA_BASE_URL", WIREMOCK::baseUrl);
 
         log.info("Database started: {}", POSTGRES.getJdbcUrl());
         log.info("Redis started: {}:{}", REDIS.getHost(), REDIS.getMappedPort(6379));
-        log.info("Captcha api mock started: {}", CAPTCHA_API.baseUrl());
+        log.info("Captcha api mock started: {}", WIREMOCK.baseUrl());
     }
 
     @AfterEach
     void tearDown() {
         newsEventRepository.deleteAll();
         cacheManager.getCacheNames().forEach(name -> Objects.requireNonNull(cacheManager.getCache(name)).clear());
-        CAPTCHA_API.resetAll();
+        WIREMOCK.resetAll();
     }
 
     protected WireMockServer captchaApiMock() {
-        return CAPTCHA_API;
+        return WIREMOCK;
     }
 }

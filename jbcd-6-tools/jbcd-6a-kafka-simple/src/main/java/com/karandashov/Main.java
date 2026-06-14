@@ -9,11 +9,8 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        String kafkaBrokersUrls = System.getenv("BOOTSTRAP_SERVERS");
-        if (kafkaBrokersUrls == null) {
-            log.error("Не заданы переменные окружения!");
-            return;
-        }
+        PropertiesService propertiesService = new PropertiesService();
+        String kafkaBrokersUrls = propertiesService.get("kafka.bootstrap-servers");
 
         ServiceConsumer serviceConsumer = new ServiceConsumer(kafkaBrokersUrls);
         serviceConsumer.subscribeAsync(TOPIC, "telegram");

@@ -4,19 +4,23 @@ import org.springframework.http.HttpStatus;
 
 public enum Error implements ErrorInfo {
 
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, 4000, "Bad request"),
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "bad.request"),
 
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Unexpected internal server error");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal.server.error");
 
     private final HttpStatus httpStatusCode;
 
-    private final int errorCode;
+    private final String code;
 
     private final String message;
 
-    Error(HttpStatus httpStatusCode, int errorCode, String message) {
+    Error(HttpStatus httpStatusCode, String code) {
+        this(httpStatusCode, code, null);
+    }
+
+    Error(HttpStatus httpStatusCode, String code, String message) {
         this.httpStatusCode = httpStatusCode;
-        this.errorCode = errorCode;
+        this.code = code;
         this.message = message;
     }
 
@@ -26,8 +30,8 @@ public enum Error implements ErrorInfo {
     }
 
     @Override
-    public int getErrorCode() {
-        return errorCode;
+    public String getCode() {
+        return code;
     }
 
     @Override

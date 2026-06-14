@@ -5,16 +5,12 @@ java-backend-course-demo = jbcd
 Контакты преподавателя: 
 * Vk: https://vk.com/good_vladik — для организационных вопросов
 * Tg: `@VVKarandashov` — для любых вопросов по java/backend/лабораторным/проектам
-* Email: `vlad.karandashov.tech@gmail.com` — для обратной связи по курсу
-* оставьте обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
+* Email: `vlad.karandashov.tech@gmail.com`
+* Оставьте обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
 * * Любая обратная связь приветствуется и поощряется!
-* * Вы можете рассчитывать на анонимность и непредвзятость.
-* * Можете зарегистрировать временный email.
-* * На каждое письмо постараюсь ответить!
+* * Вы можете рассчитывать на анонимность и непредвзятость!
 
-Описание лабораторных работ и проекта [читай здесь](assignments/README.md).
-
-Памятку по автоматам и экзамену [читай здесь](assignments/exam.md).
+Описание всех правил игры [читай здесь](assignments/README.md).
 
 ## Работа с репозиторием
 
@@ -22,7 +18,7 @@ java-backend-course-demo = jbcd
 - установите сами или через ide необходимые инструменты:
 - - git
 - - maven
-- - любой JDK 21+
+- - любой JDK 25
 - - желательно плагин lombok для ide
 - установите docker (обязательно запускайте его daemon перед сборкой, некоторые тесты его используют)
 - выполните сами или через ide клонирование репозитория
@@ -31,9 +27,9 @@ java-backend-course-demo = jbcd
 - - или через вкладку maven в ide -> lifecycle -> clean && install
 - запускайте сервисы из класса Main или `java -jar example.jar`
 - если для запуска требуется внешние БД или сервисы:
-- - перейдите в папку с примерами (test-database, test-kafka, test-redis, test-s3)
+- - перейдите в подходящую папку внутри `infra` (`database`, `kafka`, `redis`, `s3`, `sso`, `temporal`)
 - - выполните `docker compose up -d`
-- - при запуске приложения подложите в него local.env файл из соответствующей папки
+- - запускайте приложение, параметры подключения лежат в `application.properties` или `application.yml`в ресурсах соответствующего примера
 
 Возможные ошибки [смотри здесь](tutorials/errors.md)
 
@@ -46,20 +42,16 @@ java-backend-course-demo = jbcd
 
 ## Оглавление
 
-### test-database
-Пример запуска локальной базы данных PostgreSQL с помощью docker compose.
+### infra
 
-### test-kafka
-Пример запуска локального кластера Apache Kafka с помощью docker compose.
-
-### test-debezium
-Пример реализации паттерна transactional outbox с помощью debezium. Пример запуска и конфигурации debezium.
-
-### test-redis
-Пример запуска локального Redis с помощью docker compose.
-
-### test-s3
-Пример запуска локального S3-совместимого хранилища с помощью docker compose.
+- [database](infra/database): Пример запуска **актуальной версии** базы данных PostgreSQL с автоматическим созданием схем.
+- [kafka](infra/kafka): Пример запуска локального кластера Apache Kafka с помощью docker compose.
+- [debezium](infra/debezium): Пример реализации паттерна transactional outbox с помощью debezium. Пример запуска и конфигурации debezium.
+- [redis](infra/redis): Пример запуска локального Redis (master + replica).
+- [s3](infra/s3): Пример запуска локального S3-совместимого хранилища.
+- [sso](infra/sso): Пример запуска отладочного локального SSO-сервера.
+- [sso-oauth2-proxy](infra/sso-oauth2-proxy): Пример конфигурации OAuth2-прокси.
+- [temporal](infra/temporal): Пример запуска и настройки Temporal.
 
 ### jbcd-1-core
 
@@ -67,8 +59,10 @@ java-backend-course-demo = jbcd
 
 - **jbcd-1a-first-program**: Базовый пример Java-приложения с простой функцией сложения чисел. Демонстрирует основы синтаксиса Java и структуру проекта.
 - **jbcd-1b-java-core**: Пример основных конструкций Java
-- **jbcd-1b-oop-exceptions-io**: Пример объектно-ориентированного программирования в Java. Демонстрирует работу с объектами, классами, интерфейсами, JSON-сериализацией и файлами на примере системы управления документами.
-- **jbcd-1c-collections**: Демонстрация различных коллекций и чтения csv файла.
+- **jbcd-1b-oop**: Пример объектно-ориентированного программирования на сохранении документов в разные хранилища.
+- **jbcd-1b-exceptions**: Пример checked/unchecked исключений, своих исключений и обработки ошибок через try/catch.
+- **jbcd-1c-io**: Простой пример чтения CSV через BufferedReader и записи JSON через BufferedWriter.
+- **jbcd-1c-collections**: Демонстрация массива и основных коллекций Java без Stream API.
 - **jbcd-1d-reflection-annotation**: Демонстрация возможностей рефлексии и аннотаций
 - **jbcd-1d-lombok**: Использование Lombok
 - **jbcd-1d-mapstruct**: Использование MapStruct
@@ -81,22 +75,20 @@ java-backend-course-demo = jbcd
 - **jbcd-2-base-server-lib**: Общая библиотека с DTO, моделями и сервисами, используемая в примерах модуля.
 - **jbcd-2a-netty-server**: Реализация HTTP-сервера на фреймворке Netty.
 - **jbcd-2a-jooby-server**: Пример создания REST API с использованием фреймворка Jooby.
-- **jbcd-2a-jooby-server-mvc**: Использование MVC-подхода в Jooby.
+- **jbcd-2a-javalin-server**: Пример создания REST API с использованием фреймворка Javalin.
 - **jbcd-2a-http-client**: Примеры использования стандартного Java HttpClient.
 - **jbcd-2b-long-polling**: Реализация технологии Long Polling.
 - **jbcd-2b-sse**: Пример использования Server-Sent Events (SSE).
 - **jbcd-2b-websocket**: Двусторонний обмен данными через WebSockets.
-- **jbcd-2b-grpc-contract-lib**: Описание gRPC контракта через Protocol Buffers.
-- **jbcd-2b-grpc-server**: Реализация gRPC сервера.
-- **jbcd-2b-grpc-client**: Реализация gRPC клиента.
 
 ### jbcd-3-database
 
 Модуль для демонстрации работы с БД:
 
 - **jbcd-3a-jdbc**: Пример работы с БД с помощью чистого JDBC.
-- **jbcd-3b-tools**: Использование connection pool Hikari и инструмента миграции Liquibase.
-- **jbcd-3c-jdbi**: Пример работы с простейшим ORM: Jdbi.
+- **jbcd-3b-pool-flyway**: Использование connection pool Hikari и инструмента миграции Flyway.
+- **jbcd-3b-pool-liquibase**: Аналогичный пример с Liquibase, оставлен для сравнения подходов к миграциям.
+- **jbcd-3c-jdbi**: Пример работы с простейшим ORM: Jdbi и миграциями Flyway.
 
 ### jbcd-4-spring
 
@@ -105,7 +97,8 @@ java-backend-course-demo = jbcd
 - **jbcd-4a1-spring-core-configuration**: Конфигурация чистого Spring Core с использованием Java Config.
 - **jbcd-4a2-spring-core-annotation**: Использование аннотаций (`@Component`, `@Service`, `@Repository` и др.) для управления бинами в Spring.
 - **jbcd-4b-spring-boot-web**: Создание веб-приложений с использованием Spring Boot Starter Web + использование AOP.
-- **jbcd-4c-spring-boot-jpa-hibernate**: Работа с базами данных через Spring Data JPA и Hibernate + liquibase.
+- **jbcd-4c-spring-boot-data-jdbc**: Работа с базами данных через Spring Data JDBC и миграции Flyway.
+- **jbcd-4c-spring-boot-jpa-hibernate**: Работа с базами данных через Spring Data JPA, Hibernate и миграции Flyway.
 
 ### jbcd-5-docs
 

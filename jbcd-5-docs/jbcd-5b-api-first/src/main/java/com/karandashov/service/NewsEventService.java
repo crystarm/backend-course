@@ -9,6 +9,7 @@ import com.karandashov.news.dto.NewsEventList;
 import com.karandashov.repository.NewsEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,18 +25,21 @@ public class NewsEventService {
 
     private final NewsMapper mapper;
 
+    @Transactional(readOnly = true)
     public NewsEvent getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
         return mapper.toDto(event);
     }
 
+    @Transactional(readOnly = true)
     public NewsEventList getAll() {
         List<NewsEventEntity> events = repository.findAll();
         List<NewsEvent> newsEventDtoList = mapper.toDtoList(events);
         return new NewsEventList(newsEventDtoList);
     }
 
+    @Transactional
     public NewsEvent save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
                 .id(UUID.randomUUID())

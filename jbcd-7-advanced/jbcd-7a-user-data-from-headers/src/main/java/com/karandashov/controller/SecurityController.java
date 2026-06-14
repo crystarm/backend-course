@@ -1,7 +1,6 @@
 package com.karandashov.controller;
 
 import com.karandashov.dto.CurrentUserResponse;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.dto.UserInfoHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SecurityController {
 
     @GetMapping("/me")
-    public ResponseEntity<UniversalResponse<CurrentUserResponse>> currentUser(UserInfoHeaders userInfoHeaders) {
-        return ResponseEntity.ok(new UniversalResponse<>(new CurrentUserResponse(
+    public ResponseEntity<CurrentUserResponse> currentUser(UserInfoHeaders userInfoHeaders) {
+        return ResponseEntity.ok(new CurrentUserResponse(
                 userInfoHeaders.authenticated(),
                 buildUserInfo(userInfoHeaders)
-        )));
+        ));
     }
 
     private java.util.Map<String, Object> buildUserInfo(UserInfoHeaders userInfoHeaders) {

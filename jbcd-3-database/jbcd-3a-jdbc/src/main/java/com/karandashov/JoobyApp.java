@@ -1,16 +1,17 @@
 package com.karandashov;
 
 import com.karandashov.dto.CreateNewsEventRequest;
-import com.karandashov.dto.UniversalResponse;
+import com.karandashov.dto.ErrorResponse;
 import com.karandashov.exceptions.BaseException;
 import com.karandashov.repository.ConnectionFactory;
 import com.karandashov.repository.JdbcNewsEventRepository;
 import com.karandashov.repository.NewsEventRepository;
+import com.karandashov.repository.PropertiesService;
 import com.karandashov.service.NewsEventService;
 import io.jooby.Jooby;
 import io.jooby.StatusCode;
 import io.jooby.handler.AccessLogHandler;
-import io.jooby.jackson.JacksonModule;
+import io.jooby.jackson.Jackson2Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,20 +22,16 @@ public class JoobyApp extends Jooby {
 
     public JoobyApp() {
         // Использование Jackson для JSON
-        install(new JacksonModule());
+        install(new Jackson2Module());
 
         // Логирование запросов
         use(new AccessLogHandler());
 
-        String databaseUrl = System.getenv("DATABASE_URL");
-        String databaseUser = System.getenv("DATABASE_USERNAME");
-        String databasePassword = System.getenv("DATABASE_PASSWORD");
-        String databaseSchema = System.getenv("APP_DATABASE_SCHEMA");
-
-        if (databaseUrl == null || databaseUser == null || databasePassword == null || databaseSchema == null) {
-            log.error("Не заданы переменные окружения для подключения к БД!");
-            throw new RuntimeException("Не заданы переменные окружения для подключения к БД!");
-        }
+        PropertiesService propertiesService = new PropertiesService();
+        String databaseUrl = propertiesService.get("database.url");
+        String databaseUser = propertiesService.get("database.username");
+        String databasePassword = propertiesService.get("database.password");
+        String databaseSchema = propertiesService.get("database.schema");
 
         // Создаем дерево наших классов, начиная с нижнего слоя
         ConnectionFactory connectionFactory = new ConnectionFactory(databaseUrl, databaseUser, databasePassword);
@@ -42,7 +39,7 @@ public class JoobyApp extends Jooby {
         NewsEventService service = new NewsEventService(repository);
 
         // Определяем маршруты через Script API
-        get("/", ctx -> service.getAll());
+        get("/", _ -> service.getAll());
 
         get("/{id}", ctx -> {
             String id = ctx.path("id").value();
@@ -55,18 +52,18 @@ public class JoobyApp extends Jooby {
         });
 
         // Обработка бизнес-исключений
-        error(BaseException.class, (ctx, cause, statusCode) -> {
+        error(BaseException.class, (ctx, cause, _) -> {
             BaseException e = (BaseException) cause;
             log.error("Business error: {}", e.getMessage());
             ctx.setResponseCode(StatusCode.valueOf(e.getHttpCode()));
-            ctx.render(new UniversalResponse<>(e.getCode(), e.getMessage()));
+            ctx.render(new ErrorResponse(e.getCode(), e.getMessage()));
         });
 
         // Обработка остальных исключений
-        error(Exception.class, (ctx, cause, statusCode) -> {
+        error(Exception.class, (ctx, cause, _) -> {
             log.error("Unexpected error", cause);
             ctx.setResponseCode(StatusCode.SERVER_ERROR);
-            ctx.render(new UniversalResponse<>(5000, "Неизвестная ошибка: " + cause.getMessage()));
+            ctx.render(new ErrorResponse("internal.server.error", "Internal server error"));
         });
     }
 }

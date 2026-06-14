@@ -1,5 +1,6 @@
 package com.karandashov.jbcd.api.captcha.service;
 
+import com.karandashov.jbcd.api.captcha.configuration.MetricsConfiguration;
 import com.karandashov.jbcd.api.captcha.configuration.properties.CaptchaTtlProperties;
 import com.karandashov.jbcd.api.captcha.dto.request.SolveRequest;
 import com.karandashov.jbcd.api.captcha.dto.response.CaptchaResponse;
@@ -25,6 +26,7 @@ public class CaptchaService {
 
     private final CaptchaRepository repository;
     private final CaptchaTtlProperties ttlProperties;
+    private final MetricService metricService;
 
     public CheckCaptchaResponse checkAndExpire(UUID id) {
         CaptchaEntity entity = repository.findById(id).orElseThrow(() -> {
@@ -38,6 +40,7 @@ public class CaptchaService {
         }
 
         repository.deleteById(id);
+        metricService.incrementCaptchaCounter(MetricsConfiguration.CaptchaEvent.SUCCESS_EXPIRE);
         log.info("Captcha {} success check and has been expired", id);
         return new CheckCaptchaResponse(true);
     }
@@ -50,6 +53,7 @@ public class CaptchaService {
 
         CaptchaEntity entity = new CaptchaEntity(id, answer, CaptchaStatus.CREATED);
         repository.save(entity, ttlProperties.created());
+        metricService.incrementCaptchaCounter(MetricsConfiguration.CaptchaEvent.CREATED);
 
         log.info("Captcha {} created", id);
         return new CaptchaResponse(id, captcha.toBase64());
@@ -65,11 +69,13 @@ public class CaptchaService {
         if (!entity.getAnswer().equals(normalizedAnswer)) {
             log.warn("Captcha {} answer is incorrect", id);
             repository.deleteById(id);
+            metricService.incrementCaptchaCounter(MetricsConfiguration.CaptchaEvent.MISMATCH);
             return new SolveResponse(false, "Captcha answer is incorrect");
         }
 
         entity.setStatus(CaptchaStatus.SOLVED);
         repository.save(entity, ttlProperties.solved());
+        metricService.incrementCaptchaCounter(MetricsConfiguration.CaptchaEvent.SOLVED);
         log.info("Captcha {} solved", id);
         return new SolveResponse(true, "Captcha solved successfully");
     }

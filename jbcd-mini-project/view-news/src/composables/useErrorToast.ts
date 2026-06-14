@@ -3,7 +3,8 @@ import { BackendError } from '@/types';
 
 /**
  * Унифицированный показ ошибки всплывающим сообщением.
- * Для BackendError формат: «Ошибка {code}: {message}».
+ * BackendError может прийти только с машинным code, поэтому человекочитаемый текст
+ * вычисляется на уровне BackendError.
  */
 export function useErrorToast() {
   const toast = useToast();
@@ -12,7 +13,7 @@ export function useErrorToast() {
     if (error instanceof BackendError) {
       toast.add({
         severity: 'error',
-        summary: `Ошибка ${error.code}`,
+        summary: 'Ошибка',
         detail: error.message,
         life: 5000,
       });

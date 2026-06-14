@@ -4,7 +4,10 @@ volumes:
   caddy_logs:
 
   postgres_data:
-  openobserve_data:
+  victoria_metrics_data:
+  victoria_logs_data:
+  victoria_traces_data:
+  grafana_data:
   redis_data:
 
 # Обращаю ваше внимание, что наружу торчит только caddy-gateway.
@@ -30,7 +33,7 @@ services:
       - caddy_logs:/var/log/caddy
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     # Сеть не указываем — compose положит все сервисы в одну дефолтную сеть,
-    # в ней резолвятся имена контейнеров (openobserve, api-news и т.д.).
+    # в ней резолвятся имена контейнеров (grafana, api-news и т.д.).
     # Наружу при этом торчит только этот контейнер — через ports.
     deploy:
       resources:
@@ -54,8 +57,15 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      victoria-traces:
+        condition: service_started
     env_file:
       - api-captcha.env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/application/config/application.yml,optional:file:/application/config/api-captcha.yml
+    volumes:
+      - ./../application.yml:/application/config/application.yml:ro
+      - ./../api-captcha.yml:/application/config/api-captcha.yml:ro
     deploy:
       resources:
         limits:
@@ -80,8 +90,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      victoria-traces:
+        condition: service_started
     env_file:
       - api-news.env
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/application/config/application.yml,optional:file:/application/config/api-news.yml
+    volumes:
+      - ./../application.yml:/application/config/application.yml:ro
+      - ./../api-news.yml:/application/config/api-news.yml:ro
     deploy:
       resources:
         limits:
@@ -132,7 +149,7 @@ services:
       "-c", "max_wal_size=4GB"
     ]
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./../init.sql:/docker-entrypoint-initdb.d/init-db.sql
       - postgres_data:/var/lib/postgresql
     entrypoint: [ "bash", "-c", "docker-entrypoint.sh postgres" ]
     healthcheck:
@@ -175,32 +192,76 @@ services:
           cpus: 1.5
           memory: 128m
 
-  openobserve:
-    image: public.ecr.aws/zinclabs/openobserve:latest
-    container_name: openobserve
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.144.0
+    container_name: victoria-metrics
     restart: always
-    environment:
-      ZO_ROOT_USER_EMAIL: root@example.com
-      ZO_ROOT_USER_PASSWORD: rootpass123
-      ZO_DATA_DIR: /data
-      # Публичный URL фронтенда OpenObserve. Нужен для share-links, отчётов и
-      # ссылок в алертах — без него часть UI-функций генерирует сломанные ссылки.
-      ZO_WEB_URL: https://openobserve.news.karandashov.com
-      # Отключаем анонимную телеметрию: для self-hosted это не нужно.
-      ZO_TELEMETRY: "false"
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:8428
     volumes:
-      - openobserve_data:/data
-    healthcheck:
-      test: [ "CMD", "/openobserve", "node", "status" ]
-      interval: 10s
-      retries: 20
-      start_period: 30s
-      timeout: 5s
+      - victoria_metrics_data:/storage
     deploy:
       resources:
         limits:
           cpus: 1
-          memory: 1G
+          memory: 512m
+
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v1.50.0
+    container_name: victoria-logs
+    restart: always
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:9428
+    volumes:
+      - victoria_logs_data:/storage
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512m
+
+  victoria-traces:
+    image: victoriametrics/victoria-traces:v0.9.2
+    container_name: victoria-traces
+    restart: always
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:10428
+    volumes:
+      - victoria_traces_data:/storage
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 512m
+
+  grafana:
+    image: grafana/grafana:13.0.2-slim
+    container_name: grafana
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_ROOT_URL: https://grafana.news.karandashov.com
+      GF_INSTALL_PLUGINS: victoriametrics-logs-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./../grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./../grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      victoria-metrics:
+        condition: service_started
+      victoria-logs:
+        condition: service_started
+      victoria-traces:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 256m
 
   vector:
     image: timberio/vector:0.43.1-alpine
@@ -209,15 +270,17 @@ services:
     user: "0:0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - ./../vector.yaml:/etc/vector/vector.yaml:ro
     command: [ "--config", "/etc/vector/vector.yaml" ]
     depends_on:
       api-captcha:
         condition: service_healthy
       api-news:
         condition: service_healthy
-      openobserve:
-        condition: service_healthy
+      victoria-metrics:
+        condition: service_started
+      victoria-logs:
+        condition: service_started
     deploy:
       resources:
         limits:

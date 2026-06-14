@@ -66,7 +66,7 @@ public class SecurityTest extends BaseTest {
                 HttpResponse.BodyHandlers.ofString()
         );
         assertEquals(200, registrationResponse.statusCode());
-        assertEquals("student@example.com", jsonMapper.readTree(registrationResponse.body()).path("data").path("email").asString());
+        assertEquals("student@example.com", jsonMapper.readTree(registrationResponse.body()).path("email").asString());
 
         HttpResponse<String> loginResponse = httpClient.send(
                 HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/login"))
@@ -88,7 +88,7 @@ public class SecurityTest extends BaseTest {
                 HttpResponse.BodyHandlers.ofString()
         );
         assertEquals(200, meResponse.statusCode());
-        assertEquals("student@example.com", jsonMapper.readTree(meResponse.body()).path("data").path("email").asString());
+        assertEquals("student@example.com", jsonMapper.readTree(meResponse.body()).path("email").asString());
 
         httpClient.send(HttpRequest.newBuilder(AuthUtils.uri(port, "/api/auth/me")).GET().build(), HttpResponse.BodyHandlers.ofString());
         String logoutCsrfToken = AuthUtils.getCookieValue(
@@ -113,7 +113,7 @@ public class SecurityTest extends BaseTest {
                 HttpResponse.BodyHandlers.ofString()
         );
         assertEquals(401, anonymousMeResponse.statusCode());
-        assertFalse(jsonMapper.readTree(anonymousMeResponse.body()).path("data").path("authenticated").asBoolean());
+        assertFalse(jsonMapper.readTree(anonymousMeResponse.body()).path("authenticated").asBoolean());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class SecurityTest extends BaseTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value(4002))
+                .andExpect(jsonPath("$.code").value("conflict"))
                 .andExpect(jsonPath("$.message").value("Пользователь с таким email уже существует"));
     }
 
@@ -143,9 +143,8 @@ public class SecurityTest extends BaseTest {
     void meShouldReturnUnauthorizedForAnonymousUser() throws Exception {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data.authenticated").value(false))
-                .andExpect(jsonPath("$.data.email").value(nullValue()));
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.email").value(nullValue()));
     }
 
     @Test

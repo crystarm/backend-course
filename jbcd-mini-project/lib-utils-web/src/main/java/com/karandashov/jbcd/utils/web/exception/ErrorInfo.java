@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public interface ErrorInfo {
     HttpStatus getHttpStatusCode();
-    int getErrorCode();
+    String getCode();
     String getMessage();
 }

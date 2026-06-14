@@ -3,7 +3,6 @@ package com.karandashov.service;
 import com.karandashov.dto.CreateNewsEventRequest;
 import com.karandashov.dto.NewsEvent;
 import com.karandashov.dto.NewsEventList;
-import com.karandashov.dto.UniversalResponse;
 import com.karandashov.entity.NewsEventEntity;
 import com.karandashov.exceptions.NotFoundException;
 import com.karandashov.mapper.NewsMapper;
@@ -28,22 +27,22 @@ public class NewsEventService {
 
     private final TransactionalOutboxService transactionalOutboxService;
 
-    public UniversalResponse<NewsEvent> getById(UUID id) {
+    @Transactional(readOnly = true)
+    public NewsEvent getById(UUID id) {
         NewsEventEntity event = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Не смог найти новость по id"));
-        NewsEvent newsEventDto = mapper.toDto(event);
-        return new UniversalResponse<>(newsEventDto);
+        return mapper.toDto(event);
     }
 
-    public UniversalResponse<NewsEventList> getAll() {
+    @Transactional(readOnly = true)
+    public NewsEventList getAll() {
         List<NewsEventEntity> events = repository.findAll();
         List<NewsEvent> newsEventDtoList = mapper.toDtoList(events);
-        NewsEventList newsEventList = new NewsEventList(newsEventDtoList);
-        return new UniversalResponse<>(newsEventList);
+        return new NewsEventList(newsEventDtoList);
     }
 
     @Transactional
-    public UniversalResponse<NewsEvent> save(CreateNewsEventRequest request) {
+    public NewsEvent save(CreateNewsEventRequest request) {
         NewsEventEntity entity = NewsEventEntity.builder()
                 .id(UUID.randomUUID())
                 .title(request.getTitle())
@@ -52,6 +51,6 @@ public class NewsEventService {
         entity = repository.save(entity);
         NewsEvent newsEventDto = mapper.toDto(entity);
         transactionalOutboxService.save("news-event", entity.getId().toString(), newsEventDto);
-        return new UniversalResponse<>(newsEventDto);
+        return newsEventDto;
     }
 }

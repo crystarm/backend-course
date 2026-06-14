@@ -1,33 +1,34 @@
 package com.karandashov.repository;
 
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
 
 public class DatabaseMigrator {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
-    private final ConnectionFactory connectionFactory;
+    private final String url;
+    private final String user;
+    private final String password;
+    private final String schema;
 
-    public DatabaseMigrator(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
+    public DatabaseMigrator(String url, String user, String password, String schema) {
+        this.url = url;
+        this.user = user;
+        this.password = password;
+        this.schema = schema;
     }
 
     public void runMigrations() {
-        try (Connection connection = connectionFactory.getConnection()) {
-            // Указываем путь к мастер-файлу миграций
-            Liquibase liquibase = new Liquibase(
-                    "db/changelog/db.changelog-master.xml",
-                    new ClassLoaderResourceAccessor(),
-                    new JdbcConnection(connection)
-            );
+        try {
+            Flyway flyway = Flyway.configure()
+                    .dataSource(url, user, password)
+                    .schemas(schema)
+                    .defaultSchema(schema)
+                    .locations("classpath:db/migration")
+                    .load();
 
-            // Применяем миграции (можно задавать разный контекст в зависимости от стенда - не очень хорошая практика)
-            liquibase.update();
+            flyway.migrate();
             System.out.println("Миграции успешно применены!");
         } catch (Exception e) {
             log.error("Ошибка применения миграций БД: ", e);
