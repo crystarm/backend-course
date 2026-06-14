@@ -2,13 +2,17 @@
 
 java-backend-course-demo = jbcd
 
+Текстовые версии лекций и другие полезные материалы можно найти в
+[отдельном разделе на karandashov.com](https://karandashov.com/projects/backend-java/).
+Посмотрите, возможно, найдете что-то интересное.
+
 Контакты преподавателя: 
 * Vk: https://vk.com/good_vladik — для организационных вопросов
 * Tg: `@VVKarandashov` — для любых вопросов по java/backend/лабораторным/проектам
 * Email: `vlad.karandashov.tech@gmail.com`
-* Оставьте обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
-* * Любая обратная связь приветствуется и поощряется!
-* * Вы можете рассчитывать на анонимность и непредвзятость!
+* Оставьте **анонимную** обратную связь по курсу: https://forms.gle/BA5hWZqoBWhUxBLv7
+* * Любая обратная связь приветствуется!
+* * Вы можете рассчитывать на честную анонимность и непредвзятость!
 
 Описание всех правил игры [читай здесь](assignments/README.md).
 
@@ -24,7 +28,7 @@ java-backend-course-demo = jbcd
 - выполните сами или через ide клонирование репозитория
 - соберите проект
 - - `mvn clean install` в терминале
-- - или через вкладку maven в ide -> lifecycle -> clean && install
+- - или через вкладку maven в ide → lifecycle → clean && install
 - запускайте сервисы из класса Main или `java -jar example.jar`
 - если для запуска требуется внешние БД или сервисы:
 - - перейдите в подходящую папку внутри `infra` (`database`, `kafka`, `redis`, `s3`, `sso`, `temporal`)
@@ -39,6 +43,7 @@ java-backend-course-demo = jbcd
 * [Большой гайд как начать проект для лабораторных с помощью git](tutorials/startInGit.md)
 * [Большой гайд как начать проект для лабораторных с помощью idea](tutorials/startInIde.md)
 * [Как работать с git в idea + командная разработка](tutorials/workWithGit.md)
+* Загляните на [karandashov.com](https://karandashov.com/) для более продвинутых материалов.
 
 ## Оглавление
 
