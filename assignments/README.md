@@ -30,7 +30,7 @@
    * [популярные ошибки](1-io-and-collections/popularMistakes.md)
 2) [database](2-database)
    * [популярные ошибки](2-database/popularMistakes.md)
-3) [tests](3-web-tests)
+3) [web and tests](3-web-tests)
    * [популярные ошибки](3-web-tests/popularMistakes.md)
 
 Для сдачи лабораторных работ вам потребуется публичный репозиторий на GitHub / GitLab / GitVerse / GitFlic.
