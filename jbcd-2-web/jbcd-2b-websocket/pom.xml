@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.karandashov</groupId>
-        <artifactId>jbcd-2-client-server</artifactId>
+        <artifactId>jbcd-2-web</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-2b-sse</artifactId>
+    <artifactId>jbcd-2b-websocket</artifactId>
 
     <dependencies>
         <!-- библиотека легкого создания web-сервера -->

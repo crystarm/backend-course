@@ -50,7 +50,7 @@
     <!--  jbcd - это аббревиатура от названия проекта - используется как префикс  -->
     <modules>
         <module>jbcd-1-core</module>
-        <module>jbcd-2-client-server</module>
+        <module>jbcd-2-web</module>
         <module>jbcd-3-database</module>
         <module>jbcd-4-spring</module>
         <module>jbcd-5-docs</module>

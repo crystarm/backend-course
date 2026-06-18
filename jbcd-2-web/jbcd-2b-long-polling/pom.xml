@@ -5,17 +5,30 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.karandashov</groupId>
-        <artifactId>jbcd-2-client-server</artifactId>
+        <artifactId>jbcd-2-web</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jbcd-2a-netty-server</artifactId>
+    <artifactId>jbcd-2b-long-polling</artifactId>
 
     <dependencies>
-        <!-- Netty-сервер -->
+        <!-- библиотека легкого создания web-сервера -->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby-netty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jooby</groupId>
+            <artifactId>jooby-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Наша библиотека с готовой реализацией репозитория и сервиса -->
@@ -25,16 +38,23 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <!-- Jackson для работы с JSON -->
+        <!-- для логирования -->
         <dependency>
-            <groupId>tools.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
         </dependency>
     </dependencies>
 
     <!-- Настройка сборки проекта -->
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
             <!-- Плагин для создания толстого JAR (fat JAR) со всеми зависимостями -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -51,22 +71,27 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.karandashov.Main</mainClass>
                                 </transformer>
-                                <!-- Убираем дубликаты LICENSE и NOTICE -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
                             </transformers>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>fat</shadedClassifierName>
-                            <!-- Фильтры для исключения module-info и дубликатов MANIFEST -->
+
                             <filters>
                                 <filter>
-                                    <artifact>*:*</artifact> <!-- Применяется ко всем зависимостям -->
+                                    <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>module-info.class</exclude> <!-- Для основного module-info -->
-                                        <exclude>META-INF/**</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/**/module-info.class</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/io.netty.versions.properties</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>fat</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>

@@ -13,3 +13,8 @@ spring:
     enabled: true
     schemas: jbcd_lesson
     default-schema: jbcd_lesson
+    validate-on-migrate: true
+    validate-migration-naming: true
+    clean-disabled: true
+    postgresql:
+      transactional-lock: false

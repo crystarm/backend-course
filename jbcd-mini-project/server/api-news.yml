@@ -12,6 +12,11 @@ spring:
     enabled: true
     schemas: ${APP_DATABASE_SCHEMA}
     default-schema: ${APP_DATABASE_SCHEMA}
+    validate-on-migrate: true
+    validate-migration-naming: true
+    clean-disabled: true
+    postgresql:
+      transactional-lock: false
   data:
     redis:
       host: ${REDIS_HOST}
