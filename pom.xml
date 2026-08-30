@@ -43,7 +43,7 @@
         <captcha.version>1.6.2</captcha.version>
         <wiremock.version>3.13.2</wiremock.version>
 
-        <spring.dependencies.version>4.0.6</spring.dependencies.version>
+        <spring.dependencies.version>4.1.1</spring.dependencies.version>
         <spring.openapi.version>3.0.3</spring.openapi.version>
     </properties>
 

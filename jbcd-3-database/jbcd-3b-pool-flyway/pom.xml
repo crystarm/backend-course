@@ -132,6 +132,8 @@
                                         <exclude>META-INF/FastDoubleParser-LICENSE</exclude>
                                         <exclude>META-INF/FastDoubleParser-NOTICE</exclude>
                                         <exclude>META-INF/thirdparty-LICENSE</exclude>
+                                        <exclude>META-INF/Schubfach-LICENSE</exclude>
+                                        <exclude>META-INF/FastDoubleParser-ThirdParty-LICENSE</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
