@@ -2,9 +2,7 @@
 
 java-backend-course-demo = jbcd
 
-Текстовые версии лекций и другие полезные материалы можно найти в
-[отдельном разделе на karandashov.com](https://karandashov.com/projects/backend-java/).
-Посмотрите, возможно, найдете что-то интересное.
+[//]: # (Текстовые версии лекций и другие полезные материалы можно найти в [отдельном разделе на karandashov.com]&#40;https://karandashov.com/projects/backend-java/&#41;. Посмотрите, возможно, найдете что-то интересное.)
 
 Контакты преподавателя: 
 * Vk: https://vk.com/good_vladik — для организационных вопросов
@@ -43,7 +41,8 @@ java-backend-course-demo = jbcd
 * [Большой гайд как начать проект для лабораторных с помощью git](tutorials/startInGit.md)
 * [Большой гайд как начать проект для лабораторных с помощью idea](tutorials/startInIde.md)
 * [Как работать с git в idea + командная разработка](tutorials/workWithGit.md)
-* Загляните на [karandashov.com](https://karandashov.com/) для более продвинутых материалов.
+
+[//]: # (* Загляните на [karandashov.com]&#40;https://karandashov.com/&#41; для более продвинутых материалов.)
 
 ## Оглавление
 
