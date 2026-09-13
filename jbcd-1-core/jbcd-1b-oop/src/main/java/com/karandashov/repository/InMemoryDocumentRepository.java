@@ -33,7 +33,7 @@ public abstract class InMemoryDocumentRepository implements DocumentRepository {
 
     protected void store(Document document) {
         // Базовая реализация знает, как именно хранить документ в памяти.
-        storage.put(document.id(), document);
+        storage.put(document.getId(), document);
     }
 
     protected void afterSave(Document document) {
@@ -42,7 +42,7 @@ public abstract class InMemoryDocumentRepository implements DocumentRepository {
 
     private void validateSupported(Document document) {
         if (!supports(document)) {
-            throw new IllegalArgumentException("Repository does not support document type: " + document.type());
+            throw new IllegalArgumentException("Repository does not support document type: " + document.getType());
         }
     }
 }

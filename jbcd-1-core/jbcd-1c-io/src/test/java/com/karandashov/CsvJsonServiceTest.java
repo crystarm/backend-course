@@ -27,8 +27,8 @@ class CsvJsonServiceTest {
         List<User> users = service.readUsers(csvFile);
 
         assertEquals(List.of(
-                new User(1, "Ivan", "ivan@example.com"),
-                new User(2, "Anna", "anna@example.com")
+                new User(1L, "Ivan", "ivan@example.com"),
+                new User(2L, "Anna", "anna@example.com")
         ), users);
     }
 
@@ -36,7 +36,7 @@ class CsvJsonServiceTest {
     void shouldWriteUsersToJson() throws IOException {
         Path jsonFile = tempDir.resolve("users.json");
 
-        service.writeUsers(jsonFile, List.of(new User(1, "Ivan", "ivan@example.com")));
+        service.writeUsers(jsonFile, List.of(new User(1L, "Ivan", "ivan@example.com")));
 
         String json = Files.readString(jsonFile);
         assertTrue(json.contains("\"id\": 1"));

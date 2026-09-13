@@ -19,9 +19,9 @@ public class CollectionExamples {
 
     public User[] createArray() {
         return new User[]{
-                new User(3, "Petr", 34),
-                new User(1, "Anna", 22),
-                new User(2, "Ivan", 28)
+                new User(3L, "Petr", 34),
+                new User(1L, "Anna", 22),
+                new User(2L, "Ivan", 28)
         };
     }
 
@@ -68,7 +68,7 @@ public class CollectionExamples {
     }
 
     public PriorityQueue<User> createPriorityQueue(User[] users) {
-        PriorityQueue<User> result = new PriorityQueue<>(Comparator.comparingInt(User::age));
+        PriorityQueue<User> result = new PriorityQueue<>(Comparator.comparingInt(User::getAge));
         addAll(users, result);
         return result;
     }
@@ -79,7 +79,7 @@ public class CollectionExamples {
 
     private void putAll(User[] users, Map<Long, User> map) {
         for (User user : users) {
-            map.put(user.id(), user);
+            map.put(user.getId(), user);
         }
     }
 }

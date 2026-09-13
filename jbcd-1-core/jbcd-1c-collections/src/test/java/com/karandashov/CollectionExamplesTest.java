@@ -47,6 +47,6 @@ class CollectionExamplesTest {
     void shouldCreatePriorityQueue() {
         PriorityQueue<User> queue = examples.createPriorityQueue(users);
 
-        assertEquals("Anna", Objects.requireNonNull(queue.poll()).name());
+        assertEquals("Anna", Objects.requireNonNull(queue.poll()).getName());
     }
 }

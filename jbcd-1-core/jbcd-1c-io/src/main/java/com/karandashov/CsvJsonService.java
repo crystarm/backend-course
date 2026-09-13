@@ -39,9 +39,9 @@ public class CsvJsonService {
             writer.newLine();
             for (int i = 0; i < users.size(); i++) {
                 User user = users.get(i);
-                writer.write("  {\"id\": " + user.id()
-                        + ", \"name\": \"" + user.name()
-                        + "\", \"email\": \"" + user.email() + "\"}");
+                writer.write("  {\"id\": " + user.getId()
+                        + ", \"name\": \"" + user.getName()
+                        + "\", \"email\": \"" + user.getEmail() + "\"}");
                 if (i < users.size() - 1) {
                     writer.write(",");
                 }

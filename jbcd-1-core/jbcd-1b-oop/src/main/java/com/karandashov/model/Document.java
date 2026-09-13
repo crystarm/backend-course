@@ -2,7 +2,7 @@ package com.karandashov.model;
 
 public interface Document {
 
-    String id();
+    String getId();
 
-    String type();
+    String getType();
 }

@@ -35,7 +35,7 @@ public abstract class JsonFileDocumentRepository implements DocumentRepository {
 
     protected Path resolveFile(Document document) {
         // У файла предсказуемое имя: type-id.json. Так студент легко найдет результат.
-        return directory.resolve(document.type() + "-" + document.id() + ".json");
+        return directory.resolve(document.getType() + "-" + document.getId() + ".json");
     }
 
     protected void store(Document document, Path file) {
@@ -54,7 +54,7 @@ public abstract class JsonFileDocumentRepository implements DocumentRepository {
 
     private void validateSupported(Document document) {
         if (!supports(document)) {
-            throw new IllegalArgumentException("Repository does not support document type: " + document.type());
+            throw new IllegalArgumentException("Repository does not support document type: " + document.getType());
         }
     }
 }
