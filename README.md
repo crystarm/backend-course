@@ -77,6 +77,7 @@ java-backend-course-demo = jbcd
 Модуль для демонстрации работы с сетью:
 
 - **jbcd-2-base-server-lib**: Общая библиотека с DTO, моделями и сервисами, используемая в примерах модуля.
+- **jbcd-2a-simple-http-server**: Пример создания REST API на встроенном Java-HTTP-сервере.
 - **jbcd-2a-netty-server**: Реализация HTTP-сервера на фреймворке Netty.
 - **jbcd-2a-jooby-server**: Пример создания REST API с использованием фреймворка Jooby.
 - **jbcd-2a-javalin-server**: Пример создания REST API с использованием фреймворка Javalin.

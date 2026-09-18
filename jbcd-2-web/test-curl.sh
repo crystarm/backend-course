@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Не забудь запустить один из примеров сервера (netty/javalin)
+# Не забудь запустить один из примеров сервера (simple-http-server/netty/javalin/jooby)
 
 HOST="localhost"
 PORT="8080"

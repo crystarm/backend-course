@@ -16,6 +16,7 @@
 
     <modules>
         <module>jbcd-2-base-server-lib</module>
+        <module>jbcd-2a-simple-http-server</module>
         <module>jbcd-2a-netty-server</module>
         <module>jbcd-2a-jooby-server</module>
         <module>jbcd-2a-javalin-server</module>
