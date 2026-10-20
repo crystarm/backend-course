@@ -1,4 +1,4 @@
-package ru.karandashov.entity;
+package ru.tsarin.entity;
 
 import java.util.Objects;
 

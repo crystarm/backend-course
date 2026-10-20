@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ru.karandashov</groupId>
+        <groupId>ru.tsarin</groupId>
         <artifactId>java-backend-labs</artifactId>
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
@@ -76,7 +76,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ru.karandashov.Main</mainClass>
+                                    <mainClass>ru.tsarin.Main</mainClass>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>

@@ -1,4 +1,4 @@
-package ru.karandashov.writer;
+package ru.tsarin.writer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

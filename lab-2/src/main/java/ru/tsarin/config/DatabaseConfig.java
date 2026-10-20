@@ -1,4 +1,4 @@
-package ru.karandashov.config;
+package ru.tsarin.config;
 
 import java.io.IOException;
 import java.io.InputStream;

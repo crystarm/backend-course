@@ -1,4 +1,4 @@
-package ru.karandashov.repository;
+package ru.tsarin.repository;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterAll;
@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-import ru.karandashov.config.DatabaseConfig;
-import ru.karandashov.database.DataSourceFactory;
-import ru.karandashov.database.DatabaseMigrator;
-import ru.karandashov.entity.GameEntity;
+import ru.tsarin.config.DatabaseConfig;
+import ru.tsarin.database.DataSourceFactory;
+import ru.tsarin.database.DatabaseMigrator;
+import ru.tsarin.entity.GameEntity;
 
 import java.sql.Connection;
 import java.sql.SQLException;

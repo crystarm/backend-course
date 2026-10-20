@@ -1,7 +1,7 @@
-package ru.karandashov;
+package ru.tsarin;
 
-import ru.karandashov.repository.CsvCharacterRepository;
-import ru.karandashov.writer.CharacterNameCsvWriter;
+import ru.tsarin.repository.CsvCharacterRepository;
+import ru.tsarin.writer.CharacterNameCsvWriter;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -11,8 +11,6 @@ public final class Main {
     private static final String CHARACTERS_RESOURCE = "characters.csv";
     private static final Path DEFAULT_OUTPUT_FILE = Path.of("result", "unique-character-names.csv");
 
-    private Main() {
-    }
 
     public static void main(String[] args) {
         Path outputFile = args.length == 0 ? DEFAULT_OUTPUT_FILE : Path.of(args[0]);

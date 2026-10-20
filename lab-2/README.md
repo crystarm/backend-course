@@ -17,7 +17,7 @@
 
 ## Запуск
 
-Требуются JDK 21, Maven и Docker с плагином Compose.
+Требуются JDK 25, Maven и Docker с плагином Compose.
 
 ```bash
 docker compose up -d
@@ -51,7 +51,6 @@ docker compose down -v
 | `DB_POOL_MIN_IDLE` | минимальное число свободных соединений |
 | `DB_CONNECTION_TIMEOUT_MS` | таймаут получения соединения |
 
-В Docker Compose используются отдельные пользователь `game_app` и база `game_database`; стандартные пользователь `postgres` и схема `public` приложением не используются.
 
 ## Миграции
 

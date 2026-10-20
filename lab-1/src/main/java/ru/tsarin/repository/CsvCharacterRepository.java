@@ -1,4 +1,4 @@
-package ru.karandashov.repository;
+package ru.tsarin.repository;
 
 import java.io.BufferedReader;
 import java.io.IOException;

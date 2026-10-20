@@ -1,4 +1,4 @@
-package ru.karandashov.repository;
+package ru.tsarin.repository;
 
 import org.junit.jupiter.api.Test;
 

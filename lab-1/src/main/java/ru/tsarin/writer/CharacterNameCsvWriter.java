@@ -1,4 +1,4 @@
-package ru.karandashov.writer;
+package ru.tsarin.writer;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -1,6 +1,6 @@
-package ru.karandashov.repository;
+package ru.tsarin.repository;
 
-import ru.karandashov.entity.GameEntity;
+import ru.tsarin.entity.GameEntity;
 
 import java.util.List;
 

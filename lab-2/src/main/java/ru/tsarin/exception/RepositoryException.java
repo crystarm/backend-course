@@ -1,4 +1,4 @@
-package ru.karandashov.exception;
+package ru.tsarin.exception;
 
 public class RepositoryException extends RuntimeException {
 

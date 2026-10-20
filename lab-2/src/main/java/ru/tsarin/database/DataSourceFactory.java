@@ -1,8 +1,8 @@
-package ru.karandashov.database;
+package ru.tsarin.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import ru.karandashov.config.DatabaseConfig;
+import ru.tsarin.config.DatabaseConfig;
 
 public final class DataSourceFactory {
 

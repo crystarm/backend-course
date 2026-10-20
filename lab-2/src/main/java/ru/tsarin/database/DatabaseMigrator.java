@@ -1,4 +1,4 @@
-package ru.karandashov.database;
+package ru.tsarin.database;
 
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;

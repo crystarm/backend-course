@@ -1,7 +1,7 @@
-package ru.karandashov.repository;
+package ru.tsarin.repository;
 
-import ru.karandashov.entity.GameEntity;
-import ru.karandashov.exception.RepositoryException;
+import ru.tsarin.entity.GameEntity;
+import ru.tsarin.exception.RepositoryException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

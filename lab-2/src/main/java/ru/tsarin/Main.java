@@ -1,21 +1,19 @@
-package ru.karandashov;
+package ru.tsarin;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.karandashov.config.DatabaseConfig;
-import ru.karandashov.database.DataSourceFactory;
-import ru.karandashov.database.DatabaseMigrator;
-import ru.karandashov.entity.GameEntity;
-import ru.karandashov.repository.GameRepository;
-import ru.karandashov.repository.JdbcGameRepository;
+import ru.tsarin.config.DatabaseConfig;
+import ru.tsarin.database.DataSourceFactory;
+import ru.tsarin.database.DatabaseMigrator;
+import ru.tsarin.entity.GameEntity;
+import ru.tsarin.repository.GameRepository;
+import ru.tsarin.repository.JdbcGameRepository;
 
 public final class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    private Main() {
-    }
 
     public static void main(String[] args) {
         DatabaseConfig databaseConfig = DatabaseConfig.load();
